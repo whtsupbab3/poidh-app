@@ -1,16 +1,12 @@
+import { withdrawFromOpenBounty } from '@/app/context/web3';
+import { useGetChain } from '@/hooks/useGetChain';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import React from 'react';
 import { toast } from 'react-toastify';
 
-import { withdrawFromOpenBounty } from '@/app/context';
-import { ErrorInfo } from '@/types';
-
-interface WithdrawProps {
-  bountyId: string;
-}
-
-const Withdraw: React.FC<WithdrawProps> = ({ bountyId }) => {
+export default function Withdraw({ bountyId }: { bountyId: string }) {
   const { primaryWallet } = useDynamicContext();
+  const chain = useGetChain();
 
   const handlewithdrawFromOpenBounty = async () => {
     if (!primaryWallet) {
@@ -18,16 +14,15 @@ const Withdraw: React.FC<WithdrawProps> = ({ bountyId }) => {
       return;
     }
     try {
-      await withdrawFromOpenBounty(primaryWallet, bountyId);
-      toast.success('withdraw successful!');
-    } catch (error: unknown) {
-      console.error('Error joining:', error);
-      // Use a more detailed check to find the error code
-      const errorCode = (error as ErrorInfo)?.info?.error?.code;
-      if (errorCode === 4001) {
-        toast.error('Transaction denied by user');
-      } else {
-        toast.error('withdraw failed');
+      await withdrawFromOpenBounty({
+        chainName: chain.chainPathName,
+        id: bountyId,
+        wallet: primaryWallet,
+      });
+      toast.success('Withdraw successful!');
+    } catch (error: any) {
+      if (error.info?.error?.code !== 4001) {
+        toast.error('Withdraw failed');
       }
     }
   };
@@ -43,6 +38,4 @@ const Withdraw: React.FC<WithdrawProps> = ({ bountyId }) => {
       </button>
     </div>
   );
-};
-
-export default Withdraw;
+}

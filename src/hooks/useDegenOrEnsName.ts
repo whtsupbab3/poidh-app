@@ -1,16 +1,17 @@
+import { getDegenOrEnsName } from '@/app/context/web3';
+import { useGetChain } from '@/hooks';
 import { useEffect, useState } from 'react';
 
-import { getDegenOrEnsName } from '@/app/context';
-
-/**
- * @note we can replace this hook with useQuery from react-query if we decide to install the package and use it
- * */
-const useDegenOrEnsName = (addr: string) => {
+export default function useDegenOrEnsName(addr: string) {
   const [result, setResult] = useState<string | null>(null);
+  const chain = useGetChain();
 
   useEffect(() => {
     const cb = async () => {
-      const degenOrEnsName = await getDegenOrEnsName(addr);
+      const degenOrEnsName = await getDegenOrEnsName({
+        chainName: chain.chainPathName,
+        address: addr,
+      });
       setResult(degenOrEnsName);
     };
 
@@ -18,6 +19,4 @@ const useDegenOrEnsName = (addr: string) => {
   }, [addr]);
 
   return result;
-};
-
-export default useDegenOrEnsName;
+}

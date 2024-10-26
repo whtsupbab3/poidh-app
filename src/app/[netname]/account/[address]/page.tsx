@@ -7,14 +7,6 @@ const AccountInfo = dynamic(() => import('@/components/account/AccountInfo'), {
   ssr: false,
 });
 
-const Account = () => {
-  return (
-    <>
-      <div className='container mx-auto px-5 lg:px-0 pt-16'>
-        <AccountInfo />
-      </div>
-    </>
-  );
-};
-
-export default Account;
+export default function Account({ params }: { params: { address: string } }) {
+  return <AccountInfo address={params.address} />;
+}

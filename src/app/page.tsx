@@ -1,10 +1,9 @@
 'use client';
 
+import NetworkSelector from '@/components/global/NetworkSelector';
 import * as React from 'react';
 
 import 'react-toastify/dist/ReactToastify.css';
-
-import { NetworkSelector } from '@/components/ui';
 
 const Home = () => {
   return (

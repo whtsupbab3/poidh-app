@@ -1,106 +1,47 @@
+/* eslint-disable simple-import-sort/imports */
 'use client';
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
-import { ethers } from 'ethers';
-import { UsersRound } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { formatEther } from 'viem';
 
-import { applyBreakAllToLongWords } from '@/lib';
-import { Button } from '@/components/ui';
+import { useGetChain } from '@/hooks/useGetChain';
+import { UsersRoundIcon } from '@/components/global/Icons';
+import Button from '@/components/ui/Button';
 
-interface BountyItemProps {
+interface Bounty {
   id: string;
   title: string;
   description: string;
-  amount: string | number | bigint;
+  amount: string;
+  network: string;
   isMultiplayer: boolean;
 }
 
-const BountyItem: React.FC<BountyItemProps> = ({
-  id,
-  title,
-  description,
-  amount,
-  isMultiplayer,
-}) => {
-  const shortDescription =
-    description.length > 50
-      ? `${description.substring(0, 50)}...`
-      : description;
-  const amountETH = ethers.formatEther(amount);
-  const { network, networkConfigurations, walletConnector } =
-    useDynamicContext();
-
-  const [currentNetwork, setCurrentNetwork] = useState(network);
-  const [currentNetworkName, setCurrentNetworkName] = useState('');
-  const [isClient, setIsClient] = useState(false);
-
-  const path = usePathname();
-
-  useEffect(() => {
-    setIsClient(true);
-    const currentUrl = path.split('/')[1];
-    if (currentUrl === '') {
-      setCurrentNetworkName('base');
-    } else {
-      setCurrentNetworkName(currentUrl);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isClient && network && networkConfigurations) {
-      const currentUrl = path.split('/')[1];
-      const currentUrlNetwork = networkConfigurations['evm']?.find((net) =>
-        net.name.toLowerCase().match(currentUrl)
-      );
-
-      let currentBountyNetwork = currentUrlNetwork?.name.toLowerCase();
-      if (currentBountyNetwork === 'degen chain') {
-        currentBountyNetwork = 'degen';
-      }
-
-      if (currentBountyNetwork) {
-        setCurrentNetwork(network);
-      }
-    }
-  }, [
-    isClient,
-    network,
-    networkConfigurations,
-    path,
-    walletConnector,
-    currentNetwork,
-  ]);
-
+export default function BountyItem({ bounty }: { bounty: Bounty }) {
+  const amount = formatEther(BigInt(bounty.amount)).toString();
+  const chain = useGetChain();
   return (
     <>
-      <Link href={`/${currentNetworkName}/bounty/${id}`}>
-        <div className='relative p-[2px] h-full  rounded-xl'>
+      <Link href={`/${chain.chainPathName}/bounty/${bounty.id}`}>
+        <div className='relative p-[2px] h-fit  rounded-xl'>
           <div className='p-5 flex flex-col justify-between relative z-20 h-full lg:col-span-4'>
             <div className='z-[-1] absolute w-full h-full left-0 top-0 borderBox rounded-[6px]  bg-whiteblue '></div>
-            <h3 className='normal-case'>{title}</h3>
-            <p className='my-5 normal-case'>
-              {applyBreakAllToLongWords(shortDescription)}
+            <h3 className='normal-case text-nowrap overflow-ellipsis overflow-hidden'>
+              {bounty.title}
+            </h3>
+            <p className='my-5 normal-case max-w-fit h-28 overflow-y-scroll overflow-hidden overflow-ellipsis'>
+              {bounty.description}
             </p>
-
             <div className='flex items-end justify-between mt-5'>
               <div className='flex gap-2 items-center'>
                 <div>
-                  {Number(amountETH)}{' '}
-                  {currentNetworkName === 'base' ||
-                  currentNetworkName === 'arbitrum'
-                    ? 'eth'
-                    : 'degen'}
+                  {formatAmount(amount)}{' '}
+                  {bounty.network === 'degen' ? 'degen' : 'eth'}
                 </div>
-                {isMultiplayer && (
-                  <div>
-                    <UsersRound />
-                  </div>
-                )}
+                {bounty.isMultiplayer && <UsersRoundIcon />}
               </div>
               <Button>
-                <Link href={`/${currentNetworkName}/bounty/${id}`}>
+                <Link href={`/${chain.chainPathName}/bounty/${bounty.id}`}>
                   see bounty
                 </Link>
               </Button>
@@ -111,6 +52,18 @@ const BountyItem: React.FC<BountyItemProps> = ({
       </Link>
     </>
   );
-};
+}
 
-export default BountyItem;
+function formatAmount(amount: string): string {
+  const num = parseFloat(amount);
+
+  if (isNaN(num)) {
+    return '0';
+  }
+
+  if (num < 0.001) {
+    return '<0.001';
+  }
+
+  return num.toString();
+}

@@ -6,10 +6,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-import { useGetChain } from '@/hooks/new/useGetChain';
-import { Banner, Menu } from '@/components/global';
-import { Footer } from '@/components/layout';
-import { Logo } from '@/components/ui';
+import { useGetChain } from '@/hooks/useGetChain';
+import Footer from '@/components/layout/Footer';
+import Banner from '@/components/global/Banner';
+import Menu from '@/components/global/Menu';
+import Logo from '@/components/ui/Logo';
 
 const ConnectWallet = dynamic(() => import('@/components/web3/ConnectWallet'), {
   ssr: false,
@@ -51,7 +52,7 @@ const Header = () => {
     <>
       <Banner networkName={chain.chainPathName} />
       <div className='px-5 lg:px-20 pt-12 pb-2 border-b border-white flex justify-between items-center'>
-        <Link href={`/new/${chain.chainPathName}`}>
+        <Link href={`/${chain.chainPathName}`}>
           <Logo />
         </Link>
         <div className='hidden lg:block'>
@@ -313,7 +314,7 @@ const Header = () => {
       {isClient && isAuthenticated ? (
         <div className='py-2 border-b border-white flex justify-end px-5 lg:hidden'>
           <Link
-            href={`/new/${chain.chainPathName}/account/${primaryWallet?.address}`}
+            href={`/${chain.chainPathName}/account/${primaryWallet?.address}`}
           >
             my bounties
           </Link>

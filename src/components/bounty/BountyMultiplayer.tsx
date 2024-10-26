@@ -1,74 +1,48 @@
+/* eslint-disable simple-import-sort/imports */
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { Address } from 'viem';
+import { useState } from 'react';
+import { formatEther } from 'viem';
 
-import { weiToEth } from '@/lib';
-import { useBountyContext } from '@/components/bounty';
-import { JoinBounty, Withdraw } from '@/components/ui';
-import { getDegenOrEnsName, getParticipants } from '@/app/context/web3';
-import { OpenBounty } from '@/types/web3';
+import { ExpandMoreIcon } from '@/components/global/Icons';
+import JoinBounty from '@/components/ui/JoinBounty';
+import Withdraw from '@/components/ui/Withdraw';
+import { trpc } from '@/trpc/client';
+import { Chain } from '@/types/web3';
 
-const BountyMultiplayer = ({
+export default function BountyMultiplayer({
+  chain,
   bountyId,
-  currentNetworkName,
+  inProgress,
+  issuer,
+  isCanceled,
 }: {
+  chain: Chain;
   bountyId: string;
-  currentNetworkName: string;
-}) => {
-  const [participants, setParticipants] = useState<OpenBounty | null>(null);
+  inProgress: boolean;
+  issuer: string;
+  isCanceled: boolean;
+}) {
   const [showParticipants, setShowParticipants] = useState(false);
-  // const [userParticipate, setUserParticipate] = useState(false);
+  const { primaryWallet } = useDynamicContext();
 
-  const { user } = useDynamicContext();
-  const currentUser = user?.verifiedCredentials[0].address as Address;
-
-  useEffect(() => {
-    if (bountyId) {
-      getParticipants(bountyId)
-        .then(async (data: OpenBounty) => {
-          const filteredAddresses = data.addresses.filter(
-            (address) =>
-              address !== '0x0000000000000000000000000000000000000000'
-          );
-          const filteredAmounts = data.amounts.filter(
-            (_, index) =>
-              data.addresses[index] !==
-              '0x0000000000000000000000000000000000000000'
-          );
-          const degenOrEnsNames = await Promise.all(
-            filteredAddresses.map((addr) => getDegenOrEnsName(addr))
-          );
-
-          setParticipants({
-            addresses: filteredAddresses,
-            amounts: filteredAmounts,
-            degenOrEnsNames,
-          });
-        })
-        .catch(console.error);
+  const { data, isSuccess } = trpc.participants.useQuery(
+    {
+      bountyId: bountyId,
+      chainId: chain.id.toString(),
+    },
+    {
+      enabled: !!bountyId,
     }
-  }, [bountyId]);
+  );
 
   const toggleParticipants = () => {
     setShowParticipants(!showParticipants);
   };
 
-  const isCurrentUserAParticipant = currentUser
-    ? participants?.addresses.includes(currentUser)
-    : false;
-
-  const { /*isMultiplayer,*/ isOwner, /*bountyData,*/ isBountyClaimed } =
-    useBountyContext()!;
-
-  // getting the current network to show currency based on that
-  const getCurrency = () => {
-    if (currentNetworkName === 'base' || currentNetworkName === 'arbitrum') {
-      return 'eth';
-    }
-    return 'degen';
-  };
+  const isCurrentUserAParticipant = data?.some(
+    (participant) => participant.user.id === primaryWallet?.address
+  );
 
   return (
     <>
@@ -78,67 +52,61 @@ const BountyMultiplayer = ({
           onClick={toggleParticipants}
           className='border border-white rounded-full mt-5  px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
         >
-          {participants
-            ? `${participants.addresses.length} contributors`
-            : 'Loading contributors...'}
+          {data ? `${data.length} contributors` : 'Loading contributors...'}
           <span
             className={`${
               showParticipants ? '-rotate-180' : ''
             } animation-all duration-300 `}
           >
-            <ExpandMoreIcon />
+            <ExpandMoreIcon width={16} height={16} />
           </span>
         </button>
 
         {showParticipants && (
           <div className='border mt-5 border-white rounded-[8px] px-10 lg:px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'>
             <div className='flex flex-col'>
-              {participants ? (
-                participants.addresses.map((address, index) => {
-                  const formattedAddress = `${address.substring(
+              {isSuccess ? (
+                data.map((participant, index) => {
+                  const formattedAddress = `${participant.user.id.substring(
                     0,
                     6
-                  )}...${address.substring(address.length - 3)}`;
-                  const degenOrEnsName = participants.degenOrEnsNames?.[index];
+                  )}...${participant.user.id.substring(
+                    participant.user.id.length - 3
+                  )}`;
+                  const degenOrEnsName =
+                    participant.user.degenName || participant.user.ens;
                   const displayText = degenOrEnsName || formattedAddress;
 
                   return (
                     <div className='py-2' key={index}>
-                      <Link href={`/${currentNetworkName}/account/${address}`}>
+                      <Link
+                        href={`/${chain.chainPathName}/account/${participant.user.id}`}
+                      >
                         {displayText}
                       </Link>{' '}
-                      - {weiToEth(participants.amounts[index])} {getCurrency()}
+                      - {formatEther(BigInt(participant.amount))}{' '}
+                      {chain.currency}
                     </div>
                   );
                 })
               ) : (
-                <p>Loading addresses...</p>
+                <p>Loading addresses…</p>
               )}
             </div>
           </div>
         )}
       </div>
       <div>
-        {/* {isOwner ?
-<div className='mt-5'>
-<CancelOpenBounty bountyId={bountyId} />
-</div>
-: null
-} */}
-      </div>
-      <div>
-        {isCurrentUserAParticipant && !isBountyClaimed && !isOwner ? (
-          <Withdraw bountyId={bountyId} />
-        ) : null}
+        {isCurrentUserAParticipant &&
+          inProgress &&
+          primaryWallet?.address !== issuer && <Withdraw bountyId={bountyId} />}
       </div>
 
       <div>
-        {!isCurrentUserAParticipant && !isBountyClaimed ? (
+        {!isCurrentUserAParticipant && !isCanceled && (
           <JoinBounty bountyId={bountyId} />
-        ) : null}
+        )}
       </div>
     </>
   );
-};
-
-export default BountyMultiplayer;
+}

@@ -24,6 +24,7 @@ model Bounty {
   no            Decimal?            @db.Decimal(78, 0)
   deadline      Decimal?            @db.Decimal(78, 0)
   user          User?               @relation(fields: [issuer], references: [id])
+  isVoting      Int?
   claims        Claim[]
   votes         Vote[]
   participants  ParticipantBounty[]

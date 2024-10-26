@@ -11,8 +11,8 @@ export const appRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const bounty = await prisma.bounty.findFirstOrThrow({
         where: {
-          primaryId: input.id.toString(),
-          chainId: input.chainId.toString(),
+          primaryId: input.id,
+          chainId: input.chainId,
           isBanned: 0,
         },
         include: {
@@ -35,7 +35,7 @@ export const appRouter = createTRPCRouter({
   bounties: baseProcedure
     .input(
       z.object({
-        chainId: z.number(),
+        chainId: z.string(),
         status: z.enum(['open', 'progress', 'past']),
         limit: z.number().min(1).max(100).default(10),
         cursor: z.string().nullish(),
@@ -44,7 +44,7 @@ export const appRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const items = await prisma.bounty.findMany({
         where: {
-          chainId: input.chainId.toString(),
+          chainId: input.chainId,
           isBanned: 0,
           ...(input.status === 'open'
             ? {
@@ -54,7 +54,7 @@ export const appRouter = createTRPCRouter({
           ...(input.status === 'progress'
             ? {
                 inProgress: 1,
-                isMultiplayer: 1,
+                isVoting: 1,
               }
             : {}),
           ...(input.status === 'past'
@@ -115,8 +115,8 @@ export const appRouter = createTRPCRouter({
       const items = await prisma.claim.findMany({
         where: {
           bountyId: (
-            BigInt(input.chainId.toString()) * BigInt(100_000) +
-            BigInt(input.bountyId.toString())
+            BigInt(input.chainId) * BigInt(100_000) +
+            BigInt(input.bountyId)
           ).toString(),
           isBanned: 0,
           ...(input.cursor ? { primaryId: { lt: input.cursor } } : {}),
@@ -152,8 +152,8 @@ export const appRouter = createTRPCRouter({
     .query(async ({ input }) => {
       return prisma.claim.findFirstOrThrow({
         where: {
-          primaryId: input.claimId.toString(),
-          chainId: input.chainId.toString(),
+          primaryId: input.claimId,
+          chainId: input.chainId,
           isBanned: 0,
         },
         select: {
@@ -165,22 +165,6 @@ export const appRouter = createTRPCRouter({
           createdAt: true,
           accepted: true,
           url: true,
-        },
-      });
-    }),
-
-  bountyVoting: baseProcedure
-    .input(z.object({ bountyId: z.string(), chainId: z.string() }))
-    .query(async ({ input }) => {
-      return prisma.bounty.findFirst({
-        where: {
-          primaryId: input.bountyId,
-          chainId: input.chainId,
-        },
-        select: {
-          yes: true,
-          no: true,
-          deadline: true,
         },
       });
     }),
