@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { trpc } from '@/trpc/client';
 import { useGetChain } from '@/hooks/useGetChain';
 import ClaimList from '@/components/bounty/ClaimList';
-import { bountyCurrentVotingClaim } from '@/app/context/web3';
+import { bountyCurrentVotingClaim } from '@/utils/web3';
 
 const PAGE_SIZE = 9;
 

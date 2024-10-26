@@ -12,9 +12,12 @@ import Banner from '@/components/global/Banner';
 import Menu from '@/components/global/Menu';
 import Logo from '@/components/ui/Logo';
 
-const ConnectWallet = dynamic(() => import('@/components/web3/ConnectWallet'), {
-  ssr: false,
-});
+const ConnectWallet = dynamic(
+  () => import('@/components/global/ConnectWallet'),
+  {
+    ssr: false,
+  }
+);
 
 const Header = () => {
   const router = useRouter();
@@ -50,13 +53,13 @@ const Header = () => {
 
   return (
     <>
-      <Banner networkName={chain.chainPathName} />
+      <Banner />
       <div className='px-5 lg:px-20 pt-12 pb-2 border-b border-white flex justify-between items-center'>
         <Link href={`/${chain.chainPathName}`}>
           <Logo />
         </Link>
         <div className='hidden lg:block'>
-          <Menu menuPoints={['about us', 'how it works']} />
+          <Menu />
         </div>
         <div className='flex flex-col'>
           <div className='flex flex-row relative items-center gap-x-5'>
@@ -154,7 +157,7 @@ const Header = () => {
               </button>
               <div></div>
               <div className='flex flex-col items-center justify-center'>
-                <Menu menuPoints={['about us', 'how it works']} />
+                <Menu />
                 {!isAuthenticated ? (
                   <div className='px-5  lg:px-20 flex  justify-center'>
                     <div className='flex   top-0 mt-5 flex-row gap-2'>

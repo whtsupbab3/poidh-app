@@ -1,4 +1,4 @@
-import { joinOpenBounty } from '@/app/context/web3';
+import { joinOpenBounty } from '@/utils/web3';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { useState } from 'react';
 import { toast } from 'react-toastify';

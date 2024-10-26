@@ -5,7 +5,7 @@ import React from 'react';
 import '@/styles/globals.css';
 import '@/styles/colors.css';
 
-import ContextProvider from '@/app/context/ContextProvider';
+import ContextProvider from '@/components/global/ContextProvider';
 import { TRPCProvider } from '@/trpc/client';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';

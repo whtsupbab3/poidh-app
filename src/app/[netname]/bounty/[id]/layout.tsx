@@ -5,9 +5,8 @@ import * as React from 'react';
 
 import '@/styles/colors.css';
 
-import chainStatusStore from '@/store/chainStatus.store';
-
-import { Netname } from '@/types/web3';
+import { Netname } from '@/utils/types';
+import { chains } from '@/utils/config';
 
 type Props = {
   params: { id: string; netname: Netname };
@@ -15,16 +14,19 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = params.id;
+  const chain = chains[params.netname];
 
-  let bounty;
-  if (id !== 'null') {
-    bounty = await prisma.bounty.findFirst({
-      where: {
-        primaryId: id,
-        chainId: chainStatusStore.currentChain?.id,
-      },
-    });
-  }
+  const bounty =
+    id !== 'null'
+      ? await prisma.bounty.findFirst({
+          where: {
+            primaryId: id,
+            chainId: chain.id,
+          },
+        })
+      : null;
+
+  console.log('bounty', bounty);
 
   return {
     title: bounty?.title || '',

@@ -3,10 +3,10 @@
 
 import { useState } from 'react';
 
-import { cn } from '@/lib';
 import { useGetChain } from '@/hooks/useGetChain';
 import { trpc } from '@/trpc/client';
 import BountyList from '@/components/ui/BountyList';
+import { cn } from '@/utils';
 
 type DisplayType = 'open' | 'progress' | 'past';
 

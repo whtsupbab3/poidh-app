@@ -1,5 +1,5 @@
-import { getDegenOrEnsName } from '@/app/context/web3';
 import { useGetChain } from '@/hooks/useGetChain';
+import { getDegenOrEnsName } from '@/utils/web3';
 import { useEffect, useState } from 'react';
 
 export default function useDegenOrEnsName(addr: string) {

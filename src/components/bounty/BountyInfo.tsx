@@ -9,7 +9,7 @@ import { useGetChain } from '@/hooks/useGetChain';
 import BountyMultiplayer from '@/components/bounty/BountyMultiplayer';
 import CreateClaim from '@/components/ui/CreateClaim';
 import { trpc } from '@/trpc/client';
-import { cancelOpenBounty, cancelSoloBounty } from '@/app/context/web3';
+import { cancelOpenBounty, cancelSoloBounty } from '@/utils/web3';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
   const { primaryWallet } = useDynamicContext();

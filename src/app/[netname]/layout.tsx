@@ -2,8 +2,8 @@
 import { Metadata } from 'next';
 import React from 'react';
 
-import Wrapper from '@/app/Wrapper';
-import { Netname } from '@/types/web3';
+import Wrapper from '@/components/global/Wrapper';
+import { Netname } from '@/utils/types';
 
 type Props = {
   children: React.ReactNode;

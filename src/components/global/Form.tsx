@@ -9,7 +9,7 @@ import GameButton from '@/components/global/GameButton';
 import { InfoIcon } from '@/components/global/Icons';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { useGetChain } from '@/hooks/useGetChain';
-import { createOpenBounty, createSoloBounty } from '@/app/context/web3';
+import { createOpenBounty, createSoloBounty } from '@/utils/web3';
 
 export default function Form() {
   const { primaryWallet } = useDynamicContext();

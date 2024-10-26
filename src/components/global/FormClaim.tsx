@@ -5,9 +5,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 
-import { buildMetadata, uploadFile, uploadMetadata } from '@/lib';
-import { createClaim } from '@/app/context/web3';
 import { useGetChain } from '@/hooks/useGetChain';
+import { buildMetadata, uploadFile, uploadMetadata } from '@/utils';
+import { createClaim } from '@/utils/web3';
 
 const LINK_IPFS = 'https://beige-impossible-dragon-883.mypinata.cloud/ipfs';
 

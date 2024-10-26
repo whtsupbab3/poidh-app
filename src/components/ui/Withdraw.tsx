@@ -1,5 +1,5 @@
-import { withdrawFromOpenBounty } from '@/app/context/web3';
 import { useGetChain } from '@/hooks/useGetChain';
+import { withdrawFromOpenBounty } from '@/utils/web3';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import React from 'react';
 import { toast } from 'react-toastify';

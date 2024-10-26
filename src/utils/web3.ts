@@ -4,9 +4,9 @@ import { Wallet } from '@dynamic-labs/sdk-react-core';
 import { Contract, ethers } from 'ethers';
 import { parseEther } from 'viem';
 
-import { publicClient } from '@/lib';
 import { ABI, DEGENNAMERESABI } from '@/constant';
-import { chains } from '@/app/context/config';
+import { chains } from '@/utils/config';
+import publicClient from '@/utils/publicClient';
 
 export async function getContract({
   wallet,

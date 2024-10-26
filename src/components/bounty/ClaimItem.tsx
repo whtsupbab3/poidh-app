@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { useGetChain } from '@/hooks/useGetChain';
 import { CopyIcon } from '@/components/global/Icons';
 import { trpc } from '@/trpc/client';
-import { acceptClaim, submitClaimForVote } from '@/app/context/web3';
+import { acceptClaim, submitClaimForVote } from '@/utils/web3';
 
 export default function ClaimItem({
   id,

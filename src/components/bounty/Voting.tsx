@@ -6,12 +6,7 @@ import { toast } from 'react-toastify';
 import { formatEther } from 'viem';
 
 import { useGetChain } from '@/hooks/useGetChain';
-
-import {
-  bountyVotingTracker,
-  resolveVote,
-  voteClaim,
-} from '@/app/context/web3';
+import { bountyVotingTracker, resolveVote, voteClaim } from '@/utils/web3';
 
 export default function Voting({ bountyId }: { bountyId: string }) {
   const { primaryWallet } = useDynamicContext();

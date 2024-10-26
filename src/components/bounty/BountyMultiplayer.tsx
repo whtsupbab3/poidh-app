@@ -8,7 +8,7 @@ import { ExpandMoreIcon } from '@/components/global/Icons';
 import JoinBounty from '@/components/ui/JoinBounty';
 import Withdraw from '@/components/ui/Withdraw';
 import { trpc } from '@/trpc/client';
-import { Chain } from '@/types/web3';
+import { Chain } from '@/utils/types';
 
 export default function BountyMultiplayer({
   chain,

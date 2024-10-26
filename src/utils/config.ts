@@ -1,4 +1,4 @@
-import { Chain, Netname } from '@/types/web3';
+import { Chain, Netname } from '@/utils/types';
 
 export const chains: { [key in Netname]: Chain } = {
   degen: {
