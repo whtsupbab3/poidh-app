@@ -1,161 +1,124 @@
+/* eslint-disable simple-import-sort/imports */
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { LiaCopySolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 
-import { applyBreakAllToLongWords } from '@/lib/uiHelpers';
-import { useGetChain, useDegenOrEnsName } from '@/hooks';
-import { useBountyContext } from '@/components/bounty';
-import { acceptClaim, getURI, submitClaimForVote } from '@/app/context';
-import { ErrorInfo } from '@/types';
+import { useGetChain } from '@/hooks/useGetChain';
+import { CopyIcon } from '@/components/global/Icons';
+import { trpc } from '@/trpc/client';
+import { acceptClaim, submitClaimForVote } from '@/app/context/web3';
 
-interface ClaimItemProps {
-  id: string;
-  title: string;
-  description: string;
-  issuer: string;
-  bountyId: string;
-  youOwner: boolean;
-  accepted: boolean;
-  isAccepted: boolean;
-  openBounty: boolean | null;
-}
-
-const ClaimItem: React.FC<ClaimItemProps> = ({
-  //openBounty,
+export default function ClaimItem({
   id,
   title,
   description,
   issuer,
   bountyId,
   accepted,
-  //isAccepted,
-}) => {
+  isMultiplayer,
+  url,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  issuer: string;
+  bountyId: string;
+  accepted: boolean;
+  isMultiplayer: boolean;
+  url: string;
+}) {
   const { primaryWallet } = useDynamicContext();
-  const [claimsURI, setClaimsURI] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  // const path = usePathname();
-  //const [currentNetworkName, setCurrentNetworkName] = useState('');
-  const currentNetworkName = useGetChain();
-  const {
-    isMultiplayer,
-    isOwner,
-    //bountyData,
-    isBountyClaimed,
-    isOwnerContributor,
-  } = useBountyContext()!;
-  const issuerDegenOrEnsName = useDegenOrEnsName(issuer);
-
-  // useEffect(() => {
-  //   const currentUrl = path.split('/')[1];
-  //   setCurrentNetworkName(currentUrl || 'base');
-  // }, []);
-
-  useEffect(() => {
-    if (id) {
-      getURI(id)
-        .then((data) => setClaimsURI(data))
-        .catch(console.error);
+  const chain = useGetChain();
+  const { data: bounty } = trpc.bounty.useQuery(
+    {
+      id: bountyId,
+      chainId: chain.id.toString(),
+    },
+    {
+      enabled: !!bountyId,
     }
-  }, [id]);
+  );
 
-  const fetchImageUrl = async (uri: string) => {
-    try {
-      const response = await fetch(uri);
-      const data = await response.json();
-      console.log('@@@@@@@@@@ data:', data);
-      setImageUrl(data.image);
-    } catch (error) {
-      console.error('Error fetching image:', error);
-      setImageUrl(null);
-    }
+  const fetchImageUrl = async (url: string) => {
+    const response = await fetch(url);
+    const data = await response.json();
+    setImageUrl(data.image);
   };
 
   useEffect(() => {
-    if (claimsURI) {
-      console.log('@@@@@@@@@@ claimsURI:', claimsURI);
-      fetchImageUrl(claimsURI);
-    }
-  }, [claimsURI]);
+    fetchImageUrl(url);
+  }, [url]);
 
   const handleAcceptClaim = async () => {
-    if (!id || !bountyId || !primaryWallet) {
-      toast.error('Please check connection');
+    if (!primaryWallet) {
+      toast.error('Please connect your wallet');
       return;
     }
     try {
-      await acceptClaim(primaryWallet, bountyId, id);
+      await acceptClaim({
+        wallet: primaryWallet,
+        bountyId,
+        claimId: id,
+        chainName: chain.chainPathName,
+      });
       toast.success('Claim accepted!');
       window.location.reload();
-    } catch (error: unknown) {
-      console.error('Error accepting claim:', error);
-      const errorCode = (error as ErrorInfo)?.info?.error?.code;
-      if (errorCode === 4001) {
-        toast.error('Transaction denied by user.');
-      } else {
+    } catch (error: any) {
+      if (error.info?.error?.code !== 4001) {
         toast.error('Failed to accept claim.');
       }
     }
   };
 
   const handleSubmitClaimForVote = async () => {
-    if (!id || !bountyId || !primaryWallet) {
-      toast.error('Please check connection');
+    if (!primaryWallet) {
+      toast.error('Please connect your wallet');
       return;
     }
     try {
-      await submitClaimForVote(primaryWallet, bountyId, id);
+      await submitClaimForVote({
+        wallet: primaryWallet,
+        bountyId,
+        claimId: id,
+        chainName: chain.chainPathName,
+      });
       toast.success('Claim submitted!');
-    } catch (error: unknown) {
-      console.error('Error submitting claim:', error);
-      const errorCode = (error as ErrorInfo)?.info?.error?.code;
-      if (errorCode === 4001) {
-        toast.error('Transaction denied by user');
-      } else {
-        toast.error('Failed to submit claim');
+    } catch (error: any) {
+      if (error.info?.error?.code !== 4001) {
+        toast.error('Failed to submit claim.');
       }
     }
   };
 
-  const copyAddresstoClipboard = (address: string) => {
-    try {
-      navigator.clipboard.writeText(address);
-      toast.success('Address copied to clipboard');
-    } catch (error) {
-      console.error('Error copying address to clipboard:', error);
-      toast.error('Failed to copy address to clipboard');
-    }
-  };
-
   return (
-    <div className='p-[2px] border text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
+    <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
       <div className='left-5 top-5 absolute  flex flex-col text-white'>
-        {isMultiplayer && isOwner && !isOwnerContributor ? (
+        {isMultiplayer && primaryWallet?.address === issuer && (
           <button
             className=' submitForVote cursor-pointer text-[#F15E5F] hover:text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
             onClick={handleSubmitClaimForVote}
           >
             submit for vote
           </button>
-        ) : null}
+        )}
 
-        {isOwner && !isBountyClaimed && primaryWallet && isOwnerContributor ? (
+        {bounty && primaryWallet?.address === bounty.issuer && (
           <div
             onClick={handleAcceptClaim}
             className=' acceptButton cursor-pointer mt-5 text-[#F15E5F] hover:text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
           >
             accept
           </div>
-        ) : null}
+        )}
       </div>
 
-      {accepted ? (
+      {accepted && (
         <div className='left-5 top-5 text-white bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5 absolute '>
           accepted
         </div>
-      ) : null}
+      )}
 
       <div
         style={{ backgroundImage: `url(${imageUrl})` }}
@@ -163,22 +126,30 @@ const ClaimItem: React.FC<ClaimItemProps> = ({
       ></div>
       <div className='p-3'>
         <div className='flex flex-col'>
-          <p className='normal-case'>{title}</p>
-          <p className='normal-case'>{applyBreakAllToLongWords(description)}</p>
+          <p className='normal-case text-nowrap overflow-ellipsis overflow-hidden'>
+            {title}
+          </p>
+          <p className='normal-case max-w-fit h-20 overflow-y-scroll overflow-x-hidden overflow-hidden'>
+            {description}
+          </p>
         </div>
         <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed'>
           <span className=''>issuer</span>
           <span className='flex flex-row'>
             <Link
-              href={`/${currentNetworkName}/account/${issuer}`}
+              href={`/${chain.chainPathName}/account/${issuer}`}
               className='hover:text-gray-200'
             >
-              {issuerDegenOrEnsName ||
-                `$` + issuer.slice(0, 5) + '...' + issuer.slice(-6)}
+              {issuer.slice(0, 5) + '…' + issuer.slice(-6)}
             </Link>
-            <span className='ml-1'>
-              <button onClick={() => copyAddresstoClipboard(issuer)}>
-                <LiaCopySolid color='white' size={20} />
+            <span className='ml-1 text-white'>
+              <button
+                onClick={async () => {
+                  await navigator.clipboard.writeText(issuer);
+                  toast.success('Address copied to clipboard');
+                }}
+              >
+                <CopyIcon width={16} height={16} />
               </button>
             </span>
           </span>
@@ -187,6 +158,4 @@ const ClaimItem: React.FC<ClaimItemProps> = ({
       </div>
     </div>
   );
-};
-
-export default ClaimItem;
+}

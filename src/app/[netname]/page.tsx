@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import ContentHome from '@/components/layout/ContentHome';
 import CreateBounty from '@/components/ui/CreateBounty';
 
-const Home = () => {
+export default function Home() {
   return (
     <>
       <ContentHome />
@@ -16,6 +16,4 @@ const Home = () => {
       <ToastContainer />
     </>
   );
-};
-
-export default Home;
+}

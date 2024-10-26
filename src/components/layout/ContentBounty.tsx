@@ -1,18 +1,11 @@
-import { usePathname } from 'next/navigation';
+import BountyClaims from '@/components/bounty/BountyClaims';
+import BountyInfo from '@/components/bounty/BountyInfo';
 
-import { BountyClaims, BountyInfo, BountyProvider } from '@/components/bounty';
-
-const ContentBounty = () => {
-  const pathname = usePathname();
-  const bountyId = pathname.split('/').pop() || '';
+export default function ContentBounty({ bountyId }: { bountyId: string }) {
   return (
-    <BountyProvider bountyId={bountyId}>
-      <div className='pb-44'>
-        <BountyInfo bountyId={bountyId} />
-        <BountyClaims bountyId={bountyId} />
-      </div>
-    </BountyProvider>
+    <div className='pb-44'>
+      <BountyInfo bountyId={bountyId} />
+      <BountyClaims bountyId={bountyId} />
+    </div>
   );
-};
-
-export default ContentBounty;
+}

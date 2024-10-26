@@ -1,11 +1,10 @@
 /* eslint-disable simple-import-sort/imports */
 import React, { useEffect, useState } from 'react';
 
-import { bountyCurrentVotingClaim } from '@/app/context';
 import { trpc } from '@/trpc/client';
-import { useGetChain } from '@/hooks/new/useGetChain';
-import ClaimList from '@/components/new/bounty/ClaimList';
-import { NoClaim } from '@/components/bounty';
+import { useGetChain } from '@/hooks/useGetChain';
+import ClaimList from '@/components/bounty/ClaimList';
+import { bountyCurrentVotingClaim } from '@/app/context/web3';
 
 const PAGE_SIZE = 9;
 
@@ -14,7 +13,15 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
   const [votingClaimId, setVotingClaimId] = useState<number | null>(null);
 
   useEffect(() => {
-    bountyCurrentVotingClaim(bountyId).then(setVotingClaimId);
+    const fetchCurrentVotingClaim = async () => {
+      const currentVotingClaim = await bountyCurrentVotingClaim({
+        id: bountyId,
+        chainName: chain.chainPathName,
+      });
+      setVotingClaimId(currentVotingClaim);
+    };
+
+    fetchCurrentVotingClaim();
   }, [bountyId]);
 
   const claims = trpc.bountyClaims.useInfiniteQuery(
@@ -25,22 +32,29 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor?.toString(),
+      enabled: !!bountyId,
     }
   );
 
   const { data: votingClaim } = trpc.claim.useQuery(
     {
-      claimId: votingClaimId?.toString() || '',
+      claimId: votingClaimId?.toString() ?? '',
       chainId: chain.id.toString(),
     },
     {
       enabled: !!votingClaimId,
     }
   );
-  const { data: bounty } = trpc.bounty.useQuery({
-    id: bountyId.toString(),
-    chainId: chain.id.toString(),
-  });
+
+  const { data: bounty } = trpc.bounty.useQuery(
+    {
+      id: bountyId,
+      chainId: chain.id.toString(),
+    },
+    {
+      enabled: !!bountyId,
+    }
+  );
 
   if (!claims) {
     return null;
@@ -51,11 +65,15 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
       <div className='flex flex-col gap-x-2 py-4 border-b border-dashed'>
         <div>
           <span>
-            {claims.data?.pages.flatMap((page) => page.items).length} claims
+            {claims.data?.pages.reduce(
+              (acc, curr) => acc + curr.items.length,
+              0
+            )}{' '}
+            claims
           </span>
         </div>
       </div>
-      {claims.data ? (
+      {claims.data && (
         <ClaimList
           bountyId={bountyId}
           isMultiplayer={bounty?.isMultiplayer || false}
@@ -82,8 +100,6 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
             }));
           })}
         />
-      ) : (
-        <NoClaim bountyId={bountyId} />
       )}
       {claims.hasNextPage && (
         <div className='flex justify-center items-center pb-96'>

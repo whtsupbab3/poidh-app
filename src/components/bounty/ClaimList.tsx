@@ -1,114 +1,81 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import { ClaimItem, Voting } from '@/components/bounty';
+import ClaimItem from '@/components/bounty/ClaimItem';
+import Voting from '@/components/bounty/Voting';
 
-import { useBountyContext } from '@/components/bounty';
-
-interface Claim {
+type Claim = {
   id: string;
   issuer: string;
   bountyId: string;
-  bountyIssuer: string;
-  name: string;
+  title: string;
   description: string;
   createdAt: bigint;
   accepted: boolean;
-}
+  url: string;
+};
 
-interface ClaimListProps {
-  data: Claim[];
-  youOwner: boolean;
-  openBounty: boolean | null;
-  currentVotingClaim: number | null;
-  bountyId: string;
-}
-
-const ClaimList: React.FC<ClaimListProps> = ({
-  data,
-  youOwner,
-  openBounty,
-  currentVotingClaim,
+export default function ClaimList({
   bountyId,
-}) => {
-  const [isAccepted, setIsAccepted] = useState(true);
-  const { isMultiplayer } = useBountyContext()!;
-
-  useEffect(() => {
-    const checkAccepted = data.some((claim) => claim.accepted === true);
-    setIsAccepted(checkAccepted);
-  }, [data]);
-
+  claims,
+  votingClaim,
+  isMultiplayer,
+}: {
+  bountyId: string;
+  claims: Claim[];
+  votingClaim: Claim | null;
+  isMultiplayer: boolean;
+}) {
   return (
     <>
       <div
         className={`${
-          currentVotingClaim === 0 ? '' : 'votingStarted'
+          votingClaim ? 'votingStarted' : ''
         } container mx-auto px-0  py-12 flex flex-col gap-12 lg:grid lg:grid-cols-12 lg:gap-12 lg:px-0 `}
       >
-        {data.map((claim) => (
-          <div
-            key={claim.id}
-            className={`${
-              currentVotingClaim === 0 ||
-              currentVotingClaim === Number(claim.id)
-                ? ''
-                : 'hidden'
-            } lg:col-span-4`}
-          >
+        {votingClaim && (
+          <div className='lg:col-span-4'>
             <ClaimItem
-              openBounty={openBounty}
-              isAccepted={isAccepted}
-              youOwner={youOwner}
-              bountyId={claim.bountyId}
-              key={claim.id}
-              id={claim.id}
-              title={claim.name}
-              description={claim.description}
-              issuer={claim.issuer}
-              accepted={claim.accepted}
+              isMultiplayer={isMultiplayer}
+              bountyId={bountyId}
+              id={votingClaim.id}
+              title={votingClaim.title}
+              description={votingClaim.description}
+              issuer={votingClaim.issuer}
+              accepted={votingClaim.accepted}
+              url={votingClaim.url}
             />
           </div>
-        ))}
+        )}
       </div>
       <div className='grid grid-cols-12'>
-        {currentVotingClaim !== 0 ? <Voting bountyId={bountyId} /> : null}
+        {votingClaim && <Voting bountyId={bountyId} />}
       </div>
 
       <div
         className={`${
-          currentVotingClaim !== 0 ? 'block' : 'hidden'
+          votingClaim ? 'block' : 'hidden'
         } container mx-auto px-0  py-12 flex flex-col gap-12 lg:grid lg:grid-cols-12 lg:gap-12 lg:px-0`}
       >
         <p className={`col-span-12  ${!isMultiplayer ? 'hidden' : ' '}  `}>
           other claims
         </p>
-        {data.map((claim) => (
-          <div
-            key={claim.id}
-            className={`${
-              currentVotingClaim === 0 ||
-              currentVotingClaim === Number(claim.id)
-                ? 'hidden'
-                : ''
-            } lg:col-span-4 otherClaims`}
-          >
-            <ClaimItem
-              openBounty={openBounty}
-              isAccepted={isAccepted}
-              youOwner={youOwner}
-              bountyId={claim.bountyId}
-              key={claim.id}
-              id={claim.id}
-              title={claim.name}
-              description={claim.description}
-              issuer={claim.issuer}
-              accepted={claim.accepted}
-            />
-          </div>
-        ))}
+        {claims
+          .filter((claim) => claim.id !== votingClaim?.id)
+          .map((claim) => (
+            <div key={claim.id} className='lg:col-span-4 otherClaims'>
+              <ClaimItem
+                isMultiplayer={isMultiplayer}
+                bountyId={bountyId}
+                id={claim.id}
+                title={claim.title}
+                description={claim.description}
+                issuer={claim.issuer}
+                accepted={claim.accepted}
+                url={claim.url}
+              />
+            </div>
+          ))}
       </div>
     </>
   );
-};
-
-export default ClaimList;
+}

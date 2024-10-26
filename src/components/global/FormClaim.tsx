@@ -1,3 +1,4 @@
+/* eslint-disable simple-import-sort/imports */
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import imageCompression from 'browser-image-compression';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -5,17 +6,12 @@ import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 
 import { buildMetadata, uploadFile, uploadMetadata } from '@/lib';
-import { createClaim } from '@/app/context';
-import { ErrorInfo } from '@/types';
+import { createClaim } from '@/app/context/web3';
+import { useGetChain } from '@/hooks/useGetChain';
 
-interface FormClaimProps {
-  bountyId: string;
-  showForm?: boolean;
-}
+const LINK_IPFS = 'https://beige-impossible-dragon-883.mypinata.cloud/ipfs';
 
-const FormClaim: React.FC<FormClaimProps> = ({ bountyId }) => {
-  const [walletMessage, setWalletMessage] = useState('');
-
+export default function FormClaim({ bountyId }: { bountyId: string }) {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     setFile(file);
@@ -37,22 +33,17 @@ const FormClaim: React.FC<FormClaimProps> = ({ bountyId }) => {
   const [imageURI, setImageURI] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const inputFile = useRef<HTMLInputElement>(null);
-  //const [inTxn, setInTxn] = useState(false);
+  const chain = useGetChain();
 
   const compressImage = async (image: File): Promise<File> => {
     const options = {
-      maxSizeMB: 10,
+      maxSizeMB: 1,
       maxWidthOrHeight: 1920,
       useWebWorker: true,
     };
-    try {
-      const compressedFile = await imageCompression(image, options);
-      return compressedFile;
-    } catch (error) {
-      // Refactor Change -- Remove console.error
-      console.error('Error compressing image:', error);
-      throw error;
-    }
+
+    const compressedFile = await imageCompression(image, options);
+    return compressedFile;
   };
 
   const retryUpload = async (file: File): Promise<string> => {
@@ -67,9 +58,6 @@ const FormClaim: React.FC<FormClaimProps> = ({ bountyId }) => {
         if (attempt === MAX_RETRIES) {
           throw error;
         }
-        console.log(
-          `Attempt ${attempt} failed, retrying in ${RETRY_DELAY}ms...`
-        );
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
       }
     }
@@ -83,12 +71,9 @@ const FormClaim: React.FC<FormClaimProps> = ({ bountyId }) => {
         try {
           const compressedFile = await compressImage(file);
           const cid = await retryUpload(compressedFile);
-          setImageURI(
-            `https://beige-impossible-dragon-883.mypinata.cloud/ipfs/${cid}`
-          );
+          setImageURI(`${LINK_IPFS}/${cid}`);
         } catch (error) {
-          console.error('Error uploading file:', error);
-          alert('Trouble uploading file');
+          toast.error('Trouble uploading file');
         }
         setUploading(false);
       }
@@ -108,35 +93,32 @@ const FormClaim: React.FC<FormClaimProps> = ({ bountyId }) => {
     try {
       const metadata = buildMetadata(imageURI, name, description);
       const metadataResponse = await uploadMetadata(metadata);
-      const uri = `https://beige-impossible-dragon-883.mypinata.cloud/ipfs/${metadataResponse.IpfsHash}`;
-      //setInTxn(true);
-      await createClaim(primaryWallet, name, uri, description, bountyId);
+      const uri = `${LINK_IPFS}/${metadataResponse.IpfsHash}`;
+      await createClaim({
+        bountyId: bountyId,
+        name,
+        uri,
+        description,
+        chainName: chain.chainPathName,
+        wallet: primaryWallet,
+      });
       toast.success('Claim created successfully!');
       window.location.reload();
-    } catch (error: unknown) {
-      //setInTxn(false);
-      console.error('Error creating claim:', error);
-      const errorCode = (error as unknown as ErrorInfo)?.info?.error?.code;
-      if (errorCode === 4001) {
-        toast.error('Transaction denied by user');
-      } else {
+    } catch (error: any) {
+      if (error.info?.error?.code !== 4001) {
         toast.error('Failed to create claim');
       }
     }
   };
 
   return (
-    <div className='mt-10 flex text-left flex-col text-white rounded-md border border-[#D1ECFF] p-5 flex w-full lg:min-w-[400px] justify-center backdrop-blur-sm bg-poidhBlue/60'>
+    <div className='mt-10 text-left flex-col text-white rounded-md border border-[#D1ECFF] p-5 flex w-full lg:min-w-[400px] justify-center backdrop-blur-sm bg-poidhBlue/60'>
       <div
         {...getRootProps()}
         className='flex items-center flex-col text-left text-white rounded-[30px] border border-[#D1ECFF] border-dashed p-5 w-full lg:min-w-[400px] justify-center cursor-pointer'
       >
         <input {...getInputProps()} />
-        {isDragActive ? (
-          <p>Drop the files here ...</p>
-        ) : (
-          <p>drop the file here ...</p>
-        )}
+        {isDragActive && <p>drop files here…</p>}
         {preview && (
           <img
             src={preview}
@@ -155,7 +137,6 @@ const FormClaim: React.FC<FormClaimProps> = ({ bountyId }) => {
       <span>name</span>
       <input
         type='text'
-        placeholder=''
         value={name}
         onChange={(e) => setName(e.target.value)}
         className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4'
@@ -164,7 +145,6 @@ const FormClaim: React.FC<FormClaimProps> = ({ bountyId }) => {
       <span>description</span>
       <textarea
         rows={3}
-        placeholder=''
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4'
@@ -181,26 +161,13 @@ const FormClaim: React.FC<FormClaimProps> = ({ bountyId }) => {
         onClick={() => {
           if (!primaryWallet) {
             toast.error('Please connect wallet to continue');
-            // setWalletMessage("Please connect wallet to continue");
           } else {
             handleCreateClaim();
           }
         }}
-        onMouseEnter={() => {
-          if (!primaryWallet) {
-            toast.error('Please connect wallet to continue');
-            // setWalletMessage("Please connect wallet to continue");
-          }
-        }}
-        onMouseLeave={() => {
-          setWalletMessage('');
-        }}
       >
         create claim
       </button>
-      <span id='walletMessage'>{walletMessage}</span>
     </div>
   );
-};
-
-export default FormClaim;
+}

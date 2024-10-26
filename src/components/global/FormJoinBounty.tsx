@@ -1,19 +1,11 @@
+import { joinOpenBounty } from '@/app/context/web3';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-import { joinOpenBounty } from '@/app/context';
-import { ErrorInfo } from '@/types';
-
-interface FormJoinBountyProps {
-  bountyId: string;
-  showForm?: boolean;
-}
-
-const FormJoinBounty: React.FC<FormJoinBountyProps> = ({ bountyId }) => {
-  const [amount, setAmount] = useState('');
+export default function FormJoinBounty({ bountyId }: { bountyId: string }) {
+  const [amount, setAmount] = useState<string>('');
   const { primaryWallet } = useDynamicContext();
-  const [walletMessage, setWalletMessage] = useState('');
 
   const handleJoinBounty = async () => {
     if (!primaryWallet) {
@@ -27,29 +19,31 @@ const FormJoinBounty: React.FC<FormJoinBountyProps> = ({ bountyId }) => {
 
     try {
       const balance = await primaryWallet.connector.getBalance();
-      if (parseFloat(balance as string) < parseFloat(amount)) {
+      if (parseFloat(balance || '0') < parseFloat(amount)) {
         toast.error('Insufficient funds for this transaction');
         return;
       }
 
-      await joinOpenBounty(primaryWallet, bountyId, amount);
+      await joinOpenBounty({
+        chainName: 'degen',
+        wallet: primaryWallet,
+        id: bountyId,
+        value: amount,
+      });
       toast.success('Bounty joined successfully!');
       setAmount('');
       window.location.reload();
-    } catch (error: unknown) {
-      console.error('Error joining:', error);
-      const errorData = error as ErrorInfo;
-      const errorCode = errorData?.info?.error?.code;
-      const errorMessage = errorData?.info?.error?.message;
-      if (errorCode === 4001) {
-        toast.error('Transaction denied by user');
-      } else if (
-        errorMessage &&
-        errorMessage.toLowerCase().includes('insufficient funds')
-      ) {
-        toast.error('Insufficient funds for this transaction');
-      } else {
-        toast.error('Failed to join bounty');
+    } catch (error: any) {
+      if (error.info?.error?.code !== 4001) {
+        if (
+          error.info?.error?.message
+            .toLowerCase()
+            .includes('insufficient funds')
+        ) {
+          toast.error('Insufficient funds for this transaction');
+        } else {
+          toast.error('Failed to join bounty');
+        }
       }
     }
   };
@@ -76,20 +70,10 @@ const FormJoinBounty: React.FC<FormJoinBountyProps> = ({ bountyId }) => {
               handleJoinBounty();
             }
           }}
-          onMouseEnter={() => {
-            if (!primaryWallet) {
-              toast.error('Please connect wallet to continue');
-            }
-          }}
-          onMouseLeave={() => {
-            setWalletMessage('');
-          }}
         >
           join bounty
         </button>
       </div>
     </>
   );
-};
-
-export default FormJoinBounty;
+}

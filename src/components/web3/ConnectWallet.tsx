@@ -2,11 +2,7 @@ import { DynamicWidget, useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import {
-  ArbitrumIcon,
-  BaseIcon,
-  DegenIcon,
-} from '@/components/new/global/Icons';
+import { ArbitrumIcon, BaseIcon, DegenIcon } from '@/components/global/Icons';
 
 interface nwProps {
   network: string;
@@ -26,7 +22,7 @@ const ConnectWallet = ({ network, isClient }: nwProps) => {
     chainPath: string;
   }) => {
     await walletConnector?.switchNetwork({ networkChainId: chainId });
-    router.push(`/new/${chainPath}`);
+    router.push(`/${chainPath}`);
   };
 
   const handleClick = () => {

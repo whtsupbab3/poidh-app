@@ -1,7 +1,8 @@
+/* eslint-disable simple-import-sort/imports */
 import { action, makeObservable, observable } from 'mobx';
 
-import { chains } from '@/app/context';
-import { Chain } from '@/types';
+import { chains } from '@/app/context/config';
+import { Chain } from '@/types/web3';
 
 class ChainStatusStore {
   currentChain = chains.base;

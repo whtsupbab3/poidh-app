@@ -1,100 +1,69 @@
+/* eslint-disable simple-import-sort/imports */
 import { motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { cn } from '@/lib/utils';
-import { BountyItem } from '@/components/ui';
-import { getClaimsByBountyId } from '@/app/context';
-import { BountyListProps } from '@/types';
+import BountyItem from '@/components/ui/BountyItem';
 
-type EnhancedBounty = {
-  canceledOrClaimed: boolean;
-  hasClaims: boolean;
+type Bounty = {
   id: string;
-  issuer: string;
-  name: string;
-  amount: string | number | bigint;
+  title: string;
   description: string;
-  claimer: string;
-  createdAt: bigint;
-  claimId: string;
+  network: string;
+  amount: string;
   isMultiplayer: boolean;
+  inProgress: boolean;
+  hasClaims: boolean;
 };
 
-const container = {
-  hidden: { opacity: 1, scale: 0 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      delayChildren: 0.3,
-      staggerChildren: 0.2,
-    },
-  },
-};
-
-const item = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-  },
-};
-
-const BountyList: React.FC<BountyListProps> = ({ bountiesData }) => {
-  const [enhancedBounties, setEnhancedBounties] = useState<EnhancedBounty[]>(
-    []
-  );
-
-  useEffect(() => {
-    const fetchClaims = async () => {
-      // Refactor Notes -- Look at viem Multicall to see if we can refactor this to be more efficient.
-      const promises = bountiesData.map(async (bounty) => {
-        // Refactor Change -- This is probably why arbitrum is not working, this is causing us to go over the free limit, and we need to refactor this to be more efficient.
-        const hasClaims = await getClaimsByBountyId(bounty.id);
-        return {
-          ...bounty,
-          canceledOrClaimed:
-            bounty.claimer !== '0x0000000000000000000000000000000000000000',
-          hasClaims: hasClaims.length > 0,
-        };
-      });
-      const results = await Promise.all(promises);
-      setEnhancedBounties(results);
-    };
-
-    fetchClaims();
-  }, [bountiesData]);
-
+export default function BountyList({ bounties }: { bounties: Bounty[] }) {
   return (
     <>
       <motion.div
         className='container list mx-auto px-5 py-12 flex flex-col gap-12 lg:grid lg:grid-cols-12 lg:gap-12 lg:px-0'
-        variants={container}
+        variants={{
+          hidden: { opacity: 1, scale: 0 },
+          visible: {
+            opacity: 1,
+            scale: 1,
+            transition: {
+              delayChildren: 0.3,
+              staggerChildren: 0.2,
+            },
+          },
+        }}
         initial='hidden'
         animate='visible'
       >
-        {enhancedBounties.map((bounty) => (
+        {bounties.map((bounty) => (
           <motion.div
             className={cn(
-              bounty.canceledOrClaimed && 'canceled',
-              !bounty.hasClaims ? 'noClaims' : 'pendingClaims',
+              bounty.inProgress && 'canceled',
+              bounty.hasClaims ? 'pendingClaims' : 'noClaims',
               'bountyItem lg:col-span-4'
             )}
             key={bounty.id}
-            variants={item}
+            variants={{
+              hidden: { y: 20, opacity: 0 },
+              visible: {
+                y: 0,
+                opacity: 1,
+              },
+            }}
           >
             <BountyItem
-              id={bounty.id}
-              title={bounty.name}
-              description={bounty.description}
-              amount={bounty.amount}
-              isMultiplayer={bounty.isMultiplayer}
+              bounty={{
+                id: bounty.id,
+                title: bounty.title,
+                network: bounty.network,
+                description: bounty.description,
+                amount: bounty.amount,
+                isMultiplayer: bounty.isMultiplayer,
+              }}
             />
           </motion.div>
         ))}
       </motion.div>
     </>
   );
-};
-
-export default BountyList;
+}
