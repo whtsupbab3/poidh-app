@@ -20,13 +20,10 @@ model Bounty {
   isCanceled    Int?
   isBanned      Int
   isMultiplayer Int?
-  yes           Decimal?            @db.Decimal(78, 0)
-  no            Decimal?            @db.Decimal(78, 0)
-  deadline      Decimal?            @db.Decimal(78, 0)
+  deadline      Int?
   user          User?               @relation(fields: [issuer], references: [id])
   isVoting      Int?
   claims        Claim[]
-  votes         Vote[]
   participants  ParticipantBounty[]
 
   @@index([chainId], map: "Bounty_chainIdIndex")
@@ -48,7 +45,6 @@ model Claim {
   issuerId    String
   issuer      User    @relation(fields: [issuerId], references: [id])
   bounty      Bounty  @relation(fields: [bountyId], references: [id])
-  votes       Vote[]
 }
 
 model ParticipantBounty {
@@ -67,19 +63,6 @@ model User {
   participations ParticipantBounty[]
   bounties       Bounty[]
   claims         Claim[]
-  votes          Vote[]
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model Vote {
-  id       String  @id
-  vote     String
-  claimId  Decimal @db.Decimal(78, 0)
-  userId   String
-  bountyId Decimal @db.Decimal(78, 0)
-  user     User    @relation(fields: [userId], references: [id])
-  bounty   Bounty  @relation(fields: [bountyId], references: [id])
-  claim    Claim   @relation(fields: [claimId], references: [id])
 }
 
 model ponder_meta {
@@ -153,17 +136,4 @@ model ponder_reorg__User {
   operation    Int
 
   @@map("_ponder_reorg__User")
-}
-
-model ponder_reorg__Vote {
-  id           String
-  vote         String?
-  claimId      Decimal? @db.Decimal(78, 0)
-  userId       String?
-  bountyId     Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
-  operation    Int
-
-  @@map("_ponder_reorg__Vote")
 }
