@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import Link from 'next/link';
 import React from 'react';
@@ -59,9 +58,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           <p className='max-w-[30ch] overflow-hidden text-ellipsis text-2xl lg:text-4xl text-bold normal-case'>
             {bounty.title}
           </p>
-          <p className='max-w-[30ch] overflow-hidden text-ellipsis mt-5 normal-case'>
-            {bounty.description}
-          </p>
+          <p className='max-w-[50ch] mt-5 normal-case'>{bounty.description}</p>
           <p className='mt-5 normal-case break-all'>
             bounty issuer:{' '}
             <Link

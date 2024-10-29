@@ -26,8 +26,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         })
       : null;
 
-  console.log('bounty', bounty);
-
   return {
     title: bounty?.title || '',
     description: bounty?.description || '',

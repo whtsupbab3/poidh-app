@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 'use client';
 
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';

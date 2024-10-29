@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { z } from 'zod';
 
 import prisma from 'prisma/prisma';

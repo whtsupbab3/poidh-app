@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { motion } from 'framer-motion';
 import React from 'react';
 

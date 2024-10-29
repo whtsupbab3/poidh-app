@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
@@ -31,6 +30,7 @@ export default function ClaimItem({
   const { primaryWallet } = useDynamicContext();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const chain = useGetChain();
+
   const { data: bounty } = trpc.bounty.useQuery(
     {
       id: bountyId,

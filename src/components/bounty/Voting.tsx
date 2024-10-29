@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { PieChart } from '@mui/x-charts/PieChart';
 import React, { useEffect, useState } from 'react';
@@ -21,7 +20,7 @@ export default function Voting({ bountyId }: { bountyId: string }) {
     bountyVotingTracker({ id: bountyId, chainName: chain.chainPathName }).then(
       setVoting
     );
-  }, [bountyId, chain.chainPathName]);
+  }, [bountyId]);
 
   const voteHandler = async (vote: boolean) => {
     if (!bountyId || !primaryWallet) {

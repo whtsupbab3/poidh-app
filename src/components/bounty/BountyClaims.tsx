@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import React, { useEffect, useState } from 'react';
 
 import { trpc } from '@/trpc/client';

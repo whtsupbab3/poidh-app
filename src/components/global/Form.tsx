@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { Box, CircularProgress, Switch } from '@mui/material';
 import { useRouter } from 'next/navigation';

@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { headers } from 'next/headers';
 import React from 'react';
 
@@ -8,7 +7,6 @@ import '@/styles/colors.css';
 import ContextProvider from '@/components/global/ContextProvider';
 import { TRPCProvider } from '@/trpc/client';
 import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 
 export const metadata = {
   title: "poidh - pics or it didn't happen",
@@ -31,7 +29,6 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
           <ContextProvider>
             <Header />
             {children}
-            <Footer />
           </ContextProvider>
         </TRPCProvider>
       </body>

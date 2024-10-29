@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { usePathname } from 'next/navigation';
 
 import { Chain, Netname } from '@/utils/types';

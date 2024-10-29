@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* eslint-disable simple-import-sort/imports */
+
 import { Wallet } from '@dynamic-labs/sdk-react-core';
 import { Contract, ethers } from 'ethers';
 import { parseEther } from 'viem';
@@ -29,15 +29,22 @@ export async function getContractRead({
   return new Contract(chain.contracts.mainContract, ABI, provider);
 }
 
-export const getDegenNameContract = async () => {
+async function getDegenNameContract({
+  chainName,
+}: {
+  chainName: 'degen' | 'arbitrum' | 'base';
+}) {
+  const provider = new ethers.JsonRpcProvider(
+    chains[chainName].jsonProviderUrl
+  );
+
   return new Contract(
     '0x4087fb91A1fBdef05761C02714335D232a2Bf3a1',
     DEGENNAMERESABI,
-    new ethers.JsonRpcProvider(chains['degen'].jsonProviderUrl)
+    provider
   );
-};
+}
 
-// no public provider for etherium //TODO
 export async function getDegenOrEnsName({
   chainName,
   address,
@@ -45,18 +52,18 @@ export async function getDegenOrEnsName({
   chainName: 'degen' | 'arbitrum' | 'base';
   address: string;
 }) {
-  const chain = chains[chainName];
-  if (chain.name === 'Arbitrum One') {
-    return address;
+  if (chainName === 'arbitrum') {
+    return null;
   }
 
-  const degenNameContract = await getDegenNameContract();
+  const degenNameContract = await getDegenNameContract({ chainName });
   const degenName = await degenNameContract.defaultNames(address);
   if (degenName) {
     return `${degenName}.degen`;
   }
-
-  return publicClient.getEnsName({ address: address as `0x${string}` });
+  return publicClient.getEnsName({
+    address: address as `0x${string}`,
+  });
 }
 
 export async function createSoloBounty({

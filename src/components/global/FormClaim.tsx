@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import imageCompression from 'browser-image-compression';
 import { useCallback, useEffect, useRef, useState } from 'react';
