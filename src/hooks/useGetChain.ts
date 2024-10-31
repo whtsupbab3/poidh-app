@@ -1,8 +1,7 @@
-/* eslint-disable simple-import-sort/imports */
 import { usePathname } from 'next/navigation';
 
-import { chains } from '@/app/context/config';
-import { Chain, Netname } from '@/types/web3';
+import { Chain, Netname } from '@/utils/types';
+import { chains } from '@/utils/config';
 
 const chainPathName = {
   degen: '/degen',

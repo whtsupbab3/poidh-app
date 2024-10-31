@@ -1,12 +1,11 @@
-/* eslint-disable simple-import-sort/imports */
 'use-client';
 
 import { useState } from 'react';
 
-import { cn } from '@/lib';
 import { useGetChain } from '@/hooks/useGetChain';
 import { trpc } from '@/trpc/client';
 import BountyList from '@/components/ui/BountyList';
+import { cn } from '@/utils';
 
 type DisplayType = 'open' | 'progress' | 'past';
 
@@ -72,7 +71,7 @@ export default function ContentHome() {
                 isMultiplayer: Boolean(bounty.isMultiplayer),
                 inProgress: Boolean(bounty.inProgress),
                 hasClaims: bounty.claims.length > 0,
-                network: chain.chainPathName,
+                network: chain.slug,
               }))
             )}
           />

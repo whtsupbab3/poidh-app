@@ -3,31 +3,32 @@ import React from 'react';
 
 import { ArbitrumIcon, BaseIcon, DegenIcon } from '@/components/global/Icons';
 
-export default function NetworkSelector() {
+const networks = [
+  { href: '/arbitrum', Icon: ArbitrumIcon },
+  { href: '/base', Icon: BaseIcon },
+  { href: '/degen', Icon: DegenIcon },
+];
+
+export function NetworkSelector({
+  width = 24,
+  height = 24,
+}: {
+  width: number;
+  height: number;
+}) {
   return (
-    <>
-      <div className='px-5  lg:px-20 flex flex-col justify-center items-center'>
-        <div className='flex mt-5 flex-row gap-2'>
-          <Link
-            href='/arbitrum'
-            className='flex justify-center items-center border-[#D1ECFF] border rounded-full backdrop-blur-sm  hover:bg-white/50 bg-white/30 w-[100px] h-[100px]'
-          >
-            <ArbitrumIcon width={70} height={70} />
-          </Link>
-          <Link
-            href='/base'
-            className='flex justify-center items-center border-[#D1ECFF] border rounded-full backdrop-blur-sm  hover:bg-white/50 bg-white/30 w-[100px] h-[100px]'
-          >
-            <BaseIcon width={70} height={70} />
-          </Link>
-          <Link
-            href='/degen'
-            className='flex justify-center items-center border-[#D1ECFF] border rounded-full backdrop-blur-sm  hover:bg-white/50 bg-white/30 w-[100px] h-[100px]'
-          >
-            <DegenIcon width={70} height={70} />
-          </Link>
-        </div>
-      </div>
-    </>
+    <div className='flex flex-row gap-2'>
+      {networks.map(({ href, Icon }) => (
+        <Link
+          key={href}
+          href={href}
+          className='border-[#D1ECFF] border rounded-full backdrop-blur-sm bg-white/30 p-2 hover:bg-white/20'
+        >
+          <Icon width={width} height={height} />
+        </Link>
+      ))}
+    </div>
   );
 }
+
+export function NetworkSelectorDropDown() {}

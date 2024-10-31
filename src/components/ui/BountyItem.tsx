@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/imports */
 'use client';
 import Link from 'next/link';
 import React from 'react';
@@ -22,7 +21,7 @@ export default function BountyItem({ bounty }: { bounty: Bounty }) {
   const chain = useGetChain();
   return (
     <>
-      <Link href={`/${chain.chainPathName}/bounty/${bounty.id}`}>
+      <Link href={`/${chain.slug}/bounty/${bounty.id}`}>
         <div className='relative p-[2px] h-fit  rounded-xl'>
           <div className='p-5 flex flex-col justify-between relative z-20 h-full lg:col-span-4'>
             <div className='z-[-1] absolute w-full h-full left-0 top-0 borderBox rounded-[6px]  bg-whiteblue '></div>
@@ -41,7 +40,7 @@ export default function BountyItem({ bounty }: { bounty: Bounty }) {
                 {bounty.isMultiplayer && <UsersRoundIcon />}
               </div>
               <Button>
-                <Link href={`/${chain.chainPathName}/bounty/${bounty.id}`}>
+                <Link href={`/${chain.slug}/bounty/${bounty.id}`}>
                   see bounty
                 </Link>
               </Button>

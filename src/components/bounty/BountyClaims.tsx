@@ -1,10 +1,9 @@
-/* eslint-disable simple-import-sort/imports */
 import React, { useEffect, useState } from 'react';
 
 import { trpc } from '@/trpc/client';
 import { useGetChain } from '@/hooks/useGetChain';
 import ClaimList from '@/components/bounty/ClaimList';
-import { bountyCurrentVotingClaim } from '@/app/context/web3';
+import { bountyCurrentVotingClaim } from '@/utils/web3';
 
 const PAGE_SIZE = 9;
 
@@ -16,7 +15,7 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     const fetchCurrentVotingClaim = async () => {
       const currentVotingClaim = await bountyCurrentVotingClaim({
         id: bountyId,
-        chainName: chain.chainPathName,
+        chainName: chain.slug,
       });
       setVotingClaimId(currentVotingClaim);
     };

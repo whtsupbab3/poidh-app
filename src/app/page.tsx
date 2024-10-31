@@ -1,6 +1,6 @@
 'use client';
 
-import NetworkSelector from '@/components/global/NetworkSelector';
+import { NetworkSelector } from '@/components/global/NetworkSelector';
 import * as React from 'react';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -27,7 +27,7 @@ const Home = () => {
         monitor your submissions and confirm a claim with a single click
       </p>
       <h3 className='text-2xl mt-8'>select a network to get started</h3>
-      <NetworkSelector />
+      <NetworkSelector height={60} width={60} />
     </div>
   );
 };

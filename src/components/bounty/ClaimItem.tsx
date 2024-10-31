@@ -1,13 +1,12 @@
-/* eslint-disable simple-import-sort/imports */
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-
 import { useGetChain } from '@/hooks/useGetChain';
 import { CopyIcon } from '@/components/global/Icons';
 import { trpc } from '@/trpc/client';
-import { acceptClaim, submitClaimForVote } from '@/app/context/web3';
+import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
+import abi from '@/constant/abi/abi';
+import { useMutation } from '@tanstack/react-query';
 
 export default function ClaimItem({
   id,
@@ -28,10 +27,13 @@ export default function ClaimItem({
   isMultiplayer: boolean;
   url: string;
 }) {
-  const { primaryWallet } = useDynamicContext();
+  const account = useAccount();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const chain = useGetChain();
-  const { data: bounty } = trpc.bounty.useQuery(
+  const writeContract = useWriteContract({});
+  const switctChain = useSwitchChain();
+
+  const bounty = trpc.bounty.useQuery(
     {
       id: bountyId,
       chainId: chain.id.toString(),
@@ -51,63 +53,100 @@ export default function ClaimItem({
     fetchImageUrl(url);
   }, [url]);
 
-  const handleAcceptClaim = async () => {
-    if (!primaryWallet) {
-      toast.error('Please connect your wallet');
-      return;
-    }
-    try {
-      await acceptClaim({
-        wallet: primaryWallet,
-        bountyId,
-        claimId: id,
-        chainName: chain.chainPathName,
-      });
-      toast.success('Claim accepted!');
-      window.location.reload();
-    } catch (error: any) {
-      if (error.info?.error?.code !== 4001) {
-        toast.error('Failed to accept claim.');
+  const acceptClaimMutation = useMutation({
+    mutationFn: async ({
+      bountyId,
+      claimId,
+    }: {
+      bountyId: bigint;
+      claimId: bigint;
+    }) => {
+      if (chain.id !== account.chainId) {
+        await switctChain.switchChainAsync({ chainId: chain.id });
       }
-    }
-  };
+      await writeContract.writeContractAsync({
+        __mode: 'prepared',
+        abi,
+        address: chain.contracts.mainContract as `0x${string}`,
+        functionName: 'acceptClaim',
+        args: [bountyId, claimId],
+        chainId: chain.id,
+      });
+    },
+  });
 
-  const handleSubmitClaimForVote = async () => {
-    if (!primaryWallet) {
-      toast.error('Please connect your wallet');
-      return;
-    }
-    try {
-      await submitClaimForVote({
-        wallet: primaryWallet,
-        bountyId,
-        claimId: id,
-        chainName: chain.chainPathName,
-      });
-      toast.success('Claim submitted!');
-    } catch (error: any) {
-      if (error.info?.error?.code !== 4001) {
-        toast.error('Failed to submit claim.');
+  const submitForVoteMutation = useMutation({
+    mutationFn: async ({
+      bountyId,
+      claimId,
+    }: {
+      bountyId: bigint;
+      claimId: bigint;
+    }) => {
+      if (chain.id !== account.chainId) {
+        await switctChain.switchChainAsync({ chainId: chain.id });
       }
+      await writeContract.writeContractAsync({
+        __mode: 'prepared',
+        abi,
+        address: chain.contracts.mainContract as `0x${string}`,
+        functionName: 'submitClaimForVote',
+        args: [bountyId, claimId],
+        chainId: chain.id,
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (acceptClaimMutation.isSuccess) {
+      toast.success('Claim accepted successfully');
+    } else if (acceptClaimMutation.isError) {
+      toast.error('Failed to accept claim');
     }
-  };
+  }, [acceptClaimMutation.isSuccess, acceptClaimMutation.isError]);
+
+  useEffect(() => {
+    if (submitForVoteMutation.isSuccess) {
+      toast.success('Claim submitted for vote successfully');
+    } else if (submitForVoteMutation.isError) {
+      toast.error('Failed to submit claim for vote');
+    }
+  }, [submitForVoteMutation.isSuccess, submitForVoteMutation.isError]);
 
   return (
     <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
       <div className='left-5 top-5 absolute  flex flex-col text-white'>
-        {isMultiplayer && primaryWallet?.address === issuer && (
+        {isMultiplayer && account.address === issuer && (
           <button
-            className=' submitForVote cursor-pointer text-[#F15E5F] hover:text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
-            onClick={handleSubmitClaimForVote}
+            className='submitForVote cursor-pointer text-[#F15E5F] hover:text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
+            onClick={() => {
+              if (account.isConnected) {
+                submitForVoteMutation.mutate({
+                  bountyId: BigInt(bountyId),
+                  claimId: BigInt(id),
+                });
+              } else {
+                toast.error('Please connect wallet to continue');
+              }
+            }}
           >
             submit for vote
           </button>
         )}
 
-        {bounty && primaryWallet?.address === bounty.issuer && (
+        {bounty.data && account.address === bounty.data.issuer && (
           <div
-            onClick={handleAcceptClaim}
-            className=' acceptButton cursor-pointer mt-5 text-[#F15E5F] hover:text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
+            onClick={() => {
+              if (account.isConnected) {
+                acceptClaimMutation.mutate({
+                  bountyId: BigInt(bountyId),
+                  claimId: BigInt(id),
+                });
+              } else {
+                toast.error('Please connect wallet to continue');
+              }
+            }}
+            className='acceptButton cursor-pointer mt-5 text-[#F15E5F] hover:text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
           >
             accept
           </div>
@@ -137,7 +176,7 @@ export default function ClaimItem({
           <span className=''>issuer</span>
           <span className='flex flex-row'>
             <Link
-              href={`/${chain.chainPathName}/account/${issuer}`}
+              href={`/${chain.slug}/account/${issuer}`}
               className='hover:text-gray-200'
             >
               {issuer.slice(0, 5) + '…' + issuer.slice(-6)}

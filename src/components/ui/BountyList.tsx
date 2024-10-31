@@ -1,9 +1,8 @@
-/* eslint-disable simple-import-sort/imports */
 import { motion } from 'framer-motion';
 import React from 'react';
 
-import { cn } from '@/lib/utils';
 import BountyItem from '@/components/ui/BountyItem';
+import { cn } from '@/utils';
 
 type Bounty = {
   id: string;

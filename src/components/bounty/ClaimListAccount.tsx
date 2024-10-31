@@ -41,7 +41,7 @@ function ClaimItem({ claim }: { claim: Claim }) {
 
   return (
     <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
-      <Link href={`/${chain.chainPathName}/bounty/${claim.bountyId}`}>
+      <Link href={`/${chain.slug}/bounty/${claim.bountyId}`}>
         {claim.accepted && (
           <div className='right-5 top-5  text-white bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5 absolute '>
             accepted
@@ -68,7 +68,7 @@ function ClaimItem({ claim }: { claim: Claim }) {
           <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed'>
             <span className=''>issuer</span>
             <Link
-              href={`/${chain.chainPathName}/account/${claim.issuer}`}
+              href={`/${chain.slug}/account/${claim.issuer}`}
               className='hover:text-gray-200'
             >
               {formatAddress(claim.issuer)}

@@ -1,7 +1,5 @@
-/* eslint-disable simple-import-sort/imports */
 'use client';
 
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { useEffect, useState } from 'react';
 import { formatEther } from 'viem';
 
@@ -16,7 +14,6 @@ type Section = 'nft' | 'bounties' | 'claims';
 
 export default function AccountInfo({ address }: { address: string }) {
   const chain = useGetChain();
-  const { primaryWallet } = useDynamicContext();
   const bounties = trpc.userBounties.useQuery(
     {
       address,
@@ -46,13 +43,11 @@ export default function AccountInfo({ address }: { address: string }) {
   );
 
   const [currentSection, setCurrentSection] = useState<Section>('nft');
+
   const [ETHinContract, setETHinContract] = useState<string>('0');
   const [totalETHPaid, setTotalETHPaid] = useState<string>('0');
   const [totalETHEarn, setTotalETHEarn] = useState<string>('0');
-
   const [poidhScore, setPoidhScore] = useState<number>(0);
-
-  const userAccount = primaryWallet?.address === address;
 
   useEffect(() => {
     let totalAmount = BigInt(0);
@@ -90,8 +85,8 @@ export default function AccountInfo({ address }: { address: string }) {
   return (
     <>
       {address && (
-        <div className='p-8'>
-          <div className='flex flex-col lg:flex-row lg:justify-between lg:items-start'>
+        <div>
+          <div className='flex flex-col lg:flex-row lg:justify-between lg:items-start p-8'>
             <div>
               <div className='flex flex-col border-b border-dashed'>
                 <span>user</span>
@@ -141,21 +136,19 @@ export default function AccountInfo({ address }: { address: string }) {
               onClick={() => setCurrentSection('nft')}
               show={currentSection !== 'nft'}
             >
-              nft's ({NFTs?.data?.length ?? 0})
+              NFTs ({NFTs.data?.length ?? 0})
             </FilterButton>
             <FilterButton
               onClick={() => setCurrentSection('bounties')}
               show={currentSection !== 'bounties'}
             >
-              {' '}
-              {userAccount ? 'your bounties' : 'user bounties'} bounties (
-              {bounties.data?.length ?? 0})
+              bounties ({bounties.data?.length ?? 0})
             </FilterButton>
             <FilterButton
               onClick={() => setCurrentSection('claims')}
               show={currentSection !== 'claims'}
             >
-              submitted claims ({claims.data?.length ?? 0})
+              claims ({claims.data?.length ?? 0})
             </FilterButton>
           </div>
 
@@ -189,5 +182,5 @@ export default function AccountInfo({ address }: { address: string }) {
 }
 
 function formatAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }

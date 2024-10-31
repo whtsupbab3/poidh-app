@@ -1,37 +1,42 @@
-import { withdrawFromOpenBounty } from '@/app/context/web3';
+import abi from '@/constant/abi/abi';
 import { useGetChain } from '@/hooks/useGetChain';
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
+import { useMutation } from '@tanstack/react-query';
 import React from 'react';
 import { toast } from 'react-toastify';
+import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
 
 export default function Withdraw({ bountyId }: { bountyId: string }) {
-  const { primaryWallet } = useDynamicContext();
   const chain = useGetChain();
+  const account = useAccount();
+  const writeContract = useWriteContract({});
+  const switctChain = useSwitchChain();
 
-  const handlewithdrawFromOpenBounty = async () => {
-    if (!primaryWallet) {
-      toast.error('Please fill in all fields and connect wallet');
-      return;
-    }
-    try {
-      await withdrawFromOpenBounty({
-        chainName: chain.chainPathName,
-        id: bountyId,
-        wallet: primaryWallet,
-      });
-      toast.success('Withdraw successful!');
-    } catch (error: any) {
-      if (error.info?.error?.code !== 4001) {
-        toast.error('Withdraw failed');
+  const withdrawFromOpenBountyMutation = useMutation({
+    mutationFn: async (bountyId: bigint) => {
+      if (chain.id !== account.chainId) {
+        await switctChain.switchChainAsync({ chainId: chain.id });
       }
-    }
-  };
+      await writeContract.writeContractAsync({
+        __mode: 'prepared',
+        abi,
+        address: chain.contracts.mainContract as `0x${string}`,
+        functionName: 'withdrawFromOpenBounty',
+        args: [bountyId],
+      });
+    },
+  });
 
   return (
     <div className=' py-12 w-fit '>
       <button
         className='border border-white rounded-full px-5 py-2  backdrop-blur-sm bg-white/30 '
-        onClick={handlewithdrawFromOpenBounty}
+        onClick={() => {
+          if (account.isConnected) {
+            withdrawFromOpenBountyMutation.mutate(BigInt(bountyId));
+          } else {
+            toast.error('Please fill in all fields and connect wallet');
+          }
+        }}
       >
         {' '}
         withdraw{' '}

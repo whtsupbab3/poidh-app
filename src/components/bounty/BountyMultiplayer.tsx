@@ -1,32 +1,31 @@
-/* eslint-disable simple-import-sort/imports */
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import Link from 'next/link';
 import { useState } from 'react';
 import { formatEther } from 'viem';
+import { useQuery } from '@tanstack/react-query';
 
 import { ExpandMoreIcon } from '@/components/global/Icons';
 import JoinBounty from '@/components/ui/JoinBounty';
 import Withdraw from '@/components/ui/Withdraw';
 import { trpc } from '@/trpc/client';
-import { Chain } from '@/types/web3';
+import { Chain } from '@/utils/types';
+import { getDegenOrEnsName } from '@/utils/web3';
+import { useAccount } from 'wagmi';
 
 export default function BountyMultiplayer({
   chain,
   bountyId,
   inProgress,
   issuer,
-  isCanceled,
 }: {
   chain: Chain;
   bountyId: string;
   inProgress: boolean;
   issuer: string;
-  isCanceled: boolean;
 }) {
   const [showParticipants, setShowParticipants] = useState(false);
-  const { primaryWallet } = useDynamicContext();
+  const account = useAccount();
 
-  const { data, isSuccess } = trpc.participants.useQuery(
+  const participants = trpc.participants.useQuery(
     {
       bountyId: bountyId,
       chainId: chain.id.toString(),
@@ -36,23 +35,20 @@ export default function BountyMultiplayer({
     }
   );
 
-  const toggleParticipants = () => {
-    setShowParticipants(!showParticipants);
-  };
-
-  const isCurrentUserAParticipant = data?.some(
-    (participant) => participant.user.id === primaryWallet?.address
+  const isCurrentUserAParticipant = participants.data?.some(
+    (participant) => participant.user.id === account.address
   );
 
   return (
     <>
       <div>
-        <div></div>
         <button
-          onClick={toggleParticipants}
+          onClick={() => setShowParticipants(!showParticipants)}
           className='border border-white rounded-full mt-5  px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
         >
-          {data ? `${data.length} contributors` : 'Loading contributors...'}
+          {participants.data
+            ? `${participants.data.length} contributors`
+            : 'Loading contributors...'}
           <span
             className={`${
               showParticipants ? '-rotate-180' : ''
@@ -65,30 +61,14 @@ export default function BountyMultiplayer({
         {showParticipants && (
           <div className='border mt-5 border-white rounded-[8px] px-10 lg:px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'>
             <div className='flex flex-col'>
-              {isSuccess ? (
-                data.map((participant, index) => {
-                  const formattedAddress = `${participant.user.id.substring(
-                    0,
-                    6
-                  )}...${participant.user.id.substring(
-                    participant.user.id.length - 3
-                  )}`;
-                  const degenOrEnsName =
-                    participant.user.degenName || participant.user.ens;
-                  const displayText = degenOrEnsName || formattedAddress;
-
-                  return (
-                    <div className='py-2' key={index}>
-                      <Link
-                        href={`/${chain.chainPathName}/account/${participant.user.id}`}
-                      >
-                        {displayText}
-                      </Link>{' '}
-                      - {formatEther(BigInt(participant.amount))}{' '}
-                      {chain.currency}
-                    </div>
-                  );
-                })
+              {participants.isSuccess ? (
+                participants.data.map((participant) => (
+                  <Participant
+                    participant={participant}
+                    chain={chain}
+                    key={participant.user.id}
+                  />
+                ))
               ) : (
                 <p>Loading addresses…</p>
               )}
@@ -96,17 +76,56 @@ export default function BountyMultiplayer({
           </div>
         )}
       </div>
-      <div>
-        {isCurrentUserAParticipant &&
-          inProgress &&
-          primaryWallet?.address !== issuer && <Withdraw bountyId={bountyId} />}
-      </div>
-
-      <div>
-        {!isCurrentUserAParticipant && !isCanceled && (
+      {account.address !== issuer ? (
+        inProgress && isCurrentUserAParticipant ? (
+          <Withdraw bountyId={bountyId} />
+        ) : (
           <JoinBounty bountyId={bountyId} />
-        )}
-      </div>
+        )
+      ) : null}
     </>
   );
+}
+function Participant({
+  chain,
+  participant,
+}: {
+  chain: Chain;
+  participant: {
+    user: { id: string; ens: string | null; degenName: string | null };
+    amount: string;
+  };
+}) {
+  const walletDisplayName = useQuery({
+    queryKey: ['getWalletDisplayName', participant.user.id, chain.slug],
+    queryFn: () =>
+      getWalletDisplayName({
+        address: participant.user.id,
+        chainName: chain.slug,
+      }),
+  });
+
+  return (
+    <div className='py-2'>
+      <Link href={`/${chain.slug}/account/${participant.user.id}`}>
+        {walletDisplayName.data ?? participant.user.id}
+      </Link>{' '}
+      - {formatEther(BigInt(participant.amount))} {chain.currency}
+    </div>
+  );
+}
+
+async function getWalletDisplayName({
+  address,
+  chainName,
+}: {
+  address: string;
+  chainName: 'arbitrum' | 'base' | 'degen';
+}) {
+  const nickname = await getDegenOrEnsName({ address, chainName });
+  if (nickname) {
+    return nickname;
+  }
+
+  return address.slice(0, 6) + '…' + address.slice(-4);
 }
