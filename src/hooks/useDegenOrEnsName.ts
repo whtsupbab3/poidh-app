@@ -9,14 +9,14 @@ export default function useDegenOrEnsName(addr: string) {
   useEffect(() => {
     const cb = async () => {
       const degenOrEnsName = await getDegenOrEnsName({
-        chainName: chain.chainPathName,
+        chainName: chain.slug,
         address: addr,
       });
       setResult(degenOrEnsName);
     };
 
     cb();
-  }, [addr]);
+  }, [addr, chain]);
 
   return result;
 }

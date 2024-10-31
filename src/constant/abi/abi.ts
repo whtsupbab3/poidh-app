@@ -11,9 +11,19 @@ const abi = [
         name: '_treasury',
         type: 'address',
       },
+      {
+        internalType: 'uint256',
+        name: '_startClaimIndex',
+        type: 'uint256',
+      },
     ],
     stateMutability: 'nonpayable',
     type: 'constructor',
+  },
+  {
+    inputs: [],
+    name: 'AlreadyVoted',
+    type: 'error',
   },
   {
     inputs: [],

@@ -1,6 +1,5 @@
 'use client';
 
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { useEffect, useState } from 'react';
 import { formatEther } from 'viem';
 
@@ -15,7 +14,6 @@ type Section = 'nft' | 'bounties' | 'claims';
 
 export default function AccountInfo({ address }: { address: string }) {
   const chain = useGetChain();
-  const { primaryWallet } = useDynamicContext();
   const bounties = trpc.userBounties.useQuery(
     {
       address,
@@ -50,8 +48,6 @@ export default function AccountInfo({ address }: { address: string }) {
   const [totalETHPaid, setTotalETHPaid] = useState<string>('0');
   const [totalETHEarn, setTotalETHEarn] = useState<string>('0');
   const [poidhScore, setPoidhScore] = useState<number>(0);
-
-  const userAccount = primaryWallet?.address === address;
 
   useEffect(() => {
     let totalAmount = BigInt(0);

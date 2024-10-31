@@ -71,7 +71,7 @@ export default function ContentHome() {
                 isMultiplayer: Boolean(bounty.isMultiplayer),
                 inProgress: Boolean(bounty.inProgress),
                 hasClaims: bounty.claims.length > 0,
-                network: chain.chainPathName,
+                network: chain.slug,
               }))
             )}
           />

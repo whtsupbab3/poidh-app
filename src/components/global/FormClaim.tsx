@@ -1,4 +1,3 @@
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import imageCompression from 'browser-image-compression';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -6,7 +5,10 @@ import { toast } from 'react-toastify';
 
 import { useGetChain } from '@/hooks/useGetChain';
 import { buildMetadata, uploadFile, uploadMetadata } from '@/utils';
-import { createClaim } from '@/utils/web3';
+import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
+import abi from '@/constant/abi/abi';
+import Image from 'next/image';
+import { useMutation } from '@tanstack/react-query';
 
 const LINK_IPFS = 'https://beige-impossible-dragon-883.mypinata.cloud/ipfs';
 
@@ -25,14 +27,16 @@ export default function FormClaim({ bountyId }: { bountyId: string }) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   const [preview, setPreview] = useState('');
-  const { primaryWallet } = useDynamicContext();
+  const account = useAccount();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [imageURI, setImageURI] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const inputFile = useRef<HTMLInputElement>(null);
+  const writeContract = useWriteContract({});
   const chain = useGetChain();
+  const switctChain = useSwitchChain();
 
   const compressImage = async (image: File): Promise<File> => {
     const options = {
@@ -81,34 +85,32 @@ export default function FormClaim({ bountyId }: { bountyId: string }) {
     uploadImage();
   }, [file]);
 
-  const handleCreateClaim = async () => {
-    if (!name || !description || !primaryWallet || !imageURI) {
-      toast.error(
-        'Please fill in all fields, upload an image, and connect wallet'
-      );
-      return;
-    }
-
-    try {
+  const createClaimMutations = useMutation({
+    mutationFn: async (bountyId: bigint) => {
+      if (chain.id !== account.chainId) {
+        await switctChain.switchChainAsync({ chainId: chain.id });
+      }
       const metadata = buildMetadata(imageURI, name, description);
       const metadataResponse = await uploadMetadata(metadata);
       const uri = `${LINK_IPFS}/${metadataResponse.IpfsHash}`;
-      await createClaim({
-        bountyId: bountyId,
-        name,
-        uri,
-        description,
-        chainName: chain.chainPathName,
-        wallet: primaryWallet,
+      await writeContract.writeContractAsync({
+        __mode: 'prepared',
+        abi,
+        address: chain.contracts.mainContract as `0x${string}`,
+        functionName: 'createClaim',
+        args: [bountyId, name, uri, description],
       });
-      toast.success('Claim created successfully!');
-      window.location.reload();
-    } catch (error: any) {
-      if (error.info?.error?.code !== 4001) {
-        toast.error('Failed to create claim');
-      }
+    },
+  });
+
+  useEffect(() => {
+    if (createClaimMutations.isSuccess) {
+      toast.success('Claim created successfully');
     }
-  };
+    if (createClaimMutations.isError) {
+      toast.error('Failed to create claim');
+    }
+  }, [createClaimMutations.isSuccess, createClaimMutations.isError]);
 
   return (
     <div className='mt-10 text-left flex-col text-white rounded-md border border-[#D1ECFF] p-5 flex w-full lg:min-w-[400px] justify-center backdrop-blur-sm bg-poidhBlue/60'>
@@ -119,12 +121,12 @@ export default function FormClaim({ bountyId }: { bountyId: string }) {
         <input {...getInputProps()} />
         {isDragActive && <p>drop files here…</p>}
         {preview && (
-          <img
+          <Image
             src={preview}
             alt='Preview'
+            width={300}
+            height={300}
             style={{
-              width: '300px',
-              height: '300px',
               marginTop: '10px',
               borderRadius: '10px',
               objectFit: 'contain',
@@ -155,13 +157,15 @@ export default function FormClaim({ bountyId }: { bountyId: string }) {
 
       <button
         className={`border bg-poidhRed mt-5 rounded-full px-5 py-2 ${
-          !primaryWallet ? 'opacity-50 cursor-not-allowed' : ''
+          account.isDisconnected ? 'opacity-50 cursor-not-allowed' : ''
         }`}
         onClick={() => {
-          if (!primaryWallet) {
-            toast.error('Please connect wallet to continue');
+          if (name && description && account.isConnected && imageURI) {
+            createClaimMutations.mutate(BigInt(bountyId));
           } else {
-            handleCreateClaim();
+            toast.error(
+              'Please fill in all fields, upload an image, and connect wallet'
+            );
           }
         }}
       >

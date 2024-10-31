@@ -9,7 +9,7 @@ const networks = [
   { href: '/degen', Icon: DegenIcon },
 ];
 
-export default function NetworkSelector({
+export function NetworkSelector({
   width = 24,
   height = 24,
 }: {
@@ -30,3 +30,5 @@ export default function NetworkSelector({
     </div>
   );
 }
+
+export function NetworkSelectorDropDown() {}

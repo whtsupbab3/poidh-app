@@ -1,9 +1,9 @@
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import Link from 'next/link';
 import React from 'react';
 
 import { useGetChain } from '@/hooks/useGetChain';
-import NetworkSelector from '@/components/global/NetworkSelector';
+import { NetworkSelector } from '@/components/global/NetworkSelector';
+import { useAccount } from 'wagmi';
 
 const MenuLink = ({
   href,
@@ -17,16 +17,14 @@ const MenuLink = ({
   </Link>
 );
 
-export default function Menu() {
+export default function SlideOverMenu() {
   const chain = useGetChain();
-  const { isAuthenticated, primaryWallet } = useDynamicContext();
+  const account = useAccount();
 
   return (
     <div className='flex gap-2 flex-col p-5 text-white'>
-      {isAuthenticated && (
-        <MenuLink
-          href={`/${chain.chainPathName}/account/${primaryWallet?.address}`}
-        >
+      {account.isConnected && (
+        <MenuLink href={`/${chain.slug}/account/${account.address}`}>
           my account
         </MenuLink>
       )}
@@ -45,9 +43,6 @@ export default function Menu() {
         report bug
       </MenuLink>
       <MenuLink href='http://localhost:3000/terms'>terms</MenuLink>
-      <div className='flex justify-center mt-4'>
-        <NetworkSelector width={24} height={24} />
-      </div>
     </div>
   );
 }

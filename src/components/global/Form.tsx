@@ -1,65 +1,51 @@
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { Box, CircularProgress, Switch } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import GameButton from '@/components/global/GameButton';
 import { InfoIcon } from '@/components/global/Icons';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { useGetChain } from '@/hooks/useGetChain';
-import { createOpenBounty, createSoloBounty } from '@/utils/web3';
+import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
+import abi from '@/constant/abi/abi';
+import { parseEther } from 'viem';
+import { useMutation } from '@tanstack/react-query';
 
 export default function Form() {
-  const { primaryWallet } = useDynamicContext();
-  const router = useRouter();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [isSoloBounty, setIsSoloBounty] = useState(true);
   const chain = useGetChain();
-  const [inTxn, setInTxn] = useState(false);
+  const writeContract = useWriteContract({});
+  const account = useAccount();
+  const switctChain = useSwitchChain();
 
-  const handleCreateBounty = async () => {
-    if (!name || !description || !amount || !primaryWallet) {
-      toast.error('Please fill in all fields and check wallet connection.');
-      return;
-    }
-    try {
-      let tx;
-      setInTxn(true);
-      if (isSoloBounty) {
-        tx = await createSoloBounty({
-          wallet: primaryWallet,
-          chainName: chain.chainPathName,
-          name,
-          description,
-          value: amount,
-        });
-      } else {
-        tx = await createOpenBounty({
-          wallet: primaryWallet,
-          chainName: chain.chainPathName,
-          name,
-          description,
-          value: amount,
-        });
+  const createBountyMutations = useMutation({
+    mutationFn: async () => {
+      if (chain.id !== account.chainId) {
+        await switctChain.switchChainAsync({ chainId: chain.id });
       }
-      toast.success('Bounty created successfully!');
-      setInTxn(false);
-      setName('');
-      setDescription('');
-      setAmount('');
-      router.push(`/${chain.chainPathName}/bounty/${tx.logs[0].args[0]}`);
-    } catch (error: any) {
-      setInTxn(false);
-      console.error('Error creating bounty:', error);
-      const errorCode = error?.info?.error?.code;
-      if (errorCode !== 4001) {
-        toast.error('Failed to create bounty');
-      }
+      await writeContract.writeContractAsync({
+        __mode: 'prepared',
+        abi,
+        address: chain.contracts.mainContract as `0x${string}`,
+        functionName: isSoloBounty ? 'createSoloBounty' : 'createOpenBounty',
+        value: BigInt(parseEther(amount)),
+        args: [name, description],
+        chainId: chain.id,
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (createBountyMutations.isSuccess) {
+      toast.success('Bounty created successfully');
     }
-  };
+    if (createBountyMutations.isError) {
+      toast.error('Failed to create bounty');
+    }
+  }, [createBountyMutations.isSuccess, createBountyMutations.isError]);
 
   return (
     <div className='mt-10 flex text-left flex-col text-white rounded-[30px] border border-[#D1ECFF] p-5 w-full lg:min-w-[400px] justify-center backdrop-blur-sm bg-poidhBlue/60'>
@@ -110,19 +96,27 @@ export default function Form() {
         </span>
       </div>
 
-      {inTxn ? (
+      {createBountyMutations.isPending ? (
         <Box className='flex justify-center items-center mt-5'>
           <CircularProgress />
         </Box>
       ) : (
         <button
           className={`flex flex-row items-center justify-center ${
-            !primaryWallet ? 'opacity-50 cursor-not-allowed' : ''
+            account.isDisconnected ? 'opacity-50 cursor-not-allowed' : ''
           }`}
-          onClick={handleCreateBounty}
-          disabled={!primaryWallet}
+          onClick={() => {
+            if (account.isConnected && name && description && amount) {
+              createBountyMutations.mutate();
+            } else {
+              toast.error(
+                'Please fill in all fields and check wallet connection.'
+              );
+            }
+          }}
+          disabled={account.isDisconnected}
         >
-          {inTxn && (
+          {createBountyMutations.isPending && (
             <Box sx={{ display: 'flex' }}>
               <CircularProgress />
             </Box>

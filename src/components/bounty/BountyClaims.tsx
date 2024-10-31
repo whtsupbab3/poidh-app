@@ -15,7 +15,7 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     const fetchCurrentVotingClaim = async () => {
       const currentVotingClaim = await bountyCurrentVotingClaim({
         id: bountyId,
-        chainName: chain.chainPathName,
+        chainName: chain.slug,
       });
       setVotingClaimId(currentVotingClaim);
     };

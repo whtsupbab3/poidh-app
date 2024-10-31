@@ -1,6 +1,5 @@
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { formatEther } from 'viem';
 
@@ -8,13 +7,17 @@ import { useGetChain } from '@/hooks/useGetChain';
 import BountyMultiplayer from '@/components/bounty/BountyMultiplayer';
 import CreateClaim from '@/components/ui/CreateClaim';
 import { trpc } from '@/trpc/client';
-import { cancelOpenBounty, cancelSoloBounty } from '@/utils/web3';
+import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
+import abi from '@/constant/abi/abi';
+import { useMutation } from '@tanstack/react-query';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
-  const { primaryWallet } = useDynamicContext();
   const chain = useGetChain();
+  const account = useAccount();
+  const writeContract = useWriteContract({});
+  const switctChain = useSwitchChain();
 
-  const { data: bounty } = trpc.bounty.useQuery(
+  const bounty = trpc.bounty.useQuery(
     {
       id: bountyId,
       chainId: chain.id.toString(),
@@ -22,78 +25,89 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
     { enabled: !!bountyId }
   );
 
-  if (!bounty) {
+  const cancelMutation = useMutation({
+    mutationFn: async (bountyId: bigint) => {
+      if (chain.id !== account.chainId) {
+        await switctChain.switchChainAsync({ chainId: chain.id });
+      }
+      await writeContract.writeContractAsync({
+        __mode: 'prepared',
+        abi,
+        address: chain.contracts.mainContract as `0x${string}`,
+        functionName: bounty.data!.isMultiplayer
+          ? 'cancelOpenBounty'
+          : 'cancelSoloBounty',
+        args: [bountyId],
+        chainId: chain.id,
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (cancelMutation.isSuccess) {
+      toast.success('Bounty canceled successfully');
+    }
+    if (cancelMutation.isError) {
+      toast.error('Failed to cancel bounty');
+    }
+  }, [cancelMutation.isSuccess, cancelMutation.isError]);
+
+  if (!bounty.data) {
     return null;
   }
-
-  const handleCancel = async () => {
-    if (!primaryWallet) {
-      toast.error('Please connect your wallet first.');
-      return;
-    }
-    try {
-      bounty.isMultiplayer
-        ? await cancelOpenBounty({
-            wallet: primaryWallet,
-            id: bountyId,
-            chainName: chain.chainPathName,
-          })
-        : await cancelSoloBounty({
-            wallet: primaryWallet,
-            id: bountyId,
-            chainName: chain.chainPathName,
-          });
-      toast.success('Bounty canceled successfully!');
-    } catch (error: any) {
-      if (error?.info?.error?.code !== 4001) {
-        toast.error('Failed to cancel bounty.');
-      }
-    }
-  };
 
   return (
     <>
       <div className='flex pt-20 flex-col  justify-between lg:flex-row'>
         <div className='flex flex-col  lg:max-w-[50%]'>
           <p className='max-w-[30ch] overflow-hidden text-ellipsis text-2xl lg:text-4xl text-bold normal-case'>
-            {bounty.title}
+            {bounty.data.title}
           </p>
-          <p className='max-w-[50ch] mt-5 normal-case'>{bounty.description}</p>
+          <p className='max-w-[50ch] mt-5 normal-case'>
+            {bounty.data.description}
+          </p>
           <p className='mt-5 normal-case break-all'>
             bounty issuer:{' '}
             <Link
-              href={`/${chain.chainPathName}/account/${bounty.issuer}`}
+              href={`/${chain.slug}/account/${bounty.data.issuer}`}
               className='hover:text-gray-200'
             >
-              {bounty.issuer}
+              {bounty.data.issuer}
             </Link>
           </p>
         </div>
 
         <div className='flex flex-col space-between'>
           <div className='flex mt-5 lg:mt-0 gap-x-2 flex-row'>
-            <span>{formatEther(BigInt(bounty.amount))}</span>
+            <span>{formatEther(BigInt(bounty.data.amount))}</span>
             <span>{chain.currency}</span>
           </div>
 
           <div>
-            {bounty.inProgress && primaryWallet?.address !== bounty.issuer ? (
+            {bounty.data.inProgress &&
+            account.address !== bounty.data.issuer ? (
               <CreateClaim bountyId={bountyId} />
             ) : (
               <button
-                onClick={handleCancel}
-                disabled={!bounty.inProgress}
+                onClick={() => {
+                  if (account.isConnected) {
+                    cancelMutation.mutate(BigInt(bountyId));
+                  } else {
+                    toast.error('Please connect wallet to continue');
+                  }
+                }}
+                disabled={!bounty.data.inProgress}
                 className={`border border-[#F15E5F]  rounded-md py-2 px-5 mt-5 ${
-                  !bounty.inProgress
+                  !bounty.data.inProgress
                     ? 'bg-[#F15E5F] text-white '
                     : 'text-[#F15E5F]'
                 } `}
               >
-                {bounty.isCanceled
+                {bounty.data.isCanceled
                   ? 'canceled'
-                  : primaryWallet?.address === bounty.issuer
+                  : account.address === bounty.data.issuer
                   ? 'cancel'
-                  : !bounty.inProgress
+                  : !bounty.data.inProgress
                   ? 'accepted'
                   : null}
               </button>
@@ -101,13 +115,12 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           </div>
         </div>
       </div>
-      {bounty.isMultiplayer && (
+      {bounty.data.isMultiplayer && (
         <BountyMultiplayer
           chain={chain}
           bountyId={bountyId}
-          inProgress={Boolean(bounty.inProgress)}
-          issuer={bounty.issuer}
-          isCanceled={Boolean(bounty.isCanceled)}
+          inProgress={Boolean(bounty.data.inProgress)}
+          issuer={bounty.data.issuer}
         />
       )}
     </>

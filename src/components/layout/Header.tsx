@@ -4,15 +4,40 @@ import React, { useState } from 'react';
 
 import { useGetChain } from '@/hooks/useGetChain';
 import Banner from '@/components/global/Banner';
-import Menu from '@/components/global/Menu';
+import SlideOverMenu from '@/components/global/SlideOverMenu';
 import Logo from '@/components/ui/Logo';
-import { MenuIcon } from '@/components/global/Icons';
-import { Drawer } from '@mui/material';
-import ConnectWallet from '@/components/global/ConnectWallet';
+import {
+  ArbitrumIcon,
+  BaseIcon,
+  DegenIcon,
+  ExpandMoreIcon,
+  MenuIcon,
+  WalletIcon,
+} from '@/components/global/Icons';
+import { Button, Drawer, Menu, MenuItem } from '@mui/material';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { cn } from '@/utils';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const Header = () => {
   const chain = useGetChain();
   const [isOpen, setIsOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const router = useRouter();
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const networks = [
+    { href: '/arbitrum', Icon: ArbitrumIcon, name: 'arbitrum' },
+    { href: '/base', Icon: BaseIcon, name: 'base' },
+    { href: '/degen', Icon: DegenIcon, name: 'degen' },
+  ];
 
   return (
     <>
@@ -23,25 +48,120 @@ const Header = () => {
           className: 'w-60 bg-[#F15E5F]',
         }}
       >
-        <Menu />
+        <SlideOverMenu />
       </Drawer>
       <Banner />
-      <div className='flex justify-between items-center h-16 px-5 lg:px-20 border-b border-white'>
+      <div className='flex justify-between items-center h-[4.5rem] px-4 lg:px-20 border-b border-white'>
         <div className='flex'>
           <button
             onClick={() => setIsOpen(true)}
-            className='mr-4 hover:text-[#F15E5F]'
+            className='mr-1 hover:text-[#F15E5F]'
           >
             <MenuIcon width={30} height={30} />
           </button>
-          <Link href={`/${chain.chainPathName}`}>
+          <Link href={`/${chain.slug}`}>
             <Logo />
           </Link>
         </div>
-        <ConnectWallet />
+        <div className='flex items-center'>
+          <Button
+            id='basic-button'
+            aria-controls={open ? 'basic-menu' : undefined}
+            aria-haspopup='true'
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handleClick}
+            className='border-[#D1ECFF] border rounded-lg backdrop-blur-sm bg-white/30 p-2 mr-2 hover:bg-white/20'
+          >
+            {networks
+              .find(({ name }) => name === chain.slug)
+              ?.Icon({
+                width: 24,
+                height: 24,
+              })}{' '}
+            <ExpandMoreIcon />
+          </Button>
+          <Menu
+            id='basic-menu'
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            MenuListProps={{
+              'aria-labelledby': 'basic-button',
+            }}
+          >
+            {networks.map(({ href, Icon, name }) => (
+              <MenuItem
+                key={href}
+                className={cn('mx-1')}
+                onClick={() => router.push(href)}
+              >
+                <Icon width={24} height={24} /> <p className='ml-4'>{name}</p>
+              </MenuItem>
+            ))}
+          </Menu>
+          <ConnectWalletButton />
+        </div>
       </div>
     </>
   );
 };
+
+function ConnectWalletButton() {
+  return (
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openAccountModal,
+        openConnectModal,
+        authenticationStatus,
+        mounted,
+      }) => {
+        const ready = mounted && authenticationStatus !== 'loading';
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus || authenticationStatus === 'authenticated');
+        return (
+          <>
+            {(() => {
+              if (!connected) {
+                return (
+                  <button
+                    onClick={openConnectModal}
+                    className='border-[#D1ECFF] rounded-lg backdrop-blur-sm bg-white/30 p-2 hover:bg-white/20'
+                  >
+                    connect
+                  </button>
+                );
+              }
+              return (
+                <div className='flex gap-2'>
+                  <button
+                    onClick={openAccountModal}
+                    className='border-[#D1ECFF] rounded-lg backdrop-blur-sm bg-white/30 p-1 hover:bg-white/20'
+                  >
+                    {account.ensAvatar ? (
+                      <Image
+                        src={account.ensAvatar}
+                        className='rounded-lg'
+                        alt='User Avatar'
+                        width={33}
+                        height={33}
+                      />
+                    ) : (
+                      <WalletIcon width={33} height={33} />
+                    )}
+                  </button>
+                </div>
+              );
+            })()}
+          </>
+        );
+      }}
+    </ConnectButton.Custom>
+  );
+}
 
 export default Header;

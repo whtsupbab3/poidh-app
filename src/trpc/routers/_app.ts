@@ -259,6 +259,69 @@ export const appRouter = createTRPCRouter({
         description: NFT.description,
       }));
     }),
+
+  cancelBounty: baseProcedure
+    .input(z.object({ bountyId: z.string(), chainId: z.string() }))
+    .mutation(async ({ input }) => {
+      const bounty = await prisma.bounty.findFirstOrThrow({
+        where: {
+          primaryId: input.bountyId,
+          chainId: input.chainId,
+        },
+      });
+
+      await prisma.bounty.updateMany({
+        where: {
+          id: bounty.id,
+        },
+        data: {
+          isCanceled: 1,
+          inProgress: 0,
+        },
+      });
+    }),
+
+  acceptClaim: baseProcedure
+    .input(
+      z.object({
+        bountyId: z.string(),
+        claimId: z.string(),
+        chainId: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const claim = await prisma.claim.findFirstOrThrow({
+        where: {
+          primaryId: input.claimId,
+          chainId: input.chainId,
+        },
+      });
+
+      const bounty = await prisma.bounty.findFirstOrThrow({
+        where: {
+          primaryId: input.bountyId,
+          chainId: input.chainId,
+        },
+      });
+
+      await prisma.bounty.updateMany({
+        where: {
+          id: bounty.id,
+        },
+        data: {
+          inProgress: 0,
+        },
+      });
+
+      await prisma.claim.updateMany({
+        where: {
+          id: claim.id,
+        },
+        data: {
+          accepted: 1,
+        },
+      });
+    }),
 });
 
 export type AppRouter = typeof appRouter;

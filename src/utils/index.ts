@@ -1,4 +1,3 @@
-export { default as publicClient } from './publicClient';
 export {
   buildMetadata as buildMetadata,
   uploadFile as uploadFile,

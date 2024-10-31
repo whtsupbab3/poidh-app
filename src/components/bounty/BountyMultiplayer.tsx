@@ -1,4 +1,3 @@
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import Link from 'next/link';
 import { useState } from 'react';
 import { formatEther } from 'viem';
@@ -10,22 +9,21 @@ import Withdraw from '@/components/ui/Withdraw';
 import { trpc } from '@/trpc/client';
 import { Chain } from '@/utils/types';
 import { getDegenOrEnsName } from '@/utils/web3';
+import { useAccount } from 'wagmi';
 
 export default function BountyMultiplayer({
   chain,
   bountyId,
   inProgress,
   issuer,
-  isCanceled,
 }: {
   chain: Chain;
   bountyId: string;
   inProgress: boolean;
   issuer: string;
-  isCanceled: boolean;
 }) {
   const [showParticipants, setShowParticipants] = useState(false);
-  const { primaryWallet } = useDynamicContext();
+  const account = useAccount();
 
   const participants = trpc.participants.useQuery(
     {
@@ -38,7 +36,7 @@ export default function BountyMultiplayer({
   );
 
   const isCurrentUserAParticipant = participants.data?.some(
-    (participant) => participant.user.id === primaryWallet?.address
+    (participant) => participant.user.id === account.address
   );
 
   return (
@@ -78,7 +76,7 @@ export default function BountyMultiplayer({
           </div>
         )}
       </div>
-      {primaryWallet?.address !== issuer ? (
+      {account.address !== issuer ? (
         inProgress && isCurrentUserAParticipant ? (
           <Withdraw bountyId={bountyId} />
         ) : (
@@ -99,21 +97,17 @@ function Participant({
   };
 }) {
   const walletDisplayName = useQuery({
-    queryKey: [
-      'getWalletDisplayName',
-      participant.user.id,
-      chain.chainPathName,
-    ],
+    queryKey: ['getWalletDisplayName', participant.user.id, chain.slug],
     queryFn: () =>
       getWalletDisplayName({
         address: participant.user.id,
-        chainName: chain.chainPathName,
+        chainName: chain.slug,
       }),
   });
 
   return (
     <div className='py-2'>
-      <Link href={`/${chain.chainPathName}/account/${participant.user.id}`}>
+      <Link href={`/${chain.slug}/account/${participant.user.id}`}>
         {walletDisplayName.data ?? participant.user.id}
       </Link>{' '}
       - {formatEther(BigInt(participant.amount))} {chain.currency}

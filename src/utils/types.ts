@@ -6,8 +6,8 @@ export type Chain = {
   id: number;
   name: string;
   currency: Currency;
-  chainPathName: Netname;
-  jsonProviderUrl: string;
+  slug: Netname;
+  provider: ReturnType<typeof import('viem').createPublicClient>;
   contracts: {
     mainContract: string;
     nftContract: string;

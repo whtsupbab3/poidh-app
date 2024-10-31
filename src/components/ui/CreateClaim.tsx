@@ -1,13 +1,13 @@
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import FormClaim from '@/components/global/FormClaim';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
+import { useAccount } from 'wagmi';
 
 export default function CreateClaim({ bountyId }: { bountyId: string }) {
-  const { primaryWallet } = useDynamicContext();
+  const account = useAccount();
 
   const [showForm, setShowForm] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -16,7 +16,7 @@ export default function CreateClaim({ bountyId }: { bountyId: string }) {
   let lastScrollY = 0;
 
   const handleOpenForm = () => {
-    if (primaryWallet) {
+    if (account.isConnected) {
       setShowForm(!showForm);
     } else {
       toast.error('Please connect wallet to continue');

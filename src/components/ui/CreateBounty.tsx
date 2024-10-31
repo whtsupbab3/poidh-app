@@ -1,13 +1,12 @@
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import React, { useState } from 'react';
-
+import { useAccount } from 'wagmi';
 import Form from '@/components/global/Form';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 
 export default function CreateBounty() {
-  const { primaryWallet } = useDynamicContext();
   const [showForm, setShowForm] = useState(false);
+  const { isConnected } = useAccount();
 
   return (
     <div
@@ -15,7 +14,7 @@ export default function CreateBounty() {
         !showForm ? 'bottom-20' : 'top-0 left-0'
       } z-40 w-full py-12 flex justify-center items-center lg:flex-col`}
     >
-      {primaryWallet && !showForm && (
+      {isConnected && !showForm && (
         <div
           className='absolute button bottom-10 flex cursor-pointer flex-col items-center justify-center '
           onClick={() => setShowForm(true)}

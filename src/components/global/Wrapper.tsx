@@ -1,25 +1,25 @@
 'use client';
 
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import React, { useEffect } from 'react';
 
 import '@/styles/globals.css';
 import '@/styles/colors.css';
 
 import { useGetChain } from '@/hooks/useGetChain';
+import { useAccount, useSwitchChain } from 'wagmi';
 
 export default function Wrapper({ children }: { children: React.ReactNode }) {
   const chain = useGetChain();
-
-  const { primaryWallet } = useDynamicContext();
+  const account = useAccount();
+  const switchChain = useSwitchChain();
 
   useEffect(() => {
-    if (primaryWallet && chain) {
-      if (chain.id !== Number(primaryWallet.network)) {
-        primaryWallet.connector.switchNetwork({ networkChainId: chain.id });
+    if (account.isConnected) {
+      if (chain.id !== account.chainId) {
+        switchChain.switchChain({ chainId: chain.id });
       }
     }
-  }, [primaryWallet, chain]);
+  }, [account, chain, switchChain]);
 
   return <>{children}</>;
 }

@@ -1,52 +1,43 @@
-import { joinOpenBounty } from '@/utils/web3';
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
-import { useState } from 'react';
+import abi from '@/constant/abi/abi';
+import { useGetChain } from '@/hooks/useGetChain';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { parseEther } from 'viem';
+import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
 
 export default function FormJoinBounty({ bountyId }: { bountyId: string }) {
   const [amount, setAmount] = useState<string>('');
-  const { primaryWallet } = useDynamicContext();
+  const account = useAccount();
+  const writeContract = useWriteContract({});
+  const chain = useGetChain();
+  const switctChain = useSwitchChain();
 
-  const handleJoinBounty = async () => {
-    if (!primaryWallet) {
-      toast.error('Please connect wallet and fill in all fields');
-      return;
-    }
-    if (!amount) {
-      toast.error('Please enter the amount to join the bounty');
-      return;
-    }
-
-    try {
-      const balance = await primaryWallet.connector.getBalance();
-      if (parseFloat(balance || '0') < parseFloat(amount)) {
-        toast.error('Insufficient funds for this transaction');
-        return;
+  const bountyMutation = useMutation({
+    mutationFn: async (bountyId: bigint) => {
+      if (chain.id !== account.chainId) {
+        await switctChain.switchChainAsync({ chainId: chain.id });
       }
-
-      await joinOpenBounty({
-        chainName: 'degen',
-        wallet: primaryWallet,
-        id: bountyId,
-        value: amount,
+      await writeContract.writeContractAsync({
+        __mode: 'prepared',
+        abi,
+        address: chain.contracts.mainContract as `0x${string}`,
+        value: BigInt(parseEther(amount)),
+        functionName: 'joinOpenBounty',
+        args: [bountyId],
+        chainId: chain.id,
       });
-      toast.success('Bounty joined successfully!');
-      setAmount('');
-      window.location.reload();
-    } catch (error: any) {
-      if (error.info?.error?.code !== 4001) {
-        if (
-          error.info?.error?.message
-            .toLowerCase()
-            .includes('insufficient funds')
-        ) {
-          toast.error('Insufficient funds for this transaction');
-        } else {
-          toast.error('Failed to join bounty');
-        }
-      }
+    },
+  });
+
+  useEffect(() => {
+    if (bountyMutation.isSuccess) {
+      toast.success('Bounty joined successfully');
     }
-  };
+    if (bountyMutation.isError) {
+      toast.error('Failed to join bounty');
+    }
+  }, [bountyMutation.isSuccess, bountyMutation.isError]);
 
   return (
     <>
@@ -61,13 +52,13 @@ export default function FormJoinBounty({ bountyId }: { bountyId: string }) {
         />
         <button
           className={`border border-white rounded-full px-5 py-2  backdrop-blur-sm bg-white/30 ${
-            !primaryWallet ? 'opacity-50 cursor-not-allowed' : ''
+            account.isDisconnected ? 'opacity-50 cursor-not-allowed' : ''
           }`}
           onClick={() => {
-            if (!primaryWallet) {
-              toast.error('Please connect wallet to continue');
+            if (account.isConnected) {
+              bountyMutation.mutate(BigInt(bountyId));
             } else {
-              handleJoinBounty();
+              toast.error('Please connect wallet to continue');
             }
           }}
         >
