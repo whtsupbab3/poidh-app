@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import React, { useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { formatEther } from 'viem';
 
 import { useGetChain } from '@/hooks/useGetChain';
 import BountyMultiplayer from '@/components/bounty/BountyMultiplayer';
@@ -10,6 +9,7 @@ import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
 import abi from '@/constant/abi/abi';
 import { useMutation } from '@tanstack/react-query';
 import DisplayAddress from '@/components/DisplayAddress';
+import { formatEther } from 'viem';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();
@@ -73,12 +73,11 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
               <DisplayAddress address={bounty.data.issuer} chain={chain} />
             </Link>
           </p>
+          <p className='mt-5 font-bold'>
+            {`${formatEther(BigInt(bounty.data.amount))} ${chain.currency}`}
+          </p>
         </div>
         <div className='flex flex-col space-between'>
-          <div className='flex mt-5 lg:mt-0 gap-x-2 flex-row'>
-            <span>{formatEther(BigInt(bounty.data.amount))}</span>
-            <span>{chain.currency}</span>
-          </div>
           <div>
             {bounty.data.inProgress &&
               account.isConnected &&

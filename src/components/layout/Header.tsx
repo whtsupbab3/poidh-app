@@ -55,7 +55,7 @@ const Header = () => {
         <div className='flex'>
           <button
             onClick={() => setIsOpen(true)}
-            className='mr-1 hover:text-[#F15E5F]'
+            className='mr-2 hover:text-[#F15E5F]'
           >
             <MenuIcon width={30} height={30} />
           </button>
@@ -140,7 +140,7 @@ function ConnectWalletButton() {
                 <div className='flex gap-2'>
                   <button
                     onClick={openAccountModal}
-                    className='border-[#D1ECFF] rounded-lg backdrop-blur-sm bg-white/30 p-1 hover:bg-white/20'
+                    className='border-[#D1ECFF] rounded-lg backdrop-blur-sm bg-white/30 p-1 hover:bg-white/20 flex items-center gap-1'
                   >
                     {account.ensAvatar ? (
                       <Image
@@ -153,6 +153,8 @@ function ConnectWalletButton() {
                     ) : (
                       <WalletIcon width={33} height={33} />
                     )}
+                    {account.ensName || account.displayName}
+                    <ExpandMoreIcon height={12} width={12} />
                   </button>
                 </div>
               );

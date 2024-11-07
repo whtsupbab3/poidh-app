@@ -67,10 +67,12 @@ export default function AccountInfo({ address }: { address: string }) {
   }, [bounties]);
 
   useEffect(() => {
-    let totalAmount = BigInt(0);
-    claims.data?.forEach((claim) => {
-      totalAmount += BigInt(claim.bounty.amount);
-    });
+    const totalAmount =
+      claims.data
+        ?.filter((claim) => claim.accepted)
+        .flatMap((claim) => claim.bounty.amount)
+        .reduce((prev, curr) => BigInt(prev) + BigInt(curr), BigInt(0)) ||
+      BigInt(0);
     setTotalETHEarn(formatEther(totalAmount));
   }, [claims]);
 
@@ -79,7 +81,7 @@ export default function AccountInfo({ address }: { address: string }) {
       Number(totalETHEarn) * 1000 +
       Number(totalETHPaid) * 1000 +
       (NFTs.data?.length ?? 0) * 10;
-    setPoidhScore(Number(poidhScore));
+    setPoidhScore(Number(poidhScore.toFixed(2)));
   }, [totalETHEarn, totalETHPaid, NFTs]);
 
   return (
@@ -115,7 +117,9 @@ export default function AccountInfo({ address }: { address: string }) {
                 </div>
                 <div>
                   completed claims:{' '}
-                  <span className='font-bold'>{claims.data?.length ?? 0}</span>
+                  <span className='font-bold'>
+                    {claims.data?.filter((claim) => claim.accepted).length ?? 0}
+                  </span>
                 </div>
                 <div>
                   total {chain.currency} earned:{' '}
@@ -153,7 +157,11 @@ export default function AccountInfo({ address }: { address: string }) {
           </div>
 
           <div>
-            {currentSection === 'nft' && <NftList NFTs={NFTs.data ?? []} />}
+            {currentSection === 'nft' && (
+              <div className='lg:px-20 px-8'>
+                <NftList NFTs={NFTs.data ?? []} />
+              </div>
+            )}
             {currentSection === 'bounties' && (
               <BountyList bounties={bounties.data ?? []} />
             )}

@@ -134,23 +134,25 @@ export default function ClaimItem({
           </button>
         )}
 
-        {bounty.data && account.address === bounty.data.issuer && (
-          <div
-            onClick={() => {
-              if (account.isConnected) {
-                acceptClaimMutation.mutate({
-                  bountyId: BigInt(bountyId),
-                  claimId: BigInt(id),
-                });
-              } else {
-                toast.error('Please connect wallet to continue');
-              }
-            }}
-            className='acceptButton cursor-pointer mt-5 text-[#F15E5F] hover:text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
-          >
-            accept
-          </div>
-        )}
+        {bounty.data &&
+          bounty.data.inProgress &&
+          account.address === bounty.data.issuer && (
+            <div
+              onClick={() => {
+                if (account.isConnected) {
+                  acceptClaimMutation.mutate({
+                    bountyId: BigInt(bountyId),
+                    claimId: BigInt(id),
+                  });
+                } else {
+                  toast.error('Please connect wallet to continue');
+                }
+              }}
+              className='acceptButton cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
+            >
+              accept
+            </div>
+          )}
       </div>
 
       {accepted && (
@@ -168,7 +170,7 @@ export default function ClaimItem({
           <p className='normal-case text-nowrap overflow-ellipsis overflow-hidden'>
             {title}
           </p>
-          <p className='normal-case max-w-fit h-20 overflow-y-scroll overflow-x-hidden overflow-hidden'>
+          <p className='normal-case w-full h-20 overflow-y-scroll overflow-x-hidden overflow-hidden'>
             {description}
           </p>
         </div>

@@ -63,13 +63,13 @@ export default function Form() {
         placeholder=''
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4'
+        className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 max-h-28'
       ></textarea>
 
       <span>reward</span>
       <input
         type='number'
-        placeholder=''
+        placeholder={`amount in ${chain.currency}`}
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4'

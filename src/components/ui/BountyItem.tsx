@@ -27,7 +27,7 @@ export default function BountyItem({ bounty }: { bounty: Bounty }) {
             <h3 className='normal-case text-nowrap overflow-ellipsis overflow-hidden'>
               {bounty.title}
             </h3>
-            <p className='my-5 normal-case max-w-fit h-28 overflow-y-scroll overflow-hidden overflow-ellipsis'>
+            <p className='my-5 normal-case w-full h-28 overflow-y-scroll overflow-hidden overflow-ellipsis'>
               {bounty.description}
             </p>
             <div className='flex items-end justify-between mt-5'>

@@ -54,6 +54,9 @@ export const appRouter = createTRPCRouter({
             ? {
                 inProgress: 1,
                 isVoting: 1,
+                deadline: {
+                  gte: Date.now() / 1000,
+                },
               }
             : {}),
           ...(input.status === 'past'
@@ -176,6 +179,7 @@ export const appRouter = createTRPCRouter({
           issuer: input.address,
           chainId: input.chainId,
           isBanned: 0,
+          isCanceled: null,
         },
         select: {
           primaryId: true,
@@ -249,6 +253,11 @@ export const appRouter = createTRPCRouter({
           url: true,
           title: true,
           description: true,
+          bounty: {
+            select: {
+              primaryId: true,
+            },
+          },
         },
         orderBy: { primaryId: 'asc' },
       });
@@ -257,6 +266,7 @@ export const appRouter = createTRPCRouter({
         url: NFT.url,
         title: NFT.title,
         description: NFT.description,
+        bountyId: NFT.bounty.primaryId.toString(),
       }));
     }),
 

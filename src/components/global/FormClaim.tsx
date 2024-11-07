@@ -63,6 +63,7 @@ export default function FormClaim({
     accept: {
       'image/png': ['.png'],
       'image/jpeg': ['.jpg', '.jpeg'],
+      'image/heic': ['.heic'],
     },
     disabled: !!imageURI,
   });
@@ -216,9 +217,8 @@ export default function FormClaim({
               );
             }
           }}
-          color='error'
           variant='contained'
-          className='w-full rounded-full'
+          className='w-full rounded-full lowercase bg-[#F15E5F] hover:bg-red-400 text-white'
           disabled={
             account.isDisconnected ||
             !name ||
