@@ -4,13 +4,20 @@ import { ToastContainer } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
 
-import ContentBounty from '@/components/layout/ContentBounty';
+import BountyClaims from '@/components/bounty/BountyClaims';
+import BountyInfo from '@/components/bounty/BountyInfo';
+import CreateClaim from '@/components/ui/CreateClaim';
 
 export default function Bounty({ params }: { params: { id: string } }) {
   return (
-    <section className='px-5 lg:px-20'>
-      <ContentBounty bountyId={params.id} />
+    <>
+      <div className='px-5 lg:px-20'>
+        <BountyInfo bountyId={params.id} />
+        <BountyClaims bountyId={params.id} />
+      </div>
+      <CreateClaim bountyId={params.id} />
       <ToastContainer />
-    </section>
+      <div className='h-80' />
+    </>
   );
 }

@@ -98,6 +98,15 @@
   .min-h-main {
     @apply min-h-[calc(100vh-56px)];
   }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    @apply appearance-none;
+  }
+
+  input[type='number'] {
+    @apply appearance-none;
+  }
 }
 
 @layer utilities {

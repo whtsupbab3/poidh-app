@@ -21,7 +21,7 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     };
 
     fetchCurrentVotingClaim();
-  }, [bountyId]);
+  }, [bountyId, chain]);
 
   const claims = trpc.bountyClaims.useInfiniteQuery(
     {

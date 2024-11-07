@@ -1,3 +1,5 @@
+import { useGetChain } from '@/hooks/useGetChain';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 type NFT = {
@@ -5,6 +7,7 @@ type NFT = {
   title: string;
   description: string;
   url: string;
+  bountyId: string;
 };
 
 export default function NftList({ NFTs }: { NFTs: NFT[] }) {
@@ -23,6 +26,7 @@ export default function NftList({ NFTs }: { NFTs: NFT[] }) {
 
 function NftListItem({ NFT }: { NFT: NFT }) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const chain = useGetChain();
 
   const fetchImageUrl = async (url: string) => {
     const response = await fetch(url);
@@ -35,7 +39,7 @@ function NftListItem({ NFT }: { NFT: NFT }) {
   }, [NFT]);
 
   return (
-    <div className=' md:col-span-4 '>
+    <div className=' md:col-span-4'>
       <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
         <div
           style={{ backgroundImage: `url(${imageUrl})` }}
@@ -43,8 +47,22 @@ function NftListItem({ NFT }: { NFT: NFT }) {
         ></div>
         <div className='p-3'>
           <div className='flex break-words flex-col'>
-            <p>{NFT.title}</p>
-            <p>{NFT.description}</p>
+            <p className='text-nowrap overflow-ellipsis overflow-hidden'>
+              {NFT.title}
+            </p>
+            <p className='w-full h-20 overflow-y-scroll overflow-x-hidden overflow-hidden'>
+              {NFT.description}
+            </p>
+          </div>
+          <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed' />
+          <div>
+            bounty id:{' '}
+            <Link
+              href={`/${chain.slug}/bounty/${NFT.bountyId}`}
+              className='hover:text-gray-300'
+            >
+              {NFT.bountyId}
+            </Link>
           </div>
         </div>
       </div>
