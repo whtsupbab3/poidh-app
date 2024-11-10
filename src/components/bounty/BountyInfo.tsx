@@ -1,21 +1,24 @@
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 
 import { useGetChain } from '@/hooks/useGetChain';
 import BountyMultiplayer from '@/components/bounty/BountyMultiplayer';
-import { trpc } from '@/trpc/client';
+import { trpc, trpcClient } from '@/trpc/client';
 import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
-import abi from '@/constant/abi/abi';
 import { useMutation } from '@tanstack/react-query';
 import DisplayAddress from '@/components/DisplayAddress';
 import { formatEther } from 'viem';
+import abi from '@/constant/abi/abi';
+import Loading from '@/components/global/Loading';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();
   const account = useAccount();
   const writeContract = useWriteContract({});
   const switctChain = useSwitchChain();
+
+  const [status, setStatus] = useState<string>('');
 
   const bounty = trpc.bounty.useQuery(
     {
@@ -27,11 +30,13 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
 
   const cancelMutation = useMutation({
     mutationFn: async (bountyId: bigint) => {
-      if (chain.id !== account.chainId) {
+      const chainId = await account.connector?.getChainId();
+      if (chain.id !== chainId) {
         await switctChain.switchChainAsync({ chainId: chain.id });
       }
+
+      setStatus('Waiting approval');
       await writeContract.writeContractAsync({
-        __mode: 'prepared',
         abi,
         address: chain.contracts.mainContract as `0x${string}`,
         functionName: bounty.data!.isMultiplayer
@@ -40,17 +45,31 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
         args: [bountyId],
         chainId: chain.id,
       });
+
+      for (let i = 0; i < 60; i++) {
+        setStatus('Indexing ' + i + 's');
+        const canceled = await trpcClient.isBountyCanceled.query({
+          id: bountyId.toString(),
+          chainId: chain.id.toString(),
+        });
+        if (canceled) {
+          bounty.refetch();
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1_000));
+      }
+      throw new Error('Failed to cancel bounty');
+    },
+    onSuccess: () => {
+      toast.success('Bounty canceled');
+    },
+    onError: (error) => {
+      toast.error('Failed to cancel bounty: ' + error.message);
+    },
+    onSettled: () => {
+      setStatus('');
     },
   });
-
-  useEffect(() => {
-    if (cancelMutation.isSuccess) {
-      toast.success('Bounty canceled successfully');
-    }
-    if (cancelMutation.isError) {
-      toast.error('Failed to cancel bounty');
-    }
-  }, [cancelMutation.isSuccess, cancelMutation.isError]);
 
   if (!bounty.data) {
     return null;
@@ -58,6 +77,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
 
   return (
     <>
+      <Loading open={cancelMutation.isPending} status={status} />
       <div className='flex pt-20 flex-col justify-between lg:flex-row'>
         <div className='flex flex-col  lg:w-[50%]'>
           <p className='max-w-[30ch] overflow-hidden text-ellipsis text-2xl lg:text-4xl text-bold normal-case'>

@@ -67,3 +67,13 @@ export async function bountyVotingTracker({
     deadline: deadline.toString(),
   };
 }
+
+export function calcId({
+  id,
+  chainId,
+}: {
+  id: bigint;
+  chainId: bigint | number;
+}) {
+  return (BigInt(chainId) * BigInt(100_000) + id).toString();
+}

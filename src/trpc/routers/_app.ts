@@ -332,6 +332,72 @@ export const appRouter = createTRPCRouter({
         },
       });
     }),
+
+  isBountyCreated: baseProcedure
+    .input(z.object({ chainId: z.string(), id: z.string() }))
+    .query(async ({ input }) => {
+      return prisma.bounty.findFirst({
+        where: {
+          primaryId: input.id,
+          chainId: input.chainId,
+        },
+      });
+    }),
+
+  isClaimCreated: baseProcedure
+    .input(z.object({ chainId: z.string(), id: z.string() }))
+    .query(async ({ input }) => {
+      return prisma.claim.findFirst({
+        where: {
+          primaryId: input.id,
+          chainId: input.chainId,
+        },
+      });
+    }),
+
+  isBountyCanceled: baseProcedure
+    .input(z.object({ chainId: z.string(), id: z.string() }))
+    .query(async ({ input }) => {
+      return prisma.bounty.findFirst({
+        where: {
+          primaryId: input.id,
+          chainId: input.chainId,
+          isCanceled: 1,
+        },
+      });
+    }),
+
+  isAcceptedClaim: baseProcedure
+    .input(z.object({ chainId: z.string(), id: z.string() }))
+    .query(async ({ input }) => {
+      return prisma.claim.findFirst({
+        where: {
+          primaryId: input.id,
+          chainId: input.chainId,
+          accepted: 1,
+        },
+      });
+    }),
+
+  isJoinedBounty: baseProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      return prisma.participantBounty.findFirst({
+        where: {
+          id: input.id,
+        },
+      });
+    }),
+
+  isWithdrawBounty: baseProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      return prisma.participantBounty.findFirst({
+        where: {
+          id: input.id,
+        },
+      });
+    }),
 });
 
 export type AppRouter = typeof appRouter;

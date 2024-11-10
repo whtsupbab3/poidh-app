@@ -1,5 +1,5 @@
 import { PieChart } from '@mui/x-charts/PieChart';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { toast } from 'react-toastify';
 import { formatEther } from 'viem';
 
@@ -7,28 +7,17 @@ import { useGetChain } from '@/hooks/useGetChain';
 import { bountyVotingTracker } from '@/utils/web3';
 import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
 import abi from '@/constant/abi/abi';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 export default function Voting({ bountyId }: { bountyId: string }) {
   const account = useAccount();
   const chain = useGetChain();
   const writeContract = useWriteContract({});
-  const [voting, setVoting] = useState<{
-    yes: string;
-    no: string;
-    deadline: string;
-  } | null>(null);
   const switctChain = useSwitchChain();
 
-  const fetchVotingData = () => {
-    bountyVotingTracker({
-      id: bountyId,
-      chainName: chain.slug,
-    }).then(setVoting);
-  };
-
-  useEffect(() => {
-    fetchVotingData();
+  const voting = useQuery({
+    queryKey: ['bountyVotingTracker', { id: bountyId, chainName: chain.slug }],
+    queryFn: () => bountyVotingTracker({ id: bountyId, chainName: chain.slug }),
   });
 
   const voteMutation = useMutation({
@@ -39,11 +28,11 @@ export default function Voting({ bountyId }: { bountyId: string }) {
       vote: boolean;
       bountyId: bigint;
     }) => {
-      if (chain.id !== account.chainId) {
+      const chainId = await account.connector?.getChainId();
+      if (chain.id !== chainId) {
         await switctChain.switchChainAsync({ chainId: chain.id });
       }
       await writeContract.writeContractAsync({
-        __mode: 'prepared',
         abi,
         address: chain.contracts.mainContract as `0x${string}`,
         functionName: 'voteClaim',
@@ -51,49 +40,43 @@ export default function Voting({ bountyId }: { bountyId: string }) {
         chainId: chain.id,
       });
 
-      fetchVotingData();
+      voting.refetch();
+    },
+    onSuccess: () => {
+      toast.success('Voted successfully');
+      voting.refetch();
+    },
+    onError: (error) => {
+      toast.error('Failed to vote: ' + error.message);
     },
   });
 
   const resolveVoteMutation = useMutation({
     mutationFn: async (bountyId: bigint) => {
-      if (chain.id !== account.chainId) {
+      const chainId = await account.connector?.getChainId();
+      if (chain.id !== chainId) {
         await switctChain.switchChainAsync({ chainId: chain.id });
       }
       await writeContract.writeContractAsync({
-        __mode: 'prepared',
         abi,
         address: chain.contracts.mainContract as `0x${string}`,
         functionName: 'resolveVote',
         args: [bountyId],
         chainId: chain.id,
       });
-
-      fetchVotingData();
+    },
+    onSuccess: () => {
+      toast.success('Vote resolved successfully');
+      voting.refetch();
+    },
+    onError: (error) => {
+      toast.error('Failed to resolve vote: ' + error.message);
     },
   });
 
-  useEffect(() => {
-    if (voteMutation.isSuccess) {
-      toast.success('Voted successfully');
-    }
-    if (voteMutation.isError) {
-      toast.error('Failed to vote');
-    }
-  }, [voteMutation.isSuccess, voteMutation.isError]);
-
-  useEffect(() => {
-    if (resolveVoteMutation.isSuccess) {
-      toast.success('Vote resolved successfully');
-    }
-    if (resolveVoteMutation.isError) {
-      toast.error('Failed to resolve vote');
-    }
-  }, [resolveVoteMutation.isSuccess, resolveVoteMutation.isError]);
-
   return (
     <div className='col-span-12 lg:col-span-3 p-5 lg:p-0 '>
-      {voting ? (
+      {voting.data ? (
         <>
           <div className='flex items-center mb-5'>
             <PieChart
@@ -102,12 +85,12 @@ export default function Voting({ bountyId }: { bountyId: string }) {
                   data: [
                     {
                       id: 0,
-                      value: Number(formatEther(BigInt(voting.yes || 0))),
+                      value: Number(formatEther(BigInt(voting.data.yes || 0))),
                       label: 'Yes',
                     },
                     {
                       id: 1,
-                      value: Number(formatEther(BigInt(voting.no || 0))),
+                      value: Number(formatEther(BigInt(voting.data.no || 0))),
                       label: 'No',
                     },
                   ],
@@ -119,11 +102,11 @@ export default function Voting({ bountyId }: { bountyId: string }) {
           </div>
 
           <div>
-            Yes votes: {formatEther(BigInt(voting.yes || 0))}
+            Yes votes: {formatEther(BigInt(voting.data.yes || 0))}
             {chain.currency}
           </div>
           <div>
-            No votes: {formatEther(BigInt(voting.no || 0))}
+            No votes: {formatEther(BigInt(voting.data.no || 0))}
             {chain.currency}
           </div>
 
@@ -174,7 +157,9 @@ export default function Voting({ bountyId }: { bountyId: string }) {
 
           <div className='mt-5 '>
             Deadline:{' '}
-            {new Date(parseInt(voting.deadline ?? '0') * 1000).toLocaleString()}
+            {new Date(
+              parseInt(voting.data.deadline ?? '0') * 1000
+            ).toLocaleString()}
           </div>
         </>
       ) : (

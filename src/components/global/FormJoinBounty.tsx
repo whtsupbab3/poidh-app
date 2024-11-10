@@ -1,7 +1,7 @@
 import abi from '@/constant/abi/abi';
 import { useGetChain } from '@/hooks/useGetChain';
 import { useMutation } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { parseEther } from 'viem';
 import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
@@ -15,6 +15,9 @@ import {
   Typography,
 } from '@mui/material';
 import { cn } from '@/utils';
+import Loading from '@/components/global/Loading';
+import { trpc, trpcClient } from '@/trpc/client';
+import { calcId } from '@/utils/web3';
 
 export default function FormJoinBounty({
   bountyId,
@@ -26,6 +29,8 @@ export default function FormJoinBounty({
   onClose: () => void;
 }) {
   const [amount, setAmount] = useState<string>('');
+  const [status, setStatus] = useState<string>('');
+  const utils = trpc.useUtils();
 
   const account = useAccount();
   const writeContract = useWriteContract({});
@@ -34,11 +39,12 @@ export default function FormJoinBounty({
 
   const bountyMutation = useMutation({
     mutationFn: async (bountyId: bigint) => {
-      if (chain.id !== account.chainId) {
+      const chainId = await account.connector?.getChainId();
+      if (chain.id !== chainId) {
         await switchChain.switchChainAsync({ chainId: chain.id });
       }
+      setStatus('Waiting approval');
       await writeContract.writeContractAsync({
-        __mode: 'prepared',
         abi,
         address: chain.contracts.mainContract as `0x${string}`,
         value: BigInt(parseEther(amount)),
@@ -46,17 +52,28 @@ export default function FormJoinBounty({
         args: [bountyId],
         chainId: chain.id,
       });
+
+      for (let i = 0; i < 60; i++) {
+        setStatus('Indexing ' + i + 's');
+        const participant = await trpcClient.isJoinedBounty.query({
+          id: calcId({ id: bountyId, chainId: chain.id }),
+        });
+        if (participant) {
+          utils.participants.refetch();
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1_000));
+      }
+
+      throw new Error('Failed to join bounty');
+    },
+    onSuccess: () => {
+      toast.success('Bounty joined successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to join bounty: ' + error.message);
     },
   });
-
-  useEffect(() => {
-    if (bountyMutation.isSuccess) {
-      toast.success('Bounty joined successfully');
-    }
-    if (bountyMutation.isError) {
-      toast.error('Failed to join bounty');
-    }
-  }, [bountyMutation.isSuccess, bountyMutation.isError]);
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value.replace(/[^0-9.]/g, '');
@@ -65,6 +82,7 @@ export default function FormJoinBounty({
 
   return (
     <>
+      <Loading open={bountyMutation.isPending} status={status} />
       <Dialog
         open={open}
         onClose={() => {
