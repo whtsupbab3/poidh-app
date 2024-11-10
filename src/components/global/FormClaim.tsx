@@ -1,5 +1,5 @@
 import imageCompression from 'browser-image-compression';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 
@@ -39,6 +39,7 @@ export default function FormClaim({
   const [description, setDescription] = useState('');
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<string>('');
+  const [file, setFile] = useState<File | null>(null);
   const utils = trpc.useUtils();
 
   const account = useAccount();
@@ -47,19 +48,15 @@ export default function FormClaim({
   const switchChain = useSwitchChain();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      const selectedFile = acceptedFiles[0];
-      const reader = new FileReader();
-
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        if (e.target?.result) {
-          setPreview(e.target.result.toString());
-          handleImageUpload(selectedFile);
-        }
-      };
-
-      reader.readAsDataURL(selectedFile);
-    }
+    const file = acceptedFiles[0];
+    setFile(file);
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if (e.target?.result) {
+        setPreview(e.target.result.toString());
+      }
+    };
+    reader.readAsDataURL(file);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -87,11 +84,17 @@ export default function FormClaim({
 
   const compressImage = async (image: File): Promise<File> => {
     const options = {
-      maxSizeMB: 1,
+      maxSizeMB: 10,
       maxWidthOrHeight: 1920,
       useWebWorker: true,
     };
-    return await imageCompression(image, options);
+    try {
+      const compressedFile = await imageCompression(image, options);
+      return compressedFile;
+    } catch (error) {
+      toast.error('Error compressing image');
+      throw error;
+    }
   };
 
   const retryUpload = async (file: File): Promise<string> => {
@@ -103,12 +106,35 @@ export default function FormClaim({
         const cid = await uploadFile(file);
         return cid.IpfsHash;
       } catch (error) {
-        if (attempt === MAX_RETRIES) throw error;
+        if (attempt === MAX_RETRIES) {
+          throw error;
+        }
+        console.log(
+          `Attempt ${attempt} failed, retrying in ${RETRY_DELAY}ms...`
+        );
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
       }
     }
-    throw new Error('All upload attempts failed');
+    throw new Error('All attempts failed');
   };
+
+  useEffect(() => {
+    const uploadImage = async () => {
+      if (file) {
+        setUploading(true);
+        try {
+          const compressedFile = await compressImage(file);
+          const cid = await retryUpload(compressedFile);
+          setImageURI(`${LINK_IPFS}/${cid}`);
+        } catch (error) {
+          toast.error('Failed to upload image: ' + error);
+        } finally {
+          setUploading(false);
+        }
+      }
+    };
+    uploadImage();
+  }, [file]);
 
   const createClaimMutations = useMutation({
     mutationFn: async (bountyId: bigint) => {
