@@ -70,7 +70,6 @@ export default function FormClaim({
       'image/jpeg': ['.jpg', '.jpeg'],
       'image/heic': ['.heic'],
     },
-    disabled: !!imageURI,
   });
 
   const handleImageUpload = async (file: File) => {
@@ -134,13 +133,17 @@ export default function FormClaim({
 
       const log = receipt.logs
         .map((log) => {
-          return decodeEventLog({
-            abi,
-            data: log.data,
-            topics: log.topics,
-          });
+          try {
+            return decodeEventLog({
+              abi,
+              data: log.data,
+              topics: log.topics,
+            });
+          } catch (e) {
+            return null;
+          }
         })
-        .find((log) => log.eventName === 'ClaimCreated');
+        .find((log) => log?.eventName === 'ClaimCreated');
 
       if (!log) {
         throw new Error('No logs found');
@@ -183,7 +186,7 @@ export default function FormClaim({
     <>
       <Loading open={createClaimMutations.isPending} status={status} />
       <Dialog
-        open={open}
+        open={!createClaimMutations.isPending && open}
         onClose={onClose}
         maxWidth='xs'
         PaperProps={{
