@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
-import Form from '@/components/global/Form';
+import FormBounty from '@/components/global/FormBounty';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { toast } from 'react-toastify';
@@ -36,7 +36,7 @@ export default function CreateBounty() {
           >
             <CloseIcon />
           </button>
-          <Form />
+          <FormBounty />
         </div>
       )}
     </div>

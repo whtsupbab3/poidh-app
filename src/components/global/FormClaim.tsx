@@ -1,5 +1,5 @@
 import imageCompression from 'browser-image-compression';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 
@@ -18,6 +18,9 @@ import {
   CircularProgress,
   Box,
 } from '@mui/material';
+import { decodeEventLog } from 'viem';
+import { trpc, trpcClient } from '@/trpc/client';
+import Loading from '@/components/global/Loading';
 
 const LINK_IPFS = 'https://beige-impossible-dragon-883.mypinata.cloud/ipfs';
 
@@ -35,6 +38,8 @@ export default function FormClaim({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState<string>('');
+  const utils = trpc.useUtils();
 
   const account = useAccount();
   const writeContract = useWriteContract({});
@@ -108,128 +113,171 @@ export default function FormClaim({
 
   const createClaimMutations = useMutation({
     mutationFn: async (bountyId: bigint) => {
-      if (chain.id !== account.chainId) {
+      const chainId = await account.connector?.getChainId();
+      if (chain.id !== chainId) {
         await switchChain.switchChainAsync({ chainId: chain.id });
       }
       const metadata = buildMetadata(imageURI, name, description);
       const metadataResponse = await uploadMetadata(metadata);
       const uri = `${LINK_IPFS}/${metadataResponse.IpfsHash}`;
-      await writeContract.writeContractAsync({
-        __mode: 'prepared',
+      const tx = await writeContract.writeContractAsync({
         abi,
         address: chain.contracts.mainContract as `0x${string}`,
         functionName: 'createClaim',
         args: [bountyId, name, uri, description],
       });
+
+      setStatus('Waiting for receipt');
+      const receipt = await chain.provider.waitForTransactionReceipt({
+        hash: tx,
+      });
+
+      const log = receipt.logs
+        .map((log) => {
+          return decodeEventLog({
+            abi,
+            data: log.data,
+            topics: log.topics,
+          });
+        })
+        .find((log) => log.eventName === 'ClaimCreated');
+
+      if (!log) {
+        throw new Error('No logs found');
+      }
+
+      if (log.eventName !== 'ClaimCreated') {
+        throw new Error('Invalid event: ' + log.eventName);
+      }
+
+      const claimId = log.args.id.toString();
+
+      for (let i = 0; i < 60; i++) {
+        setStatus('Indexing ' + i + 's');
+        const claim = await trpcClient.isClaimCreated.query({
+          id: claimId,
+          chainId: chain.id.toString(),
+        });
+
+        if (claim) {
+          utils.bountyClaims.refetch();
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1_000));
+      }
+
+      throw new Error('Failed to index bounty');
+    },
+    onSuccess: () => {
+      toast.success('Claim created successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to create claim: ' + error.message);
+    },
+    onSettled: () => {
+      setStatus('');
     },
   });
 
-  useEffect(() => {
-    if (createClaimMutations.isSuccess) {
-      toast.success('Claim created successfully');
-      onClose();
-    }
-    if (createClaimMutations.isError) {
-      toast.error('Failed to create claim');
-    }
-  }, [createClaimMutations.isSuccess, createClaimMutations.isError, onClose]);
-
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth='xs'
-      PaperProps={{
-        className: 'bg-poidhBlue/80',
-        style: {
-          borderRadius: '10px',
-          color: 'white',
-          border: '1px solid #D1ECFF',
-        },
-      }}
-    >
-      <DialogContent>
-        <div
-          {...getRootProps()}
-          style={{
-            border: '2px dashed #D1ECFF',
-            padding: '20px',
-            borderRadius: '30px',
-            textAlign: 'center',
-            cursor: imageURI ? 'default' : 'pointer',
-            marginBottom: '10px',
-            opacity: imageURI ? 0.5 : 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            height: '300px',
-          }}
-        >
-          <input {...getInputProps()} />
-          {isDragActive ? (
-            <p>Drop the image here...</p>
-          ) : (
-            <p>
-              {imageURI
-                ? 'Image uploaded'
-                : 'Drag & drop or click to upload an image'}
-            </p>
-          )}
-          {preview && (
-            <Image
-              src={preview}
-              alt='Preview'
-              width={200}
-              height={200}
-              style={{
-                marginTop: '10px',
-                borderRadius: '10px',
-                objectFit: 'contain',
-              }}
+    <>
+      <Loading open={createClaimMutations.isPending} status={status} />
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth='xs'
+        PaperProps={{
+          className: 'bg-poidhBlue/80',
+          style: {
+            borderRadius: '10px',
+            color: 'white',
+            border: '1px solid #D1ECFF',
+          },
+        }}
+      >
+        <DialogContent>
+          <div
+            {...getRootProps()}
+            style={{
+              border: '2px dashed #D1ECFF',
+              padding: '20px',
+              borderRadius: '30px',
+              textAlign: 'center',
+              cursor: imageURI ? 'default' : 'pointer',
+              marginBottom: '10px',
+              opacity: imageURI ? 0.5 : 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              height: '300px',
+            }}
+          >
+            <input {...getInputProps()} />
+            {isDragActive ? (
+              <p>Drop the image here...</p>
+            ) : (
+              <p>
+                {imageURI
+                  ? 'Image uploaded'
+                  : 'Drag & drop or click to upload an image'}
+              </p>
+            )}
+            {preview && (
+              <Image
+                src={preview}
+                alt='Preview'
+                width={200}
+                height={200}
+                style={{
+                  marginTop: '10px',
+                  borderRadius: '10px',
+                  objectFit: 'contain',
+                }}
+              />
+            )}
+          </div>
+          <Box mt={2} mb={-3}>
+            <span>title</span>
+            <input
+              type='text'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 w-full'
             />
-          )}
-        </div>
-        <Box mt={2} mb={-3}>
-          <span>title</span>
-          <input
-            type='text'
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 w-full'
-          />
-          <span>description</span>
-          <textarea
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 w-full'
-          ></textarea>
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={() => {
-            if (name && description && account.isConnected && imageURI) {
-              createClaimMutations.mutate(BigInt(bountyId));
-            } else {
-              toast.error(
-                'Please fill in all fields, upload an image, and connect wallet'
-              );
+            <span>description</span>
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 w-full'
+            ></textarea>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              if (name && description && account.isConnected && imageURI) {
+                createClaimMutations.mutate(BigInt(bountyId));
+              } else {
+                toast.error(
+                  'Please fill in all fields, upload an image, and connect wallet'
+                );
+              }
+            }}
+            variant='contained'
+            className='w-full rounded-full lowercase bg-[#F15E5F] hover:bg-red-400 text-white'
+            disabled={
+              account.isDisconnected ||
+              !name ||
+              !description ||
+              uploading ||
+              !imageURI
             }
-          }}
-          variant='contained'
-          className='w-full rounded-full lowercase bg-[#F15E5F] hover:bg-red-400 text-white'
-          disabled={
-            account.isDisconnected ||
-            !name ||
-            !description ||
-            uploading ||
-            !imageURI
-          }
-        >
-          {uploading ? <CircularProgress size={24} /> : 'Create Claim'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+          >
+            {uploading ? <CircularProgress size={24} /> : 'Create Claim'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
