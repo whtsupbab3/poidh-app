@@ -59,7 +59,28 @@ export default function FormClaim({
     reader.readAsDataURL(file);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    maxFiles: 1,
+    accept: {
+      'image/png': ['.png'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/heic': ['.heic'],
+    },
+  });
+
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const compressedFile = await compressImage(file);
+      const cid = await retryUpload(compressedFile);
+      setImageURI(`${LINK_IPFS}/${cid}`);
+    } catch (error) {
+      toast.error('Error uploading image');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const compressImage = async (image: File): Promise<File> => {
     const options = {
@@ -138,13 +159,17 @@ export default function FormClaim({
 
       const log = receipt.logs
         .map((log) => {
-          return decodeEventLog({
-            abi,
-            data: log.data,
-            topics: log.topics,
-          });
+          try {
+            return decodeEventLog({
+              abi,
+              data: log.data,
+              topics: log.topics,
+            });
+          } catch (e) {
+            return null;
+          }
         })
-        .find((log) => log.eventName === 'ClaimCreated');
+        .find((log) => log?.eventName === 'ClaimCreated');
 
       if (!log) {
         throw new Error('No logs found');
