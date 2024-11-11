@@ -85,6 +85,7 @@ export default function ClaimItem({
         });
         if (accepted) {
           bounty.refetch();
+          return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1_000));
       }
