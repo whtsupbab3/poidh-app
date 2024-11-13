@@ -2,7 +2,6 @@ import Link from 'next/link';
 import React from 'react';
 
 import { useGetChain } from '@/hooks/useGetChain';
-import { NetworkSelector } from '@/components/global/NetworkSelector';
 import { useAccount } from 'wagmi';
 
 const MenuLink = ({
@@ -42,7 +41,7 @@ export default function SlideOverMenu() {
       <MenuLink href='https://github.com/picsoritdidnthappen/poidh-app/issues/new'>
         report bug
       </MenuLink>
-      <MenuLink href='http://localhost:3000/terms'>terms</MenuLink>
+      <MenuLink href='https://poidh.xyz/terms'>terms</MenuLink>
     </div>
   );
 }
