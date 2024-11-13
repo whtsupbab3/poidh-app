@@ -22,7 +22,7 @@ export default function DisplayAddress({
   return (
     <Link
       href={`/${chain.slug}/account/${address}`}
-      className='overflow-hidden lg:w-[25ch] w-[15ch] overflow-ellipsis'
+      className='overflow-hidden lg:w-[25ch] w-[15ch] overflow-ellipsis hover:text-gray-200'
     >
       {walletDisplayName.data ?? address}
     </Link>

@@ -130,12 +130,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           <p className='mt-5 normal-case'>{bounty.data.description}</p>
           <p className='mt-5 normal-case break-all'>
             bounty issuer:{' '}
-            <Link
-              href={`/${chain.slug}/account/${bounty.data.issuer}`}
-              className='hover:text-gray-200'
-            >
-              <DisplayAddress address={bounty.data.issuer} chain={chain} />
-            </Link>
+            <DisplayAddress address={bounty.data.issuer} chain={chain} />
           </p>
           {isAdmin.data && (
             <button
