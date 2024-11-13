@@ -5,18 +5,28 @@ import { toast } from 'react-toastify';
 import { useGetChain } from '@/hooks/useGetChain';
 import BountyMultiplayer from '@/components/bounty/BountyMultiplayer';
 import { trpc, trpcClient } from '@/trpc/client';
-import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
+import {
+  useAccount,
+  useSignMessage,
+  useSwitchChain,
+  useWriteContract,
+} from 'wagmi';
 import { useMutation } from '@tanstack/react-query';
 import DisplayAddress from '@/components/DisplayAddress';
 import { formatEther } from 'viem';
 import abi from '@/constant/abi/abi';
 import Loading from '@/components/global/Loading';
+import { cn } from '@/utils';
+import { getBanSignatureFirstLine } from '@/utils/utils';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();
   const account = useAccount();
   const writeContract = useWriteContract({});
   const switctChain = useSwitchChain();
+  const isAdmin = trpc.isAdmin.useQuery({ address: account.address });
+  const banBountyMutation = trpc.banBounty.useMutation({});
+  const { signMessageAsync } = useSignMessage();
 
   const [status, setStatus] = useState<string>('');
 
@@ -27,6 +37,40 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
     },
     { enabled: !!bountyId }
   );
+
+  const signMutation = useMutation({
+    mutationFn: async (bountyId: string) => {
+      const message =
+        getBanSignatureFirstLine({
+          id: bountyId,
+          chainId: chain.id,
+          type: 'bounty',
+        }) + JSON.stringify(bounty.data, undefined, 2);
+      if (account.address) {
+        const signature = await signMessageAsync({ message }).catch(() => null);
+        if (!signature) {
+          throw new Error('Failed to sign message');
+        }
+        await banBountyMutation.mutateAsync({
+          id: bountyId,
+          chainId: chain.id,
+          address: account.address,
+          chainName: chain.slug,
+          message,
+          signature,
+        });
+      }
+    },
+    onSuccess: () => {
+      toast.success('Bounty banned');
+    },
+    onError: (error) => {
+      toast.error('Failed to ban bounty: ' + error.message);
+    },
+    onSettled: () => {
+      bounty.refetch();
+    },
+  });
 
   const cancelMutation = useMutation({
     mutationFn: async (bountyId: bigint) => {
@@ -93,6 +137,26 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
               <DisplayAddress address={bounty.data.issuer} chain={chain} />
             </Link>
           </p>
+          {isAdmin.data && (
+            <button
+              onClick={() => {
+                if (isAdmin.data) {
+                  signMutation.mutate(bountyId);
+                } else {
+                  toast.error('You are not an admin');
+                }
+              }}
+              disabled={bounty.data.isBanned}
+              className={cn(
+                'border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5',
+                bounty.data.isBanned
+                  ? 'bg-red-400 text-white'
+                  : 'hover:bg-red-400 hover:text-white'
+              )}
+            >
+              {bounty.data.isBanned ? 'banned' : 'ban'}
+            </button>
+          )}
           <p className='mt-5 font-bold'>
             {`${formatEther(BigInt(bounty.data.amount))} ${chain.currency}`}
           </p>

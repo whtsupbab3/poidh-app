@@ -3,6 +3,31 @@ import { z } from 'zod';
 import prisma from 'prisma/prisma';
 
 import { baseProcedure, createTRPCRouter } from '../init';
+import serverEnv from '@/utils/serverEnv';
+import { TRPCError } from '@trpc/server';
+import { getAddress } from 'viem';
+import { chains } from '@/utils/config';
+import { getBanSignatureFirstLine } from '@/utils/utils';
+
+export const addressSchema = z
+  .string()
+  .regex(/^0x[a-fA-F0-9]{40}$/)
+  .transform((v) => getAddress(v));
+
+export const chainNameSchema = z
+  .string()
+  .regex(/^(degen|arbitrum|base)$/)
+  .transform((v) => v as 'degen' | 'arbitrum' | 'base');
+
+export const bytes32Schema = z
+  .string()
+  .regex(/^(0x)?[a-fA-F0-9]{64}$/)
+  .transform((v) => (v.startsWith('0x') ? v : '0x' + v) as `0x${string}`);
+
+export const bytesSchema = z
+  .string()
+  .regex(/^(0x)?([a-fA-F0-9]{2})*$/)
+  .transform((v) => (v.startsWith('0x') ? v : '0x' + v) as `0x${string}`);
 
 export const appRouter = createTRPCRouter({
   bounty: baseProcedure
@@ -12,7 +37,6 @@ export const appRouter = createTRPCRouter({
         where: {
           primaryId: input.id,
           chainId: input.chainId,
-          isBanned: 0,
         },
         include: {
           claims: {
@@ -20,6 +44,7 @@ export const appRouter = createTRPCRouter({
           },
         },
       });
+
       return {
         ...bounty,
         id: bounty.primaryId.toString(),
@@ -398,6 +423,141 @@ export const appRouter = createTRPCRouter({
         },
       });
     }),
+
+  isAdmin: baseProcedure
+    .input(
+      z.object({
+        address: addressSchema.optional(),
+      })
+    )
+    .query(({ input }) => {
+      return checkIsAdmin(input.address);
+    }),
+
+  banBounty: baseProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        chainId: z.number(),
+        address: addressSchema,
+        signature: bytesSchema,
+        chainName: chainNameSchema,
+        message: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const expectedMessage = getBanSignatureFirstLine({
+        id: input.id,
+        chainId: input.chainId,
+        type: 'bounty',
+      });
+
+      if (!input.message.startsWith(expectedMessage)) {
+        throw new TRPCError({
+          code: 'UNPROCESSABLE_CONTENT',
+          message: 'Invalid message',
+        });
+      }
+
+      const isAdmin = checkIsAdmin(input.address);
+      const chain = chains[input.chainName];
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Not authorized to perform this action',
+        });
+      }
+
+      const isValid = await chain.provider.verifyMessage({
+        address: input.address,
+        message: input.message,
+        signature: input.signature,
+      });
+
+      if (!isValid) {
+        throw new TRPCError({
+          code: 'UNPROCESSABLE_CONTENT',
+          message: 'Signature is invalid',
+        });
+      }
+
+      await prisma.bounty.updateMany({
+        where: {
+          primaryId: input.id,
+          chainId: input.chainId,
+        },
+        data: {
+          isBanned: 1,
+        },
+      });
+    }),
+
+  banClaim: baseProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        chainId: z.number(),
+        address: addressSchema,
+        signature: bytesSchema,
+        chainName: chainNameSchema,
+        message: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const expectedMessage = getBanSignatureFirstLine({
+        id: input.id,
+        chainId: input.chainId,
+        type: 'claim',
+      });
+
+      if (!input.message.startsWith(expectedMessage)) {
+        throw new TRPCError({
+          code: 'UNPROCESSABLE_CONTENT',
+          message: 'Invalid message',
+        });
+      }
+
+      const isAdmin = checkIsAdmin(input.address);
+      const chain = chains[input.chainName];
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Not authorized to perform this action',
+        });
+      }
+
+      const isValid = await chain.provider.verifyMessage({
+        address: input.address,
+        message: input.message,
+        signature: input.signature,
+      });
+
+      if (!isValid) {
+        throw new TRPCError({
+          code: 'UNPROCESSABLE_CONTENT',
+          message: 'Signature is invalid',
+        });
+      }
+
+      await prisma.claim.updateMany({
+        where: {
+          primaryId: input.id,
+          chainId: input.chainId,
+        },
+        data: {
+          isBanned: 1,
+        },
+      });
+    }),
 });
+
+export function checkIsAdmin(address?: string) {
+  if (!address) {
+    return false;
+  }
+  return serverEnv.ADMINS.includes(address.toLocaleLowerCase());
+}
 
 export type AppRouter = typeof appRouter;
