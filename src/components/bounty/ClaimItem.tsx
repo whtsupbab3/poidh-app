@@ -4,10 +4,17 @@ import { toast } from 'react-toastify';
 import { useGetChain } from '@/hooks/useGetChain';
 import { CopyIcon } from '@/components/global/Icons';
 import { trpc, trpcClient } from '@/trpc/client';
-import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
+import {
+  useAccount,
+  useSignMessage,
+  useSwitchChain,
+  useWriteContract,
+} from 'wagmi';
 import abi from '@/constant/abi/abi';
 import { useMutation } from '@tanstack/react-query';
 import Loading from '@/components/global/Loading';
+import { cn } from '@/utils';
+import { getBanSignatureFirstLine } from '@/utils/utils';
 
 export default function ClaimItem({
   id,
@@ -33,6 +40,43 @@ export default function ClaimItem({
   const chain = useGetChain();
   const writeContract = useWriteContract({});
   const switctChain = useSwitchChain();
+  const isAdmin = trpc.isAdmin.useQuery({ address: account.address });
+  const banClaimMutation = trpc.banClaim.useMutation({});
+  const { signMessageAsync } = useSignMessage();
+  const utils = trpc.useUtils();
+
+  const signMutation = useMutation({
+    mutationFn: async (claimId: string) => {
+      const message = getBanSignatureFirstLine({
+        id: claimId,
+        chainId: chain.id,
+        type: 'claim',
+      });
+      if (account.address) {
+        const signature = await signMessageAsync({ message }).catch(() => null);
+        if (!signature) {
+          throw new Error('Failed to sign message');
+        }
+        await banClaimMutation.mutateAsync({
+          id: claimId,
+          chainId: chain.id,
+          address: account.address,
+          chainName: chain.slug,
+          message,
+          signature,
+        });
+      }
+    },
+    onSuccess: () => {
+      toast.success('Claim banned');
+    },
+    onError: (error) => {
+      toast.error('Failed to ban claim: ' + error.message);
+    },
+    onSettled: () => {
+      utils.bountyClaims.refetch();
+    },
+  });
 
   const [status, setStatus] = useState<string>('');
 
@@ -177,7 +221,7 @@ export default function ClaimItem({
                     toast.error('Please connect wallet to continue');
                   }
                 }}
-                className='acceptButton cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
+                className='acceptButton cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5'
               >
                 accept
               </div>
@@ -185,9 +229,25 @@ export default function ClaimItem({
         </div>
 
         {accepted && (
-          <div className='left-5 top-5 text-white bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5 absolute '>
+          <div className='left-5 top-5 text-white bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5 absolute'>
             accepted
           </div>
+        )}
+        {isAdmin.data && (
+          <button
+            onClick={() => {
+              if (isAdmin.data) {
+                signMutation.mutate(id);
+              } else {
+                toast.error('You are not an admin');
+              }
+            }}
+            className={cn(
+              'border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5 hover:bg-red-400 hover:text-white absolute right-5 top-5'
+            )}
+          >
+            ban
+          </button>
         )}
         <div
           style={{ backgroundImage: `url(${imageUrl})` }}
