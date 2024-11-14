@@ -4,7 +4,6 @@ import FormBounty from '@/components/global/FormBounty';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { toast } from 'react-toastify';
-import { CloseIcon } from '@/components/global/Icons';
 
 export default function CreateBounty() {
   const [showForm, setShowForm] = useState(false);
@@ -27,18 +26,7 @@ export default function CreateBounty() {
           <ButtonCTA>create bounty</ButtonCTA>
         </div>
       )}
-
-      {showForm && (
-        <div className='w-auto relative bottom-40'>
-          <button
-            onClick={() => setShowForm(false)}
-            className='absolute right-0 border border-[#D1ECFF] backdrop-blur-sm bg-white/30 rounded-full p-2'
-          >
-            <CloseIcon />
-          </button>
-          <FormBounty />
-        </div>
-      )}
+      <FormBounty open={showForm} onClose={() => setShowForm(false)} />
     </div>
   );
 }
