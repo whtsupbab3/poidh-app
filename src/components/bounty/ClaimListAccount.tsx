@@ -60,7 +60,7 @@ function ClaimItem({ claim }: { claim: Claim }) {
             <p className='normal-case text-nowrap overflow-ellipsis overflow-hidden'>
               {claim.title}
             </p>
-            <p className='normal-case w-full h-20 overflow-y-scroll overflow-x-hidden overflow-hidden'>
+            <p className='normal-case w-full h-20 overflow-y-auto overflow-x-hidden overflow-hidden'>
               {claim.description}
             </p>
           </div>

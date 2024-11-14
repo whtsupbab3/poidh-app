@@ -50,7 +50,7 @@ function NftListItem({ NFT }: { NFT: NFT }) {
             <p className='text-nowrap overflow-ellipsis overflow-hidden'>
               {NFT.title}
             </p>
-            <p className='w-full h-20 overflow-y-scroll overflow-x-hidden overflow-hidden'>
+            <p className='w-full h-20 overflow-y-auto overflow-x-hidden overflow-hidden'>
               {NFT.description}
             </p>
           </div>
