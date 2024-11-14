@@ -142,20 +142,17 @@ function ConnectWalletButton() {
                     onClick={openAccountModal}
                     className='border-[#D1ECFF] rounded-lg backdrop-blur-sm bg-white/30 p-1 hover:bg-white/20 flex items-center gap-1'
                   >
-                    <div>
-                      {account.ensAvatar ? (
-                        <Image
-                          src={account.ensAvatar}
-                          className='rounded-lg'
-                          alt='User Avatar'
-                          width={33}
-                          height={33}
-                        />
-                      ) : (
-                        <WalletIcon width={33} height={33} />
-                      )}
-                      <div className='w-3 h-3 bg-green-500 rounded-full absolute left-7 bottom-1 md:hidden' />
-                    </div>
+                    {account.ensAvatar ? (
+                      <Image
+                        src={account.ensAvatar}
+                        className='rounded-lg'
+                        alt='User Avatar'
+                        width={33}
+                        height={33}
+                      />
+                    ) : (
+                      <WalletIcon width={33} height={33} />
+                    )}
                     <span className='hidden md:block'>
                       {account.ensName || account.displayName}
                     </span>
