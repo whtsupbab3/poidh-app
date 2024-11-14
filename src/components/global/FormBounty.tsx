@@ -120,7 +120,7 @@ export default function FormBounty({
         maxWidth='xs'
         fullWidth
         PaperProps={{
-          className: 'bg-poidhBlue/50',
+          className: 'bg-poidhBlue/90',
           style: {
             borderRadius: '30px',
             color: 'white',
