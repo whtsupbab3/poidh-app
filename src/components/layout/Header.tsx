@@ -153,7 +153,9 @@ function ConnectWalletButton() {
                     ) : (
                       <WalletIcon width={33} height={33} />
                     )}
-                    {account.ensName || account.displayName}
+                    <span className='hidden md:block'>
+                      {account.ensName || account.displayName}
+                    </span>
                     <ExpandMoreIcon height={12} width={12} />
                   </button>
                 </div>
