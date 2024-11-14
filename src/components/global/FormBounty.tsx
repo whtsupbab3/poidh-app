@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Switch,
 } from '@mui/material';
 import { useState } from 'react';
@@ -123,13 +122,12 @@ export default function FormBounty({
         PaperProps={{
           className: 'bg-poidhBlue/50',
           style: {
-            borderRadius: '10px',
+            borderRadius: '30px',
             color: 'white',
             border: '1px solid #D1ECFF',
           },
         }}
       >
-        <DialogTitle>create bounty</DialogTitle>
         <DialogContent>
           <Box display='flex' flexDirection='column' width='100%'>
             <span>title</span>
