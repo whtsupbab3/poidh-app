@@ -258,7 +258,7 @@ export default function ClaimItem({
             <p className='normal-case text-nowrap overflow-ellipsis overflow-hidden'>
               {title}
             </p>
-            <p className='normal-case w-full h-20 overflow-y-scroll overflow-x-hidden overflow-hidden'>
+            <p className='normal-case w-full h-20 overflow-y-auto overflow-x-hidden overflow-hidden'>
               {description}
             </p>
           </div>

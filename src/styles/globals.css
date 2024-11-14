@@ -132,6 +132,16 @@
   .animated-underline:focus-visible {
     background-size: 0 2px, 100% 2px;
   }
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 100vh;
+    background: #38598b;
+  }
 }
 
 body {
