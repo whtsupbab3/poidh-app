@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -97,7 +96,6 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           chainId: chain.id.toString(),
         });
         if (canceled) {
-          bounty.refetch();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1_000));
@@ -111,6 +109,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
       toast.error('Failed to cancel bounty: ' + error.message);
     },
     onSettled: () => {
+      bounty.refetch();
       setStatus('');
     },
   });

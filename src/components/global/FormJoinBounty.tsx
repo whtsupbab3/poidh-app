@@ -11,7 +11,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Typography,
 } from '@mui/material';
 import { cn } from '@/utils';
@@ -59,7 +58,6 @@ export default function FormJoinBounty({
           id: calcId({ id: bountyId, chainId: chain.id }),
         });
         if (participant) {
-          utils.participants.refetch();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1_000));
@@ -72,6 +70,9 @@ export default function FormJoinBounty({
     },
     onError: (error) => {
       toast.error('Failed to join bounty: ' + error.message);
+    },
+    onSettled: () => {
+      utils.participants.refetch();
     },
   });
 
@@ -100,12 +101,11 @@ export default function FormJoinBounty({
           },
         }}
       >
-        <DialogTitle>Join Bounty</DialogTitle>
         <DialogContent>
           <Box
             display='flex'
             flexDirection='column'
-            alignItems='center'
+            alignItems='left'
             width='100%'
           >
             <Typography variant='subtitle1' gutterBottom>
@@ -129,6 +129,8 @@ export default function FormJoinBounty({
             disabled={!amount}
             onClick={() => {
               if (account.isConnected) {
+                onClose();
+                setAmount('');
                 bountyMutation.mutate(BigInt(bountyId));
               } else {
                 toast.error('Please connect wallet to continue');

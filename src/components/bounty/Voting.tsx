@@ -44,10 +44,12 @@ export default function Voting({ bountyId }: { bountyId: string }) {
     },
     onSuccess: () => {
       toast.success('Voted successfully');
-      voting.refetch();
     },
     onError: (error) => {
       toast.error('Failed to vote: ' + error.message);
+    },
+    onSettled: () => {
+      voting.refetch();
     },
   });
 
@@ -67,10 +69,12 @@ export default function Voting({ bountyId }: { bountyId: string }) {
     },
     onSuccess: () => {
       toast.success('Vote resolved successfully');
-      voting.refetch();
     },
     onError: (error) => {
       toast.error('Failed to resolve vote: ' + error.message);
+    },
+    onSettled: () => {
+      voting.refetch();
     },
   });
 

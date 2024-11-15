@@ -166,21 +166,23 @@ export default function AccountInfo({ address }: { address: string }) {
               <BountyList bounties={bounties.data ?? []} />
             )}
             {currentSection === 'claims' && (
-              <ClaimsListAccount
-                claims={
-                  claims.data?.map((claim) => {
-                    return {
-                      id: claim.primaryId.toString(),
-                      title: claim.title,
-                      description: claim.description,
-                      issuer: claim.issuer.id,
-                      bountyId: claim.bounty.primaryId.toString(),
-                      accepted: Boolean(claim.accepted),
-                      url: claim.url,
-                    };
-                  }) ?? []
-                }
-              />
+              <div className='lg:px-20 px-8'>
+                <ClaimsListAccount
+                  claims={
+                    claims.data?.map((claim) => {
+                      return {
+                        id: claim.primaryId.toString(),
+                        title: claim.title,
+                        description: claim.description,
+                        issuer: claim.issuer.id,
+                        bountyId: claim.bounty.primaryId.toString(),
+                        accepted: Boolean(claim.accepted),
+                        url: claim.url,
+                      };
+                    }) ?? []
+                  }
+                />
+              </div>
             )}
           </div>
         </div>
