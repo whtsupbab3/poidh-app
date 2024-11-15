@@ -128,7 +128,6 @@ export default function ClaimItem({
           chainId: chain.id.toString(),
         });
         if (accepted) {
-          bounty.refetch();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1_000));
@@ -144,6 +143,7 @@ export default function ClaimItem({
       toast.error('Failed to accept claim:' + error.message);
     },
     onSettled: () => {
+      utils.bountyClaims.refetch();
       setStatus('');
     },
   });
