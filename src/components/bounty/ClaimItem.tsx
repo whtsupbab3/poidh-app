@@ -23,7 +23,6 @@ export default function ClaimItem({
   issuer,
   bountyId,
   accepted,
-  isMultiplayer,
   url,
 }: {
   id: string;
@@ -32,7 +31,6 @@ export default function ClaimItem({
   issuer: string;
   bountyId: string;
   accepted: boolean;
-  isMultiplayer: boolean;
   url: string;
 }) {
   const account = useAccount();
@@ -189,43 +187,27 @@ export default function ClaimItem({
       />
       <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
         <div className='left-5 top-5 absolute  flex flex-col text-white'>
-          {isMultiplayer && account.address === issuer && (
-            <button
-              className='submitForVote cursor-pointer text-[#F15E5F] hover:text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5  '
-              onClick={() => {
-                if (account.isConnected) {
-                  submitForVoteMutation.mutate({
-                    bountyId: BigInt(bountyId),
-                    claimId: BigInt(id),
-                  });
-                } else {
-                  toast.error('Please connect wallet to continue');
-                }
-              }}
-            >
-              submit for vote
-            </button>
-          )}
-
           {bounty.data &&
             bounty.data.inProgress &&
-            !isMultiplayer &&
             account.address === bounty.data.issuer && (
-              <div
+              <button
+                className='cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5'
                 onClick={() => {
-                  if (account.isConnected) {
-                    acceptClaimMutation.mutate({
-                      bountyId: BigInt(bountyId),
-                      claimId: BigInt(id),
-                    });
-                  } else {
-                    toast.error('Please connect wallet to continue');
-                  }
+                  bounty.data.participants.length > 1
+                    ? submitForVoteMutation.mutate({
+                        bountyId: BigInt(bountyId),
+                        claimId: BigInt(id),
+                      })
+                    : acceptClaimMutation.mutate({
+                        bountyId: BigInt(bountyId),
+                        claimId: BigInt(id),
+                      });
                 }}
-                className='acceptButton cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5'
               >
-                accept
-              </div>
+                {bounty.data.participants.length > 1
+                  ? 'submit for vote'
+                  : 'accept'}
+              </button>
             )}
         </div>
 
