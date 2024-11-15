@@ -130,8 +130,8 @@ export default function FormJoinBounty({
             onClick={() => {
               if (account.isConnected) {
                 onClose();
-                setAmount('');
                 bountyMutation.mutate(BigInt(bountyId));
+                setAmount('');
               } else {
                 toast.error('Please connect wallet to continue');
               }
