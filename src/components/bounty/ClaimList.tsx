@@ -25,6 +25,8 @@ export default function ClaimList({
   votingClaim: Claim | null;
   isMultiplayer: boolean;
 }) {
+  const isVotingOrAcceptedBounty =
+    !!votingClaim || claims.some((claim) => claim.accepted);
   return (
     <>
       <div
@@ -42,6 +44,7 @@ export default function ClaimList({
               issuer={votingClaim.issuer}
               accepted={votingClaim.accepted}
               url={votingClaim.url}
+              isVotingOrAcceptedBounty={isVotingOrAcceptedBounty}
             />
           </div>
         )}
@@ -66,6 +69,7 @@ export default function ClaimList({
                 issuer={claim.issuer}
                 accepted={claim.accepted}
                 url={claim.url}
+                isVotingOrAcceptedBounty={isVotingOrAcceptedBounty}
               />
             </div>
           ))}
