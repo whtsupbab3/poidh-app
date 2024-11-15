@@ -73,6 +73,7 @@ export default function FormJoinBounty({
     },
     onSettled: () => {
       utils.participants.refetch();
+      setAmount('');
     },
   });
 
@@ -131,7 +132,6 @@ export default function FormJoinBounty({
               if (account.isConnected) {
                 onClose();
                 bountyMutation.mutate(BigInt(bountyId));
-                setAmount('');
               } else {
                 toast.error('Please connect wallet to continue');
               }

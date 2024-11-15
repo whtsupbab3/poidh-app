@@ -182,6 +182,10 @@ export default function FormClaim({
     },
     onSettled: () => {
       utils.bountyClaims.refetch();
+      setName('');
+      setDescription('');
+      setImageURI('');
+      setPreview('');
     },
   });
 
@@ -270,10 +274,6 @@ export default function FormClaim({
               if (name && description && imageURI) {
                 onClose();
                 createClaimMutations.mutate(BigInt(bountyId));
-                setName('');
-                setDescription('');
-                setImageURI('');
-                setPreview('');
               } else {
                 toast.error(
                   'Please fill in all fields and check wallet connection.'
