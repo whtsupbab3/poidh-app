@@ -269,11 +269,11 @@ export default function FormClaim({
             onClick={() => {
               if (name && description && imageURI) {
                 onClose();
+                createClaimMutations.mutate(BigInt(bountyId));
                 setName('');
                 setDescription('');
                 setImageURI('');
                 setPreview('');
-                createClaimMutations.mutate(BigInt(bountyId));
               } else {
                 toast.error(
                   'Please fill in all fields and check wallet connection.'
