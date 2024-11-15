@@ -410,21 +410,23 @@ export const appRouter = createTRPCRouter({
     }),
 
   isJoinedBounty: baseProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ bountyId: z.string(), participantAddress: z.string() }))
     .query(async ({ input }) => {
       return prisma.participantBounty.findFirst({
         where: {
-          id: input.id,
+          bountyId: input.bountyId,
+          userId: input.participantAddress,
         },
       });
     }),
 
   isWithdrawBounty: baseProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ bountyId: z.string(), participantAddress: z.string() }))
     .query(async ({ input }) => {
       return prisma.participantBounty.findFirst({
         where: {
-          id: input.id,
+          bountyId: input.bountyId,
+          userId: input.participantAddress,
         },
       });
     }),
