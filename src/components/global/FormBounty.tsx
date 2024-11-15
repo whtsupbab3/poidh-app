@@ -1,6 +1,5 @@
 import {
   Box,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -176,39 +175,28 @@ export default function FormBounty({
           </Box>
         </DialogContent>
         <DialogActions>
-          {createBountyMutations.isPending ? (
-            <Box className='flex justify-center items-center mt-5'>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <button
-              className={cn(
-                'flex flex-row items-center justify-center',
-                account.isDisconnected && 'opacity-50 cursor-not-allowed'
-              )}
-              onClick={() => {
-                if (account.isConnected && name && description && amount) {
-                  onClose();
-                  createBountyMutations.mutate();
-                } else {
-                  toast.error(
-                    'Please fill in all fields and check wallet connection.'
-                  );
-                }
-              }}
-              disabled={account.isDisconnected}
-            >
-              {createBountyMutations.isPending && (
-                <Box sx={{ display: 'flex' }}>
-                  <CircularProgress />
-                </Box>
-              )}
-              <div className='button'>
-                <GameButton />
-              </div>
-              <ButtonCTA>create bounty</ButtonCTA>
-            </button>
-          )}
+          <button
+            className={cn(
+              'flex flex-row items-center justify-center',
+              account.isDisconnected && 'opacity-50 cursor-not-allowed'
+            )}
+            onClick={() => {
+              if (account.isConnected && name && description && amount) {
+                onClose();
+                createBountyMutations.mutate();
+              } else {
+                toast.error(
+                  'Please fill in all fields and check wallet connection.'
+                );
+              }
+            }}
+            disabled={account.isDisconnected}
+          >
+            <div className='button'>
+              <GameButton />
+            </div>
+            <ButtonCTA>create bounty</ButtonCTA>
+          </button>
         </DialogActions>
       </Dialog>
     </>

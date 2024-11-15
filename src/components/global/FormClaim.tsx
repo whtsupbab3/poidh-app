@@ -4,23 +4,18 @@ import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 
 import { useGetChain } from '@/hooks/useGetChain';
-import { buildMetadata, uploadFile, uploadMetadata } from '@/utils';
+import { buildMetadata, cn, uploadFile, uploadMetadata } from '@/utils';
 import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
 import abi from '@/constant/abi/abi';
 import Image from 'next/image';
 import { useMutation } from '@tanstack/react-query';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogActions,
-  Button,
-  CircularProgress,
-  Box,
-} from '@mui/material';
+import { Dialog, DialogContent, DialogActions, Box } from '@mui/material';
 import { decodeEventLog } from 'viem';
 import { trpc, trpcClient } from '@/trpc/client';
 import Loading from '@/components/global/Loading';
+import GameButton from '@/components/global/GameButton';
+import ButtonCTA from '@/components/ui/ButtonCTA';
 
 const LINK_IPFS = 'https://beige-impossible-dragon-883.mypinata.cloud/ipfs';
 
@@ -37,7 +32,6 @@ export default function FormClaim({
   const [imageURI, setImageURI] = useState<string>('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
   const utils = trpc.useUtils();
@@ -68,19 +62,6 @@ export default function FormClaim({
       'image/heic': ['.heic'],
     },
   });
-
-  const handleImageUpload = async (file: File) => {
-    setUploading(true);
-    try {
-      const compressedFile = await compressImage(file);
-      const cid = await retryUpload(compressedFile);
-      setImageURI(`${LINK_IPFS}/${cid}`);
-    } catch (error) {
-      toast.error('Error uploading image');
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const compressImage = async (image: File): Promise<File> => {
     const options = {
@@ -121,15 +102,12 @@ export default function FormClaim({
   useEffect(() => {
     const uploadImage = async () => {
       if (file) {
-        setUploading(true);
         try {
           const compressedFile = await compressImage(file);
           const cid = await retryUpload(compressedFile);
           setImageURI(`${LINK_IPFS}/${cid}`);
         } catch (error) {
           toast.error('Failed to upload image: ' + error);
-        } finally {
-          setUploading(false);
         }
       }
     };
@@ -189,7 +167,6 @@ export default function FormClaim({
         });
 
         if (claim) {
-          utils.bountyClaims.refetch();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1_000));
@@ -204,7 +181,7 @@ export default function FormClaim({
       toast.error('Failed to create claim: ' + error.message);
     },
     onSettled: () => {
-      setStatus('');
+      utils.bountyClaims.refetch();
     },
   });
 
@@ -212,7 +189,7 @@ export default function FormClaim({
     <>
       <Loading open={createClaimMutations.isPending} status={status} />
       <Dialog
-        open={!createClaimMutations.isPending && open}
+        open={open}
         onClose={onClose}
         maxWidth='xs'
         PaperProps={{
@@ -234,11 +211,12 @@ export default function FormClaim({
               textAlign: 'center',
               cursor: imageURI ? 'default' : 'pointer',
               marginBottom: '10px',
-              opacity: imageURI ? 0.5 : 1,
+              opacity: imageURI ? 1 : 0.5,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              height: '300px',
+              height: 'fit-content',
+              minHeight: '200px',
             }}
           >
             <input {...getInputProps()} />
@@ -255,12 +233,12 @@ export default function FormClaim({
               <Image
                 src={preview}
                 alt='Preview'
-                width={200}
-                height={200}
+                width={300}
+                height={300}
                 style={{
                   marginTop: '10px',
-                  borderRadius: '10px',
                   objectFit: 'contain',
+                  borderRadius: '10px',
                 }}
               />
             )}
@@ -283,28 +261,31 @@ export default function FormClaim({
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button
+          <button
+            className={cn(
+              'flex flex-row items-center justify-center',
+              account.isDisconnected && 'opacity-50 cursor-not-allowed'
+            )}
             onClick={() => {
-              if (name && description && account.isConnected && imageURI) {
+              if (name && description && imageURI) {
+                onClose();
+                setName('');
+                setDescription('');
+                setImageURI('');
+                setPreview('');
                 createClaimMutations.mutate(BigInt(bountyId));
               } else {
                 toast.error(
-                  'Please fill in all fields, upload an image, and connect wallet'
+                  'Please fill in all fields and check wallet connection.'
                 );
               }
             }}
-            variant='contained'
-            className='w-full rounded-full lowercase bg-[#F15E5F] hover:bg-red-400 text-white'
-            disabled={
-              account.isDisconnected ||
-              !name ||
-              !description ||
-              uploading ||
-              !imageURI
-            }
           >
-            {uploading ? <CircularProgress size={24} /> : 'Create Claim'}
-          </Button>
+            <div className='button'>
+              <GameButton />
+            </div>
+            <ButtonCTA>create claim</ButtonCTA>
+          </button>
         </DialogActions>
       </Dialog>
     </>
