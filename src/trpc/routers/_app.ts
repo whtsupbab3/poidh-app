@@ -42,6 +42,11 @@ export const appRouter = createTRPCRouter({
           claims: {
             take: 1,
           },
+          participants: {
+            select: {
+              user: true,
+            },
+          },
         },
       });
 

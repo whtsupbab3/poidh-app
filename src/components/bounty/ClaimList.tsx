@@ -35,7 +35,6 @@ export default function ClaimList({
         {votingClaim && (
           <div className='lg:col-span-4'>
             <ClaimItem
-              isMultiplayer={isMultiplayer}
               bountyId={bountyId}
               id={votingClaim.id}
               title={votingClaim.title}
@@ -60,7 +59,6 @@ export default function ClaimList({
           .map((claim) => (
             <div key={claim.id} className='lg:col-span-4 otherClaims'>
               <ClaimItem
-                isMultiplayer={isMultiplayer}
                 bountyId={bountyId}
                 id={claim.id}
                 title={claim.title}
