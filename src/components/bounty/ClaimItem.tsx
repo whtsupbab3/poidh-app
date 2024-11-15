@@ -209,6 +209,7 @@ export default function ClaimItem({
 
           {bounty.data &&
             bounty.data.inProgress &&
+            !isMultiplayer &&
             account.address === bounty.data.issuer && (
               <div
                 onClick={() => {
