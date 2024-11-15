@@ -55,7 +55,8 @@ export default function FormJoinBounty({
       for (let i = 0; i < 60; i++) {
         setStatus('Indexing ' + i + 's');
         const participant = await trpcClient.isJoinedBounty.query({
-          id: calcId({ id: bountyId, chainId: chain.id }),
+          bountyId: calcId({ id: bountyId, chainId: chain.id }),
+          participantAddress: account.address!,
         });
         if (participant) {
           return;
