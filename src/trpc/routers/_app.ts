@@ -77,7 +77,14 @@ export const appRouter = createTRPCRouter({
       const items = await prisma.bounties.findMany({
         where: {
           chain_id: input.chainId,
-          is_banned: false,
+          OR: [
+            {
+              is_banned: null,
+            },
+            {
+              is_banned: false,
+            },
+          ],
           ...(input.status === 'open'
             ? {
                 in_progress: true,
@@ -148,7 +155,14 @@ export const appRouter = createTRPCRouter({
         where: {
           bounty_id: input.bountyId,
           chain_id: input.chainId,
-          is_banned: false,
+          OR: [
+            {
+              is_banned: null,
+            },
+            {
+              is_banned: false,
+            },
+          ],
           ...(input.cursor ? { id: { lt: input.cursor } } : {}),
         },
         orderBy: { id: 'desc' },
@@ -184,7 +198,14 @@ export const appRouter = createTRPCRouter({
             id: input.claimId,
             chain_id: input.chainId,
           },
-          is_banned: false,
+          OR: [
+            {
+              is_banned: null,
+            },
+            {
+              is_banned: false,
+            },
+          ],
         },
         select: {
           id: true,
@@ -205,8 +226,16 @@ export const appRouter = createTRPCRouter({
         where: {
           issuer: input.address,
           chain_id: input.chainId,
-          is_banned: false,
-          is_canceled: false,
+          OR: [
+            {
+              is_banned: null,
+              is_canceled: null,
+            },
+            {
+              is_banned: false,
+              is_canceled: false,
+            },
+          ],
         },
         select: {
           id: true,
@@ -243,7 +272,14 @@ export const appRouter = createTRPCRouter({
         where: {
           issuer: input.address,
           chain_id: input.chainId,
-          is_banned: false,
+          OR: [
+            {
+              is_banned: null,
+            },
+            {
+              is_banned: false,
+            },
+          ],
         },
         select: {
           id: true,
