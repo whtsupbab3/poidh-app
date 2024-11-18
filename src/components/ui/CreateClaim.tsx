@@ -13,8 +13,8 @@ export default function CreateClaim({ bountyId }: { bountyId: string }) {
   const account = useAccount();
 
   const bounty = trpc.bounty.useQuery({
-    id: bountyId,
-    chainId: chain.id.toString(),
+    id: Number(bountyId),
+    chainId: chain.id,
   });
 
   if (!bounty.data?.inProgress) {

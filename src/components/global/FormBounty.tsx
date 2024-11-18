@@ -83,8 +83,8 @@ export default function FormBounty({
       for (let i = 0; i < 60; i++) {
         setStatus('Indexing ' + i + 's');
         const bounty = await trpcClient.isBountyCreated.query({
-          id: bountyId,
-          chainId: chain.id.toString(),
+          id: Number(bountyId),
+          chainId: chain.id,
         });
 
         if (bounty) {

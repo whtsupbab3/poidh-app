@@ -31,8 +31,8 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
 
   const bounty = trpc.bounty.useQuery(
     {
-      id: bountyId,
-      chainId: chain.id.toString(),
+      id: Number(bountyId),
+      chainId: chain.id,
     },
     { enabled: !!bountyId }
   );
@@ -41,7 +41,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
     mutationFn: async (bountyId: string) => {
       const message =
         getBanSignatureFirstLine({
-          id: bountyId,
+          id: Number(bountyId),
           chainId: chain.id,
           type: 'bounty',
         }) + JSON.stringify(bounty.data, undefined, 2);
@@ -51,7 +51,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           throw new Error('Failed to sign message');
         }
         await banBountyMutation.mutateAsync({
-          id: bountyId,
+          id: Number(bountyId),
           chainId: chain.id,
           address: account.address,
           chainName: chain.slug,
@@ -92,8 +92,8 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
       for (let i = 0; i < 60; i++) {
         setStatus('Indexing ' + i + 's');
         const canceled = await trpcClient.isBountyCanceled.query({
-          id: bountyId.toString(),
-          chainId: chain.id.toString(),
+          id: Number(bountyId),
+          chainId: chain.id,
         });
         if (canceled) {
           return;
@@ -140,7 +140,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
                   toast.error('You are not an admin');
                 }
               }}
-              disabled={bounty.data.isBanned}
+              disabled={bounty.data.is_banned || false}
               className={cn(
                 'border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5',
                 bounty.data.isBanned

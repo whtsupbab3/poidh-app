@@ -16,7 +16,6 @@ import {
 import { cn } from '@/utils';
 import Loading from '@/components/global/Loading';
 import { trpc, trpcClient } from '@/trpc/client';
-import { calcId } from '@/utils/web3';
 
 export default function FormJoinBounty({
   bountyId,
@@ -55,7 +54,8 @@ export default function FormJoinBounty({
       for (let i = 0; i < 60; i++) {
         setStatus('Indexing ' + i + 's');
         const participant = await trpcClient.isJoinedBounty.query({
-          bountyId: calcId({ id: bountyId, chainId: chain.id }),
+          bountyId: Number(bountyId),
+          chainId: chain.id,
           participantAddress: account.address!,
         });
         if (participant) {
@@ -73,7 +73,7 @@ export default function FormJoinBounty({
       toast.error('Failed to join bounty: ' + error.message);
     },
     onSettled: () => {
-      utils.participants.refetch();
+      utils.participations.refetch();
       setAmount('');
     },
   });

@@ -24,10 +24,10 @@ export default function BountyMultiplayer({
   const [showParticipants, setShowParticipants] = useState(false);
   const account = useAccount();
 
-  const participants = trpc.participants.useQuery(
+  const participants = trpc.participations.useQuery(
     {
-      bountyId: bountyId,
-      chainId: chain.id.toString(),
+      bountyId: Number(bountyId),
+      chainId: chain.id,
     },
     {
       enabled: !!bountyId,
@@ -35,7 +35,7 @@ export default function BountyMultiplayer({
   );
 
   const isCurrentUserAParticipant = participants.data?.some(
-    (participant) => participant.user.id === account.address
+    (participant) => participant.user_address === account.address
   );
 
   return (
@@ -63,9 +63,12 @@ export default function BountyMultiplayer({
             <div className='flex flex-col'>
               {participants.isSuccess ? (
                 participants.data.map((participant) => (
-                  <p key={participant.user.id} className='flex items-center'>
+                  <p
+                    key={participant.user_address}
+                    className='flex items-center'
+                  >
                     <DisplayAddress
-                      address={participant.user.id}
+                      address={participant.user_address}
                       chain={chain}
                     />
                     &nbsp;

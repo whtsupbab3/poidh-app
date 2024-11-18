@@ -18,10 +18,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const bounty =
     id !== 'null'
-      ? await prisma.bounty.findFirst({
+      ? await prisma.bounties.findFirst({
           where: {
-            primaryId: id,
-            chainId: chain.id,
+            id: Number(id),
+            chain_id: chain.id,
           },
         })
       : null;
