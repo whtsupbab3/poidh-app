@@ -35,7 +35,9 @@ export default function BountyMultiplayer({
   );
 
   const isCurrentUserAParticipant = participants.data?.some(
-    (participant) => participant.user_address === account.address
+    (participant) =>
+      participant.user_address.toLocaleLowerCase() ===
+      account.address?.toLocaleLowerCase()
   );
 
   return (
@@ -84,7 +86,7 @@ export default function BountyMultiplayer({
           </div>
         )}
       </div>
-      {account.address !== issuer ? (
+      {account.address?.toLocaleLowerCase() !== issuer.toLocaleLowerCase() ? (
         inProgress && isCurrentUserAParticipant ? (
           <Withdraw bountyId={bountyId} />
         ) : (
