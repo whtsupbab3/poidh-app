@@ -35,7 +35,7 @@ export default function Withdraw({ bountyId }: { bountyId: string }) {
         const participant = await trpcClient.isWithdrawBounty.query({
           bountyId: Number(bountyId),
           chainId: chain.id,
-          participantAddress: account.address!,
+          participantAddress: account.address!.toLocaleLowerCase(),
         });
         if (!participant) {
           utils.participations.refetch();

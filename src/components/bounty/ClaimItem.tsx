@@ -191,7 +191,8 @@ export default function ClaimItem({
         <div className='left-5 top-5 absolute  flex flex-col text-white'>
           {bounty.data &&
             bounty.data.inProgress &&
-            account.address === bounty.data.issuer &&
+            account.address?.toLocaleLowerCase() ===
+              bounty.data.issuer.toLocaleLowerCase() &&
             !isVotingOrAcceptedBounty && (
               <button
                 className='cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5'

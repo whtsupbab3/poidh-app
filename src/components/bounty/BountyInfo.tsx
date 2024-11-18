@@ -159,7 +159,8 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           <div>
             {bounty.data.inProgress &&
               account.isConnected &&
-              account.address === bounty.data.issuer && (
+              account.address?.toLocaleLowerCase() ===
+                bounty.data.issuer.toLocaleLowerCase() && (
                 <button
                   onClick={() => {
                     if (account.isConnected) {
@@ -177,7 +178,8 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
                 >
                   {bounty.data.isCanceled
                     ? 'canceled'
-                    : account.address === bounty.data.issuer
+                    : account.address?.toLocaleLowerCase() ===
+                      bounty.data.issuer.toLocaleLowerCase()
                     ? 'cancel'
                     : !bounty.data.inProgress
                     ? 'accepted'
