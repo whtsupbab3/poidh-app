@@ -17,7 +17,7 @@ export default function AccountInfo({ address }: { address: string }) {
   const bounties = trpc.userBounties.useQuery(
     {
       address,
-      chainId: chain.id.toString(),
+      chainId: chain.id,
     },
     {
       enabled: !!address,
@@ -26,7 +26,7 @@ export default function AccountInfo({ address }: { address: string }) {
   const claims = trpc.userClaims.useQuery(
     {
       address,
-      chainId: chain.id.toString(),
+      chainId: chain.id,
     },
     {
       enabled: !!address,
@@ -35,7 +35,7 @@ export default function AccountInfo({ address }: { address: string }) {
   const NFTs = trpc.userNFTs.useQuery(
     {
       address,
-      chainId: chain.id.toString(),
+      chainId: chain.id,
     },
     {
       enabled: !!address,
@@ -69,8 +69,8 @@ export default function AccountInfo({ address }: { address: string }) {
   useEffect(() => {
     const totalAmount =
       claims.data
-        ?.filter((claim) => claim.accepted)
-        .flatMap((claim) => claim.bounty.amount)
+        ?.filter((claim) => claim.is_accepted)
+        .flatMap((claim) => claim.bounty!.amount)
         .reduce((prev, curr) => BigInt(prev) + BigInt(curr), BigInt(0)) ||
       BigInt(0);
     setTotalETHEarn(formatEther(totalAmount));
@@ -118,7 +118,8 @@ export default function AccountInfo({ address }: { address: string }) {
                 <div>
                   completed claims:{' '}
                   <span className='font-bold'>
-                    {claims.data?.filter((claim) => claim.accepted).length ?? 0}
+                    {claims.data?.filter((claim) => claim.is_accepted).length ??
+                      0}
                   </span>
                 </div>
                 <div>
@@ -171,12 +172,12 @@ export default function AccountInfo({ address }: { address: string }) {
                   claims={
                     claims.data?.map((claim) => {
                       return {
-                        id: claim.primaryId.toString(),
+                        id: claim.id.toString(),
                         title: claim.title,
                         description: claim.description,
-                        issuer: claim.issuer.id,
-                        bountyId: claim.bounty.primaryId.toString(),
-                        accepted: Boolean(claim.accepted),
+                        issuer: claim.issuer,
+                        bountyId: claim.bounty!.id.toString(),
+                        accepted: claim.is_accepted || false,
                         url: claim.url,
                       };
                     }) ?? []

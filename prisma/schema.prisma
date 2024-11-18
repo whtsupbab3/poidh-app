@@ -7,133 +7,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Bounty {
-  id            Decimal             @id @db.Decimal(78, 0)
-  primaryId     Decimal             @db.Decimal(78, 0)
-  chainId       Decimal             @db.Decimal(78, 0)
-  title         String
-  description   String
-  amount        String
-  issuer        String
-  createdAt     Decimal             @db.Decimal(78, 0)
-  inProgress    Int
-  isCanceled    Int?
-  isBanned      Int
-  isMultiplayer Int?
-  deadline      Int?
-  user          User?               @relation(fields: [issuer], references: [id])
-  isVoting      Int?
-  claims        Claim[]
-  participants  ParticipantBounty[]
+model Bounties {
+  id               Int
+  chain_id         Int
+  title            String
+  description      String
+  amount           String
+  issuer           String
+  in_progress      Boolean? @default(true)
+  is_joined_bounty Boolean? @default(false)
+  is_canceled      Boolean? @default(false)
+  is_banned        Boolean? @default(false)
+  is_multiplayer   Boolean?
+  is_voting        Boolean? @default(false)
+  deadline         Int?
 
-  @@index([chainId], map: "Bounty_chainIdIndex")
-  @@index([primaryId], map: "Bounty_primaryIdIndex")
+  claims         Claims[]
+  participations ParticipationsBounties[]
+  issuerUser     Users?                   @relation(fields: [issuer], references: [address])
+
+  @@id([id, chain_id])
 }
 
-model Claim {
-  id          Decimal @id @db.Decimal(78, 0)
-  primaryId   Decimal @db.Decimal(78, 0)
-  chainId     Decimal @db.Decimal(78, 0)
+model Claims {
+  id          Int
+  chain_id    Int
   title       String
-  url         String
   description String
-  createdAt   Decimal @db.Decimal(78, 0)
-  isBanned    Int
-  ownerId     String
-  accepted    Int
-  bountyId    Decimal @db.Decimal(78, 0)
-  issuerId    String
-  issuer      User    @relation(fields: [issuerId], references: [id])
-  bounty      Bounty  @relation(fields: [bountyId], references: [id])
+  url         String
+  issuer      String
+  is_banned   Boolean?
+  is_accepted Boolean?
+  bounty_id   Int
+  owner       String
+
+  bounty     Bounties? @relation(fields: [bounty_id, chain_id], references: [id, chain_id])
+  issuerUser Users?    @relation(fields: [issuer], references: [address])
+
+  @@id([id, chain_id])
 }
 
-model ParticipantBounty {
-  id       Decimal @id @db.Decimal(78, 0)
-  amount   String
-  userId   String
-  bountyId Decimal @db.Decimal(78, 0)
-  user     User    @relation(fields: [userId], references: [id])
-  bounty   Bounty  @relation(fields: [bountyId], references: [id])
+model ParticipationsBounties {
+  user_address String
+  bounty_id    Int
+  chain_id     Int
+  amount       String
+
+  bounty Bounties? @relation(fields: [bounty_id, chain_id], references: [id, chain_id])
+  user   Users?    @relation(fields: [user_address], references: [address])
+
+  @@id([user_address, bounty_id, chain_id])
 }
 
-model User {
-  id             String              @id
-  ens            String?
-  degenName      String?
-  participations ParticipantBounty[]
-  bounties       Bounty[]
-  claims         Claim[]
-}
+model Users {
+  address    String
+  ens        String?
+  degen_name String?
 
-model ponder_meta {
-  key   String @id
-  value Json?
+  participations ParticipationsBounties[]
+  claims         Claims[]
+  bounties       Bounties[]
 
-  @@map("_ponder_meta")
-}
-
-model ponder_reorg__Bounty {
-  id            Decimal  @db.Decimal(78, 0)
-  primaryId     Decimal? @db.Decimal(78, 0)
-  chainId       Decimal? @db.Decimal(78, 0)
-  title         String?
-  description   String?
-  amount        String?
-  issuer        String?
-  createdAt     Decimal? @db.Decimal(78, 0)
-  inProgress    Int?
-  isCanceled    Int?
-  isBanned      Int?
-  isMultiplayer Int?
-  yes           Decimal? @db.Decimal(78, 0)
-  no            Decimal? @db.Decimal(78, 0)
-  deadline      Decimal? @db.Decimal(78, 0)
-  operation_id  Int      @id @default(autoincrement())
-  checkpoint    String   @db.VarChar(75)
-  operation     Int
-
-  @@map("_ponder_reorg__Bounty")
-}
-
-model ponder_reorg__Claim {
-  id           Decimal  @db.Decimal(78, 0)
-  primaryId    Decimal? @db.Decimal(78, 0)
-  chainId      Decimal? @db.Decimal(78, 0)
-  title        String?
-  url          String?
-  description  String?
-  createdAt    Decimal? @db.Decimal(78, 0)
-  isBanned     Int?
-  ownerId      String?
-  accepted     Int?
-  bountyId     Decimal? @db.Decimal(78, 0)
-  issuerId     String?
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
-  operation    Int
-
-  @@map("_ponder_reorg__Claim")
-}
-
-model ponder_reorg__ParticipantBounty {
-  id           Decimal  @db.Decimal(78, 0)
-  amount       String?
-  userId       String?
-  bountyId     Decimal? @db.Decimal(78, 0)
-  operation_id Int      @id @default(autoincrement())
-  checkpoint   String   @db.VarChar(75)
-  operation    Int
-
-  @@map("_ponder_reorg__ParticipantBounty")
-}
-
-model ponder_reorg__User {
-  id           String
-  ens          String?
-  degenName    String?
-  operation_id Int     @id @default(autoincrement())
-  checkpoint   String  @db.VarChar(75)
-  operation    Int
-
-  @@map("_ponder_reorg__User")
+  @@id([address])
 }

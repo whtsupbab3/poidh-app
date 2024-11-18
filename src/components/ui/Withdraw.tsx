@@ -2,7 +2,6 @@ import Loading from '@/components/global/Loading';
 import abi from '@/constant/abi/abi';
 import { useGetChain } from '@/hooks/useGetChain';
 import { trpc, trpcClient } from '@/trpc/client';
-import { calcId } from '@/utils/web3';
 import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -34,11 +33,12 @@ export default function Withdraw({ bountyId }: { bountyId: string }) {
       for (let i = 0; i < 60; i++) {
         setStatus('Indexing ' + i + 's');
         const participant = await trpcClient.isWithdrawBounty.query({
-          bountyId: calcId({ id: bountyId, chainId: chain.id }),
+          bountyId: Number(bountyId),
+          chainId: chain.id,
           participantAddress: account.address!,
         });
         if (!participant) {
-          utils.participants.refetch();
+          utils.participations.refetch();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1_000));

@@ -25,20 +25,20 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
 
   const claims = trpc.bountyClaims.useInfiniteQuery(
     {
-      bountyId,
-      chainId: chain.id.toString(),
+      bountyId: Number(bountyId),
+      chainId: chain.id,
       limit: PAGE_SIZE,
     },
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor?.toString(),
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: !!bountyId,
     }
   );
 
   const { data: votingClaim } = trpc.claim.useQuery(
     {
-      claimId: votingClaimId?.toString() ?? '',
-      chainId: chain.id.toString(),
+      claimId: Number(votingClaimId),
+      chainId: chain.id,
     },
     {
       enabled: !!votingClaimId,
@@ -47,8 +47,8 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
 
   const { data: bounty } = trpc.bounty.useQuery(
     {
-      id: bountyId,
-      chainId: chain.id.toString(),
+      id: Number(bountyId),
+      chainId: chain.id,
     },
     {
       enabled: !!bountyId,
@@ -80,22 +80,20 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
             votingClaim
               ? {
                   ...votingClaim,
-                  accepted: Boolean(votingClaim?.accepted),
-                  id: votingClaim?.primaryId.toString(),
-                  bountyId: votingClaim?.bountyId.toString(),
-                  createdAt: BigInt(votingClaim?.createdAt.toString()),
-                  issuer: votingClaim?.issuer.id,
+                  accepted: votingClaim.is_accepted || false,
+                  id: votingClaim.id.toString(),
+                  bountyId: votingClaim.bounty_id.toString(),
+                  issuer: votingClaim.issuer,
                 }
               : null
           }
           claims={claims.data.pages.flatMap((page) => {
             return page.items.map((item) => ({
               ...item,
-              accepted: Boolean(item.accepted),
-              id: item.primaryId.toString(),
-              issuer: item.issuer.id,
-              bountyId: item.bountyId.toString(),
-              createdAt: BigInt(item.createdAt.toString()),
+              accepted: item.is_accepted || false,
+              id: item.id.toString(),
+              issuer: item.issuer,
+              bountyId: item.bounty_id.toString(),
             }));
           })}
         />

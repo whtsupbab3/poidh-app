@@ -162,8 +162,8 @@ export default function FormClaim({
       for (let i = 0; i < 60; i++) {
         setStatus('Indexing ' + i + 's');
         const claim = await trpcClient.isClaimCreated.query({
-          id: claimId,
-          chainId: chain.id.toString(),
+          id: Number(claimId),
+          chainId: chain.id,
         });
 
         if (claim) {

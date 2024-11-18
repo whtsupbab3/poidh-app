@@ -23,13 +23,7 @@ This guide will help you set up your local environment for running and contribut
 1. Clone the repository to your local machine. Ensure you have Git installed. [Git installation guide](https://git-scm.com/docs).
 
    ```bash
-   git clone https://github.com/poidh/poidh-app.git
-   ```
-
-   Or, if you have the [GitHub CLI](https://cli.github.com) installed:
-
-   ```bash
-   gh repo clone picsoritdidnthappen/poidh-app
+   git clone https://github.com/picsoritdidnthappen/poidh-app
    ```
 
 2. Navigate into the project directory.
@@ -59,6 +53,28 @@ POIDH uses **pnpm** as a package manager and requires **Node.js v18.12 or higher
 
    - [Install Node.js](https://nodejs.org)
    - [Install pnpm](https://pnpm.io/)
+
+<div align="right">
+<a href="#quick-start-guide">↑ Back to Overview</a>
+</div>
+
+---
+
+### Indexer Setup
+
+Before starting, make sure to clone the **Indexer** repository:
+
+```bash
+git clone https://github.com/yukigesho/poidh-indexer.git
+```
+
+Next, follow the setup instructions in the **Indexer** repository's README. Don't forget to configure the `.env` file with your PostgreSQL database connection URL:
+
+```plaintext
+DATABASE_URL="postgresql://<username>:<password>@<host>:<port>/<database>"
+```
+
+Ensure the database is properly set up before proceeding.
 
 <div align="right">
 <a href="#quick-start-guide">↑ Back to Overview</a>

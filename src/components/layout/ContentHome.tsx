@@ -15,12 +15,12 @@ export default function ContentHome() {
 
   const bounties = trpc.bounties.useInfiniteQuery(
     {
-      chainId: chain.id.toString(),
+      chainId: chain.id,
       status: display,
       limit: 6,
     },
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor?.toString(),
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
@@ -64,12 +64,12 @@ export default function ContentHome() {
           <BountyList
             bounties={bounties.data.pages.flatMap((page) =>
               page.items.map((bounty) => ({
-                id: bounty.primaryId.toString(),
+                id: bounty.id.toString(),
                 title: bounty.title,
                 description: bounty.description,
                 amount: bounty.amount,
-                isMultiplayer: Boolean(bounty.isMultiplayer),
-                inProgress: Boolean(bounty.inProgress),
+                isMultiplayer: bounty.is_multiplayer || false,
+                inProgress: bounty.in_progress || false,
                 hasClaims: bounty.claims.length > 0,
                 network: chain.slug,
               }))

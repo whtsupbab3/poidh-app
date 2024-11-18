@@ -48,7 +48,7 @@ export default function ClaimItem({
   const signMutation = useMutation({
     mutationFn: async (claimId: string) => {
       const message = getBanSignatureFirstLine({
-        id: claimId,
+        id: Number(claimId),
         chainId: chain.id,
         type: 'claim',
       });
@@ -58,7 +58,7 @@ export default function ClaimItem({
           throw new Error('Failed to sign message');
         }
         await banClaimMutation.mutateAsync({
-          id: claimId,
+          id: Number(claimId),
           chainId: chain.id,
           address: account.address,
           chainName: chain.slug,
@@ -82,8 +82,8 @@ export default function ClaimItem({
 
   const bounty = trpc.bounty.useQuery(
     {
-      id: bountyId,
-      chainId: chain.id.toString(),
+      id: Number(bountyId),
+      chainId: chain.id,
     },
     {
       enabled: !!bountyId,
@@ -124,8 +124,8 @@ export default function ClaimItem({
       for (let i = 0; i < 60; i++) {
         setStatus('Indexing ' + i + 's');
         const accepted = await trpcClient.isAcceptedClaim.query({
-          id: claimId.toString(),
-          chainId: chain.id.toString(),
+          id: Number(claimId),
+          chainId: chain.id,
         });
         if (accepted) {
           return;
@@ -196,7 +196,7 @@ export default function ClaimItem({
               <button
                 className='cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5'
                 onClick={() => {
-                  bounty.data.participants.length > 1
+                  bounty.data.participations.length > 1
                     ? submitForVoteMutation.mutate({
                         bountyId: BigInt(bountyId),
                         claimId: BigInt(id),
@@ -207,7 +207,7 @@ export default function ClaimItem({
                       });
                 }}
               >
-                {bounty.data.participants.length > 1
+                {bounty.data.participations.length > 1
                   ? 'submit for vote'
                   : 'accept'}
               </button>

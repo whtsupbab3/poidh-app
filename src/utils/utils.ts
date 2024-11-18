@@ -10,7 +10,7 @@ export function getBanSignatureFirstLine({
   chainId,
   type,
 }: {
-  id: string;
+  id: number;
   chainId: number;
   type: 'claim' | 'bounty';
 }) {

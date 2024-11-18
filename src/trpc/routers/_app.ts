@@ -31,20 +31,23 @@ export const bytesSchema = z
 
 export const appRouter = createTRPCRouter({
   bounty: baseProcedure
-    .input(z.object({ id: z.string(), chainId: z.string() }))
+    .input(z.object({ id: z.number(), chainId: z.number() }))
     .query(async ({ input }) => {
-      const bounty = await prisma.bounty.findFirstOrThrow({
+      const bounty = await prisma.bounties.findUniqueOrThrow({
         where: {
-          primaryId: input.id,
-          chainId: input.chainId,
+          id_chain_id: {
+            id: input.id,
+            chain_id: input.chainId,
+          },
         },
         include: {
           claims: {
             take: 1,
           },
-          participants: {
+          participations: {
             select: {
-              user: true,
+              amount: true,
+              user_address: true,
             },
           },
         },
@@ -52,38 +55,38 @@ export const appRouter = createTRPCRouter({
 
       return {
         ...bounty,
-        id: bounty.primaryId.toString(),
+        id: bounty.id.toString(),
         hasClaims: bounty.claims.length > 0,
-        inProgress: Boolean(bounty.inProgress),
-        isMultiplayer: Boolean(bounty.isMultiplayer),
-        isBanned: Boolean(bounty.isBanned),
-        isCanceled: Boolean(bounty.isCanceled),
+        inProgress: bounty.in_progress,
+        isMultiplayer: bounty.is_multiplayer,
+        isBanned: bounty.is_banned,
+        isCanceled: bounty.is_canceled,
       };
     }),
 
   bounties: baseProcedure
     .input(
       z.object({
-        chainId: z.string(),
+        chainId: z.number(),
         status: z.enum(['open', 'progress', 'past']),
         limit: z.number().min(1).max(100).default(10),
-        cursor: z.string().nullish(),
+        cursor: z.number().nullish(),
       })
     )
     .query(async ({ input }) => {
-      const items = await prisma.bounty.findMany({
+      const items = await prisma.bounties.findMany({
         where: {
-          chainId: input.chainId,
-          isBanned: 0,
+          chain_id: input.chainId,
+          is_banned: false,
           ...(input.status === 'open'
             ? {
-                inProgress: 1,
+                in_progress: true,
               }
             : {}),
           ...(input.status === 'progress'
             ? {
-                inProgress: 1,
-                isVoting: 1,
+                in_progress: true,
+                is_voting: true,
                 deadline: {
                   gte: Date.now() / 1000,
                 },
@@ -91,24 +94,23 @@ export const appRouter = createTRPCRouter({
             : {}),
           ...(input.status === 'past'
             ? {
-                inProgress: 0,
+                in_progress: false,
               }
             : {}),
-          ...(input.cursor ? { primaryId: { lt: input.cursor } } : {}),
+          ...(input.cursor ? { id: { lt: input.cursor } } : {}),
         },
         include: {
           claims: {
             take: 1,
           },
         },
-        orderBy: { primaryId: 'desc' },
+        orderBy: { id: 'desc' },
         take: input.limit,
       });
 
-      let nextCursor: (typeof items)[number]['primaryId'] | undefined =
-        undefined;
+      let nextCursor: (typeof items)[number]['id'] | undefined = undefined;
       if (items.length === input.limit) {
-        nextCursor = items[items.length - 1].primaryId;
+        nextCursor = items[items.length - 1].id;
       }
 
       return {
@@ -117,19 +119,17 @@ export const appRouter = createTRPCRouter({
       };
     }),
 
-  participants: baseProcedure
-    .input(z.object({ bountyId: z.string(), chainId: z.string() }))
+  participations: baseProcedure
+    .input(z.object({ bountyId: z.number(), chainId: z.number() }))
     .query(async ({ input }) => {
-      return prisma.participantBounty.findMany({
+      return prisma.participationsBounties.findMany({
         select: {
           amount: true,
-          user: true,
+          user_address: true,
         },
         where: {
-          bountyId: (
-            BigInt(input.chainId) * BigInt(100_000) +
-            BigInt(input.bountyId)
-          ).toString(),
+          bounty_id: input.bountyId,
+          chain_id: input.chainId,
         },
       });
     }),
@@ -137,40 +137,36 @@ export const appRouter = createTRPCRouter({
   bountyClaims: baseProcedure
     .input(
       z.object({
-        bountyId: z.string(),
-        chainId: z.string(),
+        bountyId: z.number(),
+        chainId: z.number(),
         limit: z.number().min(1).max(100).default(10),
-        cursor: z.string().nullish(),
+        cursor: z.number().nullish(),
       })
     )
     .query(async ({ input }) => {
-      const items = await prisma.claim.findMany({
+      const items = await prisma.claims.findMany({
         where: {
-          bountyId: (
-            BigInt(input.chainId) * BigInt(100_000) +
-            BigInt(input.bountyId)
-          ).toString(),
-          isBanned: 0,
-          ...(input.cursor ? { primaryId: { lt: input.cursor } } : {}),
+          bounty_id: input.bountyId,
+          chain_id: input.chainId,
+          is_banned: false,
+          ...(input.cursor ? { id: { lt: input.cursor } } : {}),
         },
-        orderBy: { primaryId: 'desc' },
+        orderBy: { id: 'desc' },
         take: input.limit,
         select: {
-          primaryId: true,
+          id: true,
           issuer: true,
-          bountyId: true,
+          bounty_id: true,
           title: true,
           description: true,
-          createdAt: true,
-          accepted: true,
+          is_accepted: true,
           url: true,
         },
       });
 
-      let nextCursor: (typeof items)[number]['primaryId'] | undefined =
-        undefined;
+      let nextCursor: (typeof items)[number]['id'] | undefined = undefined;
       if (items.length === input.limit) {
-        nextCursor = items[items.length - 1].primaryId;
+        nextCursor = items[items.length - 1].id;
       }
 
       return {
@@ -180,253 +176,214 @@ export const appRouter = createTRPCRouter({
     }),
 
   claim: baseProcedure
-    .input(z.object({ claimId: z.string(), chainId: z.string() }))
+    .input(z.object({ claimId: z.number(), chainId: z.number() }))
     .query(async ({ input }) => {
-      return prisma.claim.findFirstOrThrow({
+      return prisma.claims.findUniqueOrThrow({
         where: {
-          primaryId: input.claimId,
-          chainId: input.chainId,
-          isBanned: 0,
+          id_chain_id: {
+            id: input.claimId,
+            chain_id: input.chainId,
+          },
+          is_banned: false,
         },
         select: {
-          primaryId: true,
+          id: true,
           issuer: true,
-          bountyId: true,
+          bounty_id: true,
           title: true,
           description: true,
-          createdAt: true,
-          accepted: true,
+          is_accepted: true,
           url: true,
         },
       });
     }),
 
   userBounties: baseProcedure
-    .input(z.object({ address: z.string(), chainId: z.string() }))
+    .input(z.object({ address: z.string(), chainId: z.number() }))
     .query(async ({ input }) => {
-      const bounties = await prisma.bounty.findMany({
+      const bounties = await prisma.bounties.findMany({
         where: {
           issuer: input.address,
-          chainId: input.chainId,
-          isBanned: 0,
-          isCanceled: null,
+          chain_id: input.chainId,
+          is_banned: false,
+          is_canceled: false,
         },
         select: {
-          primaryId: true,
+          id: true,
           title: true,
           description: true,
-          chainId: true,
+          chain_id: true,
           amount: true,
-          isMultiplayer: true,
-          inProgress: true,
+          is_multiplayer: true,
+          in_progress: true,
           claims: {
             take: 1,
           },
         },
 
-        orderBy: { primaryId: 'asc' },
+        orderBy: { id: 'desc' },
       });
 
       return bounties.map((bounty) => ({
-        id: bounty.primaryId.toString(),
+        id: bounty.id.toString(),
         title: bounty.title,
         description: bounty.description,
-        network: bounty.chainId.toString(),
+        network: bounty.chain_id.toString(),
         amount: bounty.amount,
-        isMultiplayer: Boolean(bounty.isMultiplayer),
-        inProgress: Boolean(bounty.inProgress),
+        isMultiplayer: bounty.is_multiplayer || false,
+        inProgress: bounty.in_progress || false,
         hasClaims: bounty.claims.length > 0,
       }));
     }),
 
   userClaims: baseProcedure
-    .input(z.object({ address: z.string(), chainId: z.string() }))
+    .input(z.object({ address: z.string(), chainId: z.number() }))
     .query(async ({ input }) => {
-      return prisma.claim.findMany({
+      return prisma.claims.findMany({
         where: {
-          issuer: {
-            id: input.address,
-          },
-          chainId: input.chainId,
-          isBanned: 0,
+          issuer: input.address,
+          chain_id: input.chainId,
+          is_banned: false,
         },
         select: {
-          primaryId: true,
+          id: true,
           title: true,
           description: true,
-          createdAt: true,
-          accepted: true,
+          is_accepted: true,
           url: true,
           bounty: {
             select: {
-              primaryId: true,
+              id: true,
               amount: true,
             },
           },
           issuer: true,
-          ownerId: true,
+          owner: true,
         },
-        orderBy: { primaryId: 'asc' },
+        orderBy: { id: 'desc' },
       });
     }),
 
   userNFTs: baseProcedure
-    .input(z.object({ address: z.string(), chainId: z.string() }))
+    .input(z.object({ address: z.string(), chainId: z.number() }))
     .query(async ({ input }) => {
-      const NFTs = await prisma.claim.findMany({
+      const NFTs = await prisma.claims.findMany({
         where: {
-          ownerId: input.address,
-          chainId: input.chainId,
+          owner: input.address,
+          chain_id: input.chainId,
         },
         select: {
-          primaryId: true,
+          id: true,
           url: true,
           title: true,
           description: true,
           bounty: {
             select: {
-              primaryId: true,
+              id: true,
             },
           },
         },
-        orderBy: { primaryId: 'asc' },
+        orderBy: { id: 'desc' },
       });
       return NFTs.map((NFT) => ({
-        id: NFT.primaryId.toString(),
+        id: NFT.id.toString(),
         url: NFT.url,
         title: NFT.title,
         description: NFT.description,
-        bountyId: NFT.bounty.primaryId.toString(),
+        bountyId: NFT.bounty!.id.toString(),
       }));
     }),
 
-  cancelBounty: baseProcedure
-    .input(z.object({ bountyId: z.string(), chainId: z.string() }))
-    .mutation(async ({ input }) => {
-      const bounty = await prisma.bounty.findFirstOrThrow({
-        where: {
-          primaryId: input.bountyId,
-          chainId: input.chainId,
-        },
-      });
-
-      await prisma.bounty.updateMany({
-        where: {
-          id: bounty.id,
-        },
-        data: {
-          isCanceled: 1,
-          inProgress: 0,
-        },
-      });
-    }),
-
-  acceptClaim: baseProcedure
-    .input(
-      z.object({
-        bountyId: z.string(),
-        claimId: z.string(),
-        chainId: z.string(),
-      })
-    )
-    .mutation(async ({ input }) => {
-      const claim = await prisma.claim.findFirstOrThrow({
-        where: {
-          primaryId: input.claimId,
-          chainId: input.chainId,
-        },
-      });
-
-      const bounty = await prisma.bounty.findFirstOrThrow({
-        where: {
-          primaryId: input.bountyId,
-          chainId: input.chainId,
-        },
-      });
-
-      await prisma.bounty.updateMany({
-        where: {
-          id: bounty.id,
-        },
-        data: {
-          inProgress: 0,
-        },
-      });
-
-      await prisma.claim.updateMany({
-        where: {
-          id: claim.id,
-        },
-        data: {
-          accepted: 1,
-        },
-      });
-    }),
-
   isBountyCreated: baseProcedure
-    .input(z.object({ chainId: z.string(), id: z.string() }))
+    .input(z.object({ chainId: z.number(), id: z.number() }))
     .query(async ({ input }) => {
-      return prisma.bounty.findFirst({
+      return prisma.bounties.findUnique({
         where: {
-          primaryId: input.id,
-          chainId: input.chainId,
+          id_chain_id: {
+            id: input.id,
+            chain_id: input.chainId,
+          },
         },
       });
     }),
 
   isClaimCreated: baseProcedure
-    .input(z.object({ chainId: z.string(), id: z.string() }))
+    .input(z.object({ chainId: z.number(), id: z.number() }))
     .query(async ({ input }) => {
-      return prisma.claim.findFirst({
+      return prisma.claims.findUnique({
         where: {
-          primaryId: input.id,
-          chainId: input.chainId,
+          id_chain_id: {
+            id: input.id,
+            chain_id: input.chainId,
+          },
         },
       });
     }),
 
   isBountyCanceled: baseProcedure
-    .input(z.object({ chainId: z.string(), id: z.string() }))
+    .input(z.object({ chainId: z.number(), id: z.number() }))
     .query(async ({ input }) => {
-      return prisma.bounty.findFirst({
+      return prisma.bounties.findUnique({
         where: {
-          primaryId: input.id,
-          chainId: input.chainId,
-          isCanceled: 1,
+          id_chain_id: {
+            id: input.id,
+            chain_id: input.chainId,
+          },
+          is_canceled: true,
         },
       });
     }),
 
   isAcceptedClaim: baseProcedure
-    .input(z.object({ chainId: z.string(), id: z.string() }))
+    .input(z.object({ chainId: z.number(), id: z.number() }))
     .query(async ({ input }) => {
-      return prisma.claim.findFirst({
+      return prisma.claims.findUnique({
         where: {
-          primaryId: input.id,
-          chainId: input.chainId,
-          accepted: 1,
+          id_chain_id: {
+            id: input.id,
+            chain_id: input.chainId,
+          },
+          is_accepted: true,
         },
       });
     }),
 
   isJoinedBounty: baseProcedure
-    .input(z.object({ bountyId: z.string(), participantAddress: z.string() }))
+    .input(
+      z.object({
+        bountyId: z.number(),
+        participantAddress: z.string(),
+        chainId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
-      return prisma.participantBounty.findFirst({
+      return prisma.participationsBounties.findUnique({
         where: {
-          bountyId: input.bountyId,
-          userId: input.participantAddress,
+          user_address_bounty_id_chain_id: {
+            bounty_id: input.bountyId,
+            user_address: input.participantAddress,
+            chain_id: input.chainId,
+          },
         },
       });
     }),
 
   isWithdrawBounty: baseProcedure
-    .input(z.object({ bountyId: z.string(), participantAddress: z.string() }))
+    .input(
+      z.object({
+        bountyId: z.number(),
+        participantAddress: z.string(),
+        chainId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
-      return prisma.participantBounty.findFirst({
+      return prisma.participationsBounties.findUnique({
         where: {
-          bountyId: input.bountyId,
-          userId: input.participantAddress,
+          user_address_bounty_id_chain_id: {
+            bounty_id: input.bountyId,
+            user_address: input.participantAddress,
+            chain_id: input.chainId,
+          },
         },
       });
     }),
@@ -444,7 +401,7 @@ export const appRouter = createTRPCRouter({
   banBounty: baseProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
         chainId: z.number(),
         address: addressSchema,
         signature: bytesSchema,
@@ -489,13 +446,15 @@ export const appRouter = createTRPCRouter({
         });
       }
 
-      await prisma.bounty.updateMany({
+      await prisma.bounties.update({
         where: {
-          primaryId: input.id,
-          chainId: input.chainId,
+          id_chain_id: {
+            id: input.id,
+            chain_id: input.chainId,
+          },
         },
         data: {
-          isBanned: 1,
+          is_banned: true,
         },
       });
     }),
@@ -503,7 +462,7 @@ export const appRouter = createTRPCRouter({
   banClaim: baseProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
         chainId: z.number(),
         address: addressSchema,
         signature: bytesSchema,
@@ -548,13 +507,15 @@ export const appRouter = createTRPCRouter({
         });
       }
 
-      await prisma.claim.updateMany({
+      await prisma.claims.update({
         where: {
-          primaryId: input.id,
-          chainId: input.chainId,
+          id_chain_id: {
+            id: input.id,
+            chain_id: input.chainId,
+          },
         },
         data: {
-          isBanned: 1,
+          is_banned: true,
         },
       });
     }),

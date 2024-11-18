@@ -9,7 +9,6 @@ type Claim = {
   bountyId: string;
   title: string;
   description: string;
-  createdAt: bigint;
   accepted: boolean;
   url: string;
 };
