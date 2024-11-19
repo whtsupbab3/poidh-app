@@ -164,13 +164,13 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
               <button
                 onClick={() => cancelMutation.mutate(BigInt(bountyId))}
                 disabled={!bounty.data.inProgress}
-                className='border border-[#F15E5F] rounded-md py-2 px-5 mt-5 hover:bg-red-400 hover:text-white'
+                className='border border-[#F15E5F] rounded-md w-fit py-2 px-5 mt-5 hover:bg-red-400 hover:text-white'
               >
                 cancel
               </button>
             )
           ) : (
-            <span className='border border-[#F15E5F] rounded-md py-2 px-5 mt-5 bg-[#F15E5F] text-white'>
+            <span className='border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5 bg-[#F15E5F] text-white'>
               {bounty.data.isCanceled ? 'canceled' : 'accepted'}
             </span>
           )}
