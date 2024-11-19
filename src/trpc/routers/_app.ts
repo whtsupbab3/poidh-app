@@ -87,9 +87,6 @@ export const appRouter = createTRPCRouter({
             ? {
                 in_progress: true,
                 is_voting: true,
-                deadline: {
-                  gte: Date.now() / 1000,
-                },
               }
             : {}),
           ...(input.status === 'past'
