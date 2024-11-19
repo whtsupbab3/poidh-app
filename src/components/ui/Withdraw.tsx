@@ -35,10 +35,9 @@ export default function Withdraw({ bountyId }: { bountyId: string }) {
         const participant = await trpcClient.isWithdrawBounty.query({
           bountyId: Number(bountyId),
           chainId: chain.id,
-          participantAddress: account.address!.toLocaleLowerCase(),
+          participantAddress: account.address!,
         });
         if (!participant) {
-          utils.participations.refetch();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1_000));
@@ -51,6 +50,9 @@ export default function Withdraw({ bountyId }: { bountyId: string }) {
     },
     onError: (error) => {
       toast.error('Failed to withdraw bounty:' + error.message);
+    },
+    onSettled: () => {
+      utils.participations.refetch();
     },
   });
 

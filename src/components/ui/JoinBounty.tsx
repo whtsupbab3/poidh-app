@@ -13,9 +13,9 @@ export default function JoinBounty({ bountyId }: { bountyId: string }) {
         open={showForm}
         onClose={() => setShowForm(false)}
       />
-      <div className=' py-12 w-fit'>
+      <div className=' py-12 w-fit cursor-pointer'>
         <div onClick={() => setShowForm(true)}>
-          <ButtonCTA> join bounty </ButtonCTA>
+          <ButtonCTA>join bounty</ButtonCTA>
         </div>
       </div>
     </>

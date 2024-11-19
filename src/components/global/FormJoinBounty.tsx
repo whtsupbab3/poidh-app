@@ -56,7 +56,7 @@ export default function FormJoinBounty({
         const participant = await trpcClient.isJoinedBounty.query({
           bountyId: Number(bountyId),
           chainId: chain.id,
-          participantAddress: account.address!.toLocaleLowerCase(),
+          participantAddress: account.address!,
         });
         if (participant) {
           return;
