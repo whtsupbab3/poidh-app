@@ -53,9 +53,7 @@ export default function ClaimList({
       </div>
 
       <div className='container mx-auto px-0  py-12 flex flex-col gap-12 lg:grid lg:grid-cols-12 lg:gap-12 lg:px-0'>
-        <p className={`col-span-12  ${!isMultiplayer ? 'hidden' : ' '}  `}>
-          other claims
-        </p>
+        {isMultiplayer && <p className='col-span-12'>other claims</p>}
         {claims
           .filter((claim) => claim.id !== votingClaim?.id)
           .map((claim) => (

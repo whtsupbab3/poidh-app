@@ -15,11 +15,13 @@ export default function BountyMultiplayer({
   bountyId,
   inProgress,
   issuer,
+  isVoting,
 }: {
   chain: Chain;
   bountyId: string;
   inProgress: boolean;
   issuer: string;
+  isVoting: boolean;
 }) {
   const [showParticipants, setShowParticipants] = useState(false);
   const account = useAccount();
@@ -86,13 +88,13 @@ export default function BountyMultiplayer({
           </div>
         )}
       </div>
-      {account.address?.toLocaleLowerCase() !== issuer.toLocaleLowerCase() ? (
-        inProgress && isCurrentUserAParticipant ? (
+      {account.address?.toLocaleLowerCase() !== issuer.toLocaleLowerCase() &&
+        !isVoting &&
+        (inProgress && isCurrentUserAParticipant ? (
           <Withdraw bountyId={bountyId} />
         ) : (
           <JoinBounty bountyId={bountyId} />
-        )
-      ) : null}
+        ))}
     </>
   );
 }

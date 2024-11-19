@@ -8,5 +8,5 @@ const AccountInfo = dynamic(() => import('@/components/account/AccountInfo'), {
 });
 
 export default function Account({ params }: { params: { address: string } }) {
-  return <AccountInfo address={params.address} />;
+  return <AccountInfo address={params.address.toLocaleLowerCase()} />;
 }

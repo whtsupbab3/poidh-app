@@ -33,8 +33,7 @@ export default function BountyItem({ bounty }: { bounty: Bounty }) {
             <div className='flex items-end justify-between mt-5'>
               <div className='flex gap-2 items-center'>
                 <div>
-                  {formatAmount(amount)}{' '}
-                  {bounty.network === 'degen' ? 'degen' : 'eth'}
+                  {formatAmount(amount)} {chain.currency}
                 </div>
                 {bounty.isMultiplayer && <UsersRoundIcon />}
               </div>

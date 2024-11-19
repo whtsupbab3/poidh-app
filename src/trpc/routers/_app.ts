@@ -77,14 +77,7 @@ export const appRouter = createTRPCRouter({
       const items = await prisma.bounties.findMany({
         where: {
           chain_id: input.chainId,
-          OR: [
-            {
-              is_banned: null,
-            },
-            {
-              is_banned: false,
-            },
-          ],
+          is_banned: false,
           ...(input.status === 'open'
             ? {
                 in_progress: true,
@@ -94,14 +87,12 @@ export const appRouter = createTRPCRouter({
             ? {
                 in_progress: true,
                 is_voting: true,
-                deadline: {
-                  gte: Date.now() / 1000,
-                },
               }
             : {}),
           ...(input.status === 'past'
             ? {
                 in_progress: false,
+                is_canceled: false,
               }
             : {}),
           ...(input.cursor ? { id: { lt: input.cursor } } : {}),
@@ -155,14 +146,7 @@ export const appRouter = createTRPCRouter({
         where: {
           bounty_id: input.bountyId,
           chain_id: input.chainId,
-          OR: [
-            {
-              is_banned: null,
-            },
-            {
-              is_banned: false,
-            },
-          ],
+          is_banned: false,
           ...(input.cursor ? { id: { lt: input.cursor } } : {}),
         },
         orderBy: { id: 'desc' },
@@ -198,14 +182,7 @@ export const appRouter = createTRPCRouter({
             id: input.claimId,
             chain_id: input.chainId,
           },
-          OR: [
-            {
-              is_banned: null,
-            },
-            {
-              is_banned: false,
-            },
-          ],
+          is_banned: false,
         },
         select: {
           id: true,
@@ -220,22 +197,19 @@ export const appRouter = createTRPCRouter({
     }),
 
   userBounties: baseProcedure
-    .input(z.object({ address: z.string(), chainId: z.number() }))
+    .input(
+      z.object({
+        address: z.string().transform((v) => v.toLocaleLowerCase()),
+        chainId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
       const bounties = await prisma.bounties.findMany({
         where: {
           issuer: input.address,
           chain_id: input.chainId,
-          OR: [
-            {
-              is_banned: null,
-              is_canceled: null,
-            },
-            {
-              is_banned: false,
-              is_canceled: false,
-            },
-          ],
+          is_banned: false,
+          is_canceled: false,
         },
         select: {
           id: true,
@@ -266,20 +240,18 @@ export const appRouter = createTRPCRouter({
     }),
 
   userClaims: baseProcedure
-    .input(z.object({ address: z.string(), chainId: z.number() }))
+    .input(
+      z.object({
+        address: z.string().transform((v) => v.toLocaleLowerCase()),
+        chainId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
       return prisma.claims.findMany({
         where: {
           issuer: input.address,
           chain_id: input.chainId,
-          OR: [
-            {
-              is_banned: null,
-            },
-            {
-              is_banned: false,
-            },
-          ],
+          is_banned: false,
         },
         select: {
           id: true,
@@ -301,7 +273,12 @@ export const appRouter = createTRPCRouter({
     }),
 
   userNFTs: baseProcedure
-    .input(z.object({ address: z.string(), chainId: z.number() }))
+    .input(
+      z.object({
+        address: z.string().transform((v) => v.toLocaleLowerCase()),
+        chainId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
       const NFTs = await prisma.claims.findMany({
         where: {
@@ -313,6 +290,7 @@ export const appRouter = createTRPCRouter({
           url: true,
           title: true,
           description: true,
+          issuer: true,
           bounty: {
             select: {
               id: true,
@@ -327,6 +305,7 @@ export const appRouter = createTRPCRouter({
         title: NFT.title,
         description: NFT.description,
         bountyId: NFT.bounty!.id.toString(),
+        issuer: NFT.issuer,
       }));
     }),
 
@@ -388,7 +367,7 @@ export const appRouter = createTRPCRouter({
     .input(
       z.object({
         bountyId: z.number(),
-        participantAddress: z.string(),
+        participantAddress: z.string().transform((v) => v.toLocaleLowerCase()),
         chainId: z.number(),
       })
     )
@@ -408,7 +387,7 @@ export const appRouter = createTRPCRouter({
     .input(
       z.object({
         bountyId: z.number(),
-        participantAddress: z.string(),
+        participantAddress: z.string().transform((v) => v.toLocaleLowerCase()),
         chainId: z.number(),
       })
     )

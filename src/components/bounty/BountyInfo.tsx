@@ -123,10 +123,12 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
       <Loading open={cancelMutation.isPending} status={status} />
       <div className='flex pt-20 flex-col justify-between lg:flex-row'>
         <div className='flex flex-col  lg:w-[50%]'>
-          <p className='max-w-[30ch] overflow-hidden text-ellipsis text-2xl lg:text-4xl text-bold normal-case'>
+          <p className='max-w-[30ch] overflow-hidden text-ellipsis text-2xl lg:text-4xl text-bold normal-case break-words'>
             {bounty.data.title}
           </p>
-          <p className='mt-5 normal-case'>{bounty.data.description}</p>
+          <p className='mt-5 normal-case break-words'>
+            {bounty.data.description}
+          </p>
           <p className='mt-5 normal-case break-all'>
             bounty issuer:{' '}
             <DisplayAddress address={bounty.data.issuer} chain={chain} />
@@ -156,37 +158,22 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           </p>
         </div>
         <div className='flex flex-col space-between'>
-          <div>
-            {bounty.data.inProgress &&
-              account.isConnected &&
-              account.address?.toLocaleLowerCase() ===
-                bounty.data.issuer.toLocaleLowerCase() && (
-                <button
-                  onClick={() => {
-                    if (account.isConnected) {
-                      cancelMutation.mutate(BigInt(bountyId));
-                    } else {
-                      toast.error('Please connect wallet to continue');
-                    }
-                  }}
-                  disabled={!bounty.data.inProgress}
-                  className={`border border-[#F15E5F] rounded-md py-2 px-5 mt-5 ${
-                    !bounty.data.inProgress
-                      ? 'bg-[#F15E5F] text-white'
-                      : 'hover:bg-red-400 hover:text-white'
-                  } `}
-                >
-                  {bounty.data.isCanceled
-                    ? 'canceled'
-                    : account.address?.toLocaleLowerCase() ===
-                      bounty.data.issuer.toLocaleLowerCase()
-                    ? 'cancel'
-                    : !bounty.data.inProgress
-                    ? 'accepted'
-                    : null}
-                </button>
-              )}
-          </div>
+          {bounty.data.inProgress ? (
+            account.address?.toLocaleLowerCase() ===
+              bounty.data.issuer.toLocaleLowerCase() && (
+              <button
+                onClick={() => cancelMutation.mutate(BigInt(bountyId))}
+                disabled={!bounty.data.inProgress}
+                className='border border-[#F15E5F] rounded-md w-fit py-2 px-5 mt-5 hover:bg-red-400 hover:text-white'
+              >
+                cancel
+              </button>
+            )
+          ) : (
+            <span className='border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5 bg-[#F15E5F] text-white'>
+              {bounty.data.isCanceled ? 'canceled' : 'accepted'}
+            </span>
+          )}
         </div>
       </div>
       {bounty.data.isMultiplayer && (
@@ -194,6 +181,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           chain={chain}
           bountyId={bountyId}
           inProgress={Boolean(bounty.data.inProgress)}
+          isVoting={!!bounty.data.is_voting && !!bounty.data.inProgress}
           issuer={bounty.data.issuer}
         />
       )}

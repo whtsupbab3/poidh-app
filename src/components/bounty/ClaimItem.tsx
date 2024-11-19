@@ -242,10 +242,10 @@ export default function ClaimItem({
         ></div>
         <div className='p-3'>
           <div className='flex flex-col'>
-            <p className='normal-case text-nowrap overflow-ellipsis overflow-hidden'>
+            <p className='normal-case text-nowrap overflow-ellipsis overflow-hidden break-words'>
               {title}
             </p>
-            <p className='normal-case w-full h-20 overflow-y-auto overflow-x-hidden overflow-hidden'>
+            <p className='normal-case w-full h-20 overflow-y-auto overflow-x-hidden overflow-hidden break-words'>
               {description}
             </p>
           </div>
