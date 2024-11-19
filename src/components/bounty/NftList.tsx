@@ -89,8 +89,8 @@ function NftListItem({ NFT }: { NFT: NFT }) {
             </span>
           </div>
         </div>
+        <div>claim id: {NFT.id}</div>
       </div>
-      <div>claim id: {NFT.id}</div>
     </div>
   );
 }
