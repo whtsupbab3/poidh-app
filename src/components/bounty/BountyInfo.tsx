@@ -181,6 +181,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           chain={chain}
           bountyId={bountyId}
           inProgress={Boolean(bounty.data.inProgress)}
+          isVoting={!!bounty.data.is_voting && !!bounty.data.inProgress}
           issuer={bounty.data.issuer}
         />
       )}
