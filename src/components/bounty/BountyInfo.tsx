@@ -156,37 +156,22 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           </p>
         </div>
         <div className='flex flex-col space-between'>
-          <div>
-            {bounty.data.inProgress &&
-              account.isConnected &&
-              account.address?.toLocaleLowerCase() ===
-                bounty.data.issuer.toLocaleLowerCase() && (
-                <button
-                  onClick={() => {
-                    if (account.isConnected) {
-                      cancelMutation.mutate(BigInt(bountyId));
-                    } else {
-                      toast.error('Please connect wallet to continue');
-                    }
-                  }}
-                  disabled={!bounty.data.inProgress}
-                  className={`border border-[#F15E5F] rounded-md py-2 px-5 mt-5 ${
-                    !bounty.data.inProgress
-                      ? 'bg-[#F15E5F] text-white'
-                      : 'hover:bg-red-400 hover:text-white'
-                  } `}
-                >
-                  {bounty.data.isCanceled
-                    ? 'canceled'
-                    : account.address?.toLocaleLowerCase() ===
-                      bounty.data.issuer.toLocaleLowerCase()
-                    ? 'cancel'
-                    : !bounty.data.inProgress
-                    ? 'accepted'
-                    : null}
-                </button>
-              )}
-          </div>
+          {bounty.data.inProgress ? (
+            account.address?.toLocaleLowerCase() ===
+              bounty.data.issuer.toLocaleLowerCase() && (
+              <button
+                onClick={() => cancelMutation.mutate(BigInt(bountyId))}
+                disabled={!bounty.data.inProgress}
+                className='border border-[#F15E5F] rounded-md py-2 px-5 mt-5 hover:bg-red-400 hover:text-white'
+              >
+                cancel
+              </button>
+            )
+          ) : (
+            <span className='border border-[#F15E5F] rounded-md py-2 px-5 mt-5 bg-[#F15E5F] text-white'>
+              {bounty.data.isCanceled ? 'canceled' : 'accepted'}
+            </span>
+          )}
         </div>
       </div>
       {bounty.data.isMultiplayer && (
