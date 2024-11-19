@@ -313,6 +313,7 @@ export const appRouter = createTRPCRouter({
           url: true,
           title: true,
           description: true,
+          issuer: true,
           bounty: {
             select: {
               id: true,
@@ -327,6 +328,7 @@ export const appRouter = createTRPCRouter({
         title: NFT.title,
         description: NFT.description,
         bountyId: NFT.bounty!.id.toString(),
+        issuer: NFT.issuer,
       }));
     }),
 
