@@ -41,30 +41,22 @@ function NftListItem({ NFT }: { NFT: NFT }) {
   return (
     <div className=' md:col-span-4'>
       <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
-        <div
-          style={{ backgroundImage: `url(${imageUrl})` }}
-          className='bg-[#12AAFF] bg-cover bg-center w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
-        ></div>
-        <div className='p-3'>
-          <div className='flex break-words flex-col'>
-            <p className='text-nowrap overflow-ellipsis overflow-hidden'>
-              {NFT.title}
-            </p>
-            <p className='w-full h-20 overflow-y-auto overflow-x-hidden overflow-hidden'>
-              {NFT.description}
-            </p>
+        <Link href={`/${chain.slug}/bounty/${NFT.bountyId}`}>
+          <div
+            style={{ backgroundImage: `url(${imageUrl})` }}
+            className='bg-[#12AAFF] bg-cover bg-center w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
+          ></div>
+          <div className='p-3'>
+            <div className='flex break-words flex-col'>
+              <p className='text-nowrap overflow-ellipsis overflow-hidden'>
+                {NFT.title}
+              </p>
+              <p className='w-full h-20 overflow-y-auto overflow-x-hidden overflow-hidden'>
+                {NFT.description}
+              </p>
+            </div>
           </div>
-          <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed' />
-          <div>
-            bounty id:{' '}
-            <Link
-              href={`/${chain.slug}/bounty/${NFT.bountyId}`}
-              className='hover:text-gray-300'
-            >
-              {NFT.bountyId}
-            </Link>
-          </div>
-        </div>
+        </Link>
       </div>
     </div>
   );
