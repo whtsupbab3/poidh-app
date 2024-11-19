@@ -106,12 +106,14 @@ export default function Voting({ bountyId }: { bountyId: string }) {
           </div>
 
           <div>
-            Yes votes: {formatEther(BigInt(voting.data.yes || 0))}
-            {chain.currency}
+            {`Yes votes: ${formatEther(BigInt(voting.data.no || 0))} ${
+              chain.currency
+            }`}
           </div>
           <div>
-            No votes: {formatEther(BigInt(voting.data.no || 0))}
-            {chain.currency}
+            {`No votes: ${formatEther(BigInt(voting.data.no || 0))} ${
+              chain.currency
+            }`}
           </div>
 
           <div className='flex flex-row gap-x-5 '>
