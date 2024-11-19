@@ -92,6 +92,7 @@ export const appRouter = createTRPCRouter({
           ...(input.status === 'past'
             ? {
                 in_progress: false,
+                is_canceled: false,
               }
             : {}),
           ...(input.cursor ? { id: { lt: input.cursor } } : {}),
