@@ -123,10 +123,12 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
       <Loading open={cancelMutation.isPending} status={status} />
       <div className='flex pt-20 flex-col justify-between lg:flex-row'>
         <div className='flex flex-col  lg:w-[50%]'>
-          <p className='max-w-[30ch] overflow-hidden text-ellipsis text-2xl lg:text-4xl text-bold normal-case'>
+          <p className='max-w-[30ch] overflow-hidden text-ellipsis text-2xl lg:text-4xl text-bold normal-case break-words'>
             {bounty.data.title}
           </p>
-          <p className='mt-5 normal-case'>{bounty.data.description}</p>
+          <p className='mt-5 normal-case break-words'>
+            {bounty.data.description}
+          </p>
           <p className='mt-5 normal-case break-all'>
             bounty issuer:{' '}
             <DisplayAddress address={bounty.data.issuer} chain={chain} />
