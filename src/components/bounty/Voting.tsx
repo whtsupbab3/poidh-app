@@ -78,6 +78,9 @@ export default function Voting({ bountyId }: { bountyId: string }) {
     },
   });
 
+  const isVotingInProgress =
+    parseInt(voting.data?.deadline ?? '0') * 1000 > Date.now();
+
   return (
     <div className='col-span-12 lg:col-span-3 p-5 lg:p-0 '>
       {voting.data ? (
@@ -115,50 +118,54 @@ export default function Voting({ bountyId }: { bountyId: string }) {
               chain.currency
             }`}
           </div>
-
           <div className='flex flex-row gap-x-5 '>
-            <button
-              className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
-              onClick={() => {
-                if (account.isConnected) {
-                  voteMutation.mutate({
-                    vote: true,
-                    bountyId: BigInt(bountyId),
-                  });
-                } else {
-                  toast.error('Please connect wallet to continue');
-                }
-              }}
-            >
-              yes
-            </button>
-            <button
-              className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
-              onClick={() => {
-                if (account.isConnected) {
-                  voteMutation.mutate({
-                    vote: false,
-                    bountyId: BigInt(bountyId),
-                  });
-                } else {
-                  toast.error('Please connect wallet to continue');
-                }
-              }}
-            >
-              no
-            </button>
-            <button
-              className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
-              onClick={() => {
-                if (account.isConnected) {
-                  resolveVoteMutation.mutate(BigInt(bountyId));
-                } else {
-                  toast.error('Please connect wallet to continue');
-                }
-              }}
-            >
-              resolve vote
-            </button>
+            {isVotingInProgress ? (
+              <>
+                <button
+                  className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
+                  onClick={() => {
+                    if (account.isConnected) {
+                      voteMutation.mutate({
+                        vote: true,
+                        bountyId: BigInt(bountyId),
+                      });
+                    } else {
+                      toast.error('Please connect wallet to continue');
+                    }
+                  }}
+                >
+                  yes
+                </button>
+                <button
+                  className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
+                  onClick={() => {
+                    if (account.isConnected) {
+                      voteMutation.mutate({
+                        vote: false,
+                        bountyId: BigInt(bountyId),
+                      });
+                    } else {
+                      toast.error('Please connect wallet to continue');
+                    }
+                  }}
+                >
+                  no
+                </button>
+              </>
+            ) : (
+              <button
+                className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
+                onClick={() => {
+                  if (account.isConnected) {
+                    resolveVoteMutation.mutate(BigInt(bountyId));
+                  } else {
+                    toast.error('Please connect wallet to continue');
+                  }
+                }}
+              >
+                resolve vote
+              </button>
+            )}
           </div>
 
           <div className='mt-5 '>
