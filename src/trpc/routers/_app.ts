@@ -81,6 +81,7 @@ export const appRouter = createTRPCRouter({
           ...(input.status === 'open'
             ? {
                 in_progress: true,
+                is_voting: false,
               }
             : {}),
           ...(input.status === 'progress'
