@@ -40,7 +40,7 @@ const Header = () => {
   ];
 
   return (
-    <div className='pb-24'>
+    <>
       <Drawer
         open={isOpen}
         onClose={(cur) => setIsOpen(!cur)}
@@ -102,7 +102,7 @@ const Header = () => {
           <ConnectWalletButton />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
