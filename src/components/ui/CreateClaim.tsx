@@ -25,7 +25,7 @@ export default function CreateClaim({ bountyId }: { bountyId: string }) {
     <div className='fixed bottom-8 z-40 w-full flex justify-center items-center'>
       {!showForm && (
         <div
-          className='absolute button bottom-10 flex cursor-pointer flex-col items-center justify-center'
+          className='absolute button -bottom-3 flex cursor-pointer flex-col items-center justify-center'
           onClick={() => {
             if (account.isConnected) {
               setShowForm(true);

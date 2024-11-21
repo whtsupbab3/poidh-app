@@ -1,10 +1,10 @@
 export default function GameButton() {
   return (
-    <>
+    <div className='flex justify-center items-center'>
       <svg
         className='normal'
-        width='157'
-        height='157'
+        width='125'
+        height='125'
         viewBox='0 0 157 157'
         fill='none'
         xmlns='http://www.w3.org/2000/svg'
@@ -371,8 +371,8 @@ export default function GameButton() {
 
       <svg
         className='press'
-        width='157'
-        height='157'
+        width='125'
+        height='125'
         viewBox='0 0 157 157'
         fill='none'
         xmlns='http://www.w3.org/2000/svg'
@@ -1098,6 +1098,6 @@ export default function GameButton() {
           </linearGradient>
         </defs>
       </svg>
-    </>
+    </div>
   );
 }
