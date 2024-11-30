@@ -1,6 +1,6 @@
 import FormBounty from '@/components/global/FormBounty';
 import FormClaim from '@/components/global/FormClaim';
-import GameButton from '@/components/global/GameButton';
+import GameButton, { PlainGameButton } from '@/components/global/GameButton';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useAccount } from 'wagmi';
@@ -30,7 +30,7 @@ export default function NavBarMobile({
 
         <div className='w-[157px] h-[157px] -mt-8 relative z-10'>
           <div
-            className='button bg-transparent rounded-full'
+            className='bg-transparent rounded-full'
             onClick={() => {
               if (account.isConnected) {
                 setShowForm(true);
@@ -39,7 +39,15 @@ export default function NavBarMobile({
               toast.error('Please connect your wallet');
             }}
           >
-            <GameButton />
+            <div className={type === 'claim' ? 'mr-2' : ''}>
+              {showForm ? (
+                <PlainGameButton />
+              ) : (
+                <div className='button'>
+                  <GameButton />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
