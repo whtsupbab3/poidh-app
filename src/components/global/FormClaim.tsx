@@ -35,6 +35,7 @@ export default function FormClaim({
   const [status, setStatus] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
   const utils = trpc.useUtils();
+  const [uploading, setUploading] = useState(false);
 
   const account = useAccount();
   const writeContract = useWriteContract({});
@@ -53,15 +54,7 @@ export default function FormClaim({
     reader.readAsDataURL(file);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    maxFiles: 1,
-    accept: {
-      'image/png': ['.png'],
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/heic': ['.heic'],
-    },
-  });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const compressImage = async (image: File): Promise<File> => {
     const options = {
@@ -102,15 +95,19 @@ export default function FormClaim({
   useEffect(() => {
     const uploadImage = async () => {
       if (file) {
+        setUploading(true);
         try {
           const compressedFile = await compressImage(file);
           const cid = await retryUpload(compressedFile);
           setImageURI(`${LINK_IPFS}/${cid}`);
         } catch (error) {
-          toast.error('Failed to upload image: ' + error);
+          console.error('Error uploading file:', error);
+          alert('Trouble uploading file');
         }
+        setUploading(false);
       }
     };
+
     uploadImage();
   }, [file]);
 
@@ -208,20 +205,7 @@ export default function FormClaim({
         <DialogContent>
           <div
             {...getRootProps()}
-            style={{
-              border: '2px dashed #D1ECFF',
-              padding: '20px',
-              borderRadius: '30px',
-              textAlign: 'center',
-              cursor: imageURI ? 'default' : 'pointer',
-              marginBottom: '10px',
-              opacity: imageURI ? 1 : 0.5,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              height: 'fit-content',
-              minHeight: '200px',
-            }}
+            className='flex items-center flex-col text-left text-white rounded-[30px] border border-[#D1ECFF] border-dashed p-5 w-full lg:min-w-[400px] justify-center cursor-pointer'
           >
             <input {...getInputProps()} />
             {isDragActive ? (
@@ -237,13 +221,7 @@ export default function FormClaim({
               <Image
                 src={preview}
                 alt='Preview'
-                width={300}
-                height={300}
-                style={{
-                  marginTop: '10px',
-                  objectFit: 'contain',
-                  borderRadius: '10px',
-                }}
+                className='w-[300px] h-[300px] mt-2 rounded-md object-contain'
               />
             )}
           </div>
@@ -271,7 +249,7 @@ export default function FormClaim({
               account.isDisconnected && 'opacity-50 cursor-not-allowed'
             )}
             onClick={() => {
-              if (name && description && imageURI) {
+              if (name && description && imageURI && !uploading) {
                 onClose();
                 createClaimMutations.mutate(BigInt(bountyId));
               } else {
