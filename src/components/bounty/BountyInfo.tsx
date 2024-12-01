@@ -142,15 +142,15 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
                   toast.error('You are not an admin');
                 }
               }}
-              disabled={bounty.data.is_banned || false}
+              disabled={bounty.data.ban.length > 0 || false}
               className={cn(
                 'border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5',
-                bounty.data.isBanned
+                bounty.data.ban.length > 0
                   ? 'bg-red-400 text-white'
                   : 'hover:bg-red-400 hover:text-white'
               )}
             >
-              {bounty.data.isBanned ? 'banned' : 'ban'}
+              {bounty.data.ban.length > 0 ? 'banned' : 'ban'}
             </button>
           )}
           <p className='mt-5 font-bold'>
