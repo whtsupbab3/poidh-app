@@ -17,7 +17,6 @@ model Bounties {
   in_progress      Boolean? @default(true)
   is_joined_bounty Boolean? @default(false)
   is_canceled      Boolean? @default(false)
-  is_banned        Boolean? @default(false)
   is_multiplayer   Boolean?
   is_voting        Boolean? @default(false)
   deadline         Int?
@@ -25,6 +24,7 @@ model Bounties {
   claims         Claims[]
   participations ParticipationsBounties[]
   issuerUser     Users?                   @relation(fields: [issuer], references: [address])
+  ban            Ban[]
 
   @@id([id, chain_id])
 }
@@ -36,13 +36,13 @@ model Claims {
   description String
   url         String
   issuer      String
-  is_banned   Boolean?
   is_accepted Boolean?
   bounty_id   Int
   owner       String
 
   bounty     Bounties? @relation(fields: [bounty_id, chain_id], references: [id, chain_id])
   issuerUser Users?    @relation(fields: [issuer], references: [address])
+  ban        Ban[]
 
   @@id([id, chain_id])
 }
@@ -69,4 +69,16 @@ model Users {
   bounties       Bounties[]
 
   @@id([address])
+}
+
+model Ban {
+  id        Int      @id @default(autoincrement())
+  chain_id  Int
+  bounty_id Int?
+  claim_id  Int?
+  banned_at DateTime @default(now())
+  banned_by String
+
+  bounty Bounties? @relation(fields: [bounty_id, chain_id], references: [id, chain_id])
+  claim  Claims?   @relation(fields: [claim_id, chain_id], references: [id, chain_id])
 }

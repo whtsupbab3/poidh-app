@@ -57,6 +57,7 @@ export default function ClaimItem({
         if (!signature) {
           throw new Error('Failed to sign message');
         }
+
         await banClaimMutation.mutateAsync({
           id: Number(claimId),
           chainId: chain.id,

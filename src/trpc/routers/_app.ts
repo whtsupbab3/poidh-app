@@ -41,6 +41,7 @@ export const appRouter = createTRPCRouter({
           },
         },
         include: {
+          ban: true,
           claims: {
             take: 1,
           },
@@ -59,7 +60,7 @@ export const appRouter = createTRPCRouter({
         hasClaims: bounty.claims.length > 0,
         inProgress: bounty.in_progress,
         isMultiplayer: bounty.is_multiplayer,
-        isBanned: bounty.is_banned,
+        isBanned: bounty.ban.length > 0,
         isCanceled: bounty.is_canceled,
       };
     }),
@@ -77,7 +78,9 @@ export const appRouter = createTRPCRouter({
       const items = await prisma.bounties.findMany({
         where: {
           chain_id: input.chainId,
-          is_banned: false,
+          ban: {
+            none: {},
+          },
           ...(input.status === 'open'
             ? {
                 in_progress: true,
@@ -147,7 +150,9 @@ export const appRouter = createTRPCRouter({
         where: {
           bounty_id: input.bountyId,
           chain_id: input.chainId,
-          is_banned: false,
+          ban: {
+            none: {},
+          },
           ...(input.cursor ? { id: { lt: input.cursor } } : {}),
         },
         orderBy: { id: 'desc' },
@@ -183,7 +188,9 @@ export const appRouter = createTRPCRouter({
             id: input.claimId,
             chain_id: input.chainId,
           },
-          is_banned: false,
+          ban: {
+            none: {},
+          },
         },
         select: {
           id: true,
@@ -209,7 +216,9 @@ export const appRouter = createTRPCRouter({
         where: {
           issuer: input.address,
           chain_id: input.chainId,
-          is_banned: false,
+          ban: {
+            none: {},
+          },
           is_canceled: false,
         },
         select: {
@@ -252,7 +261,9 @@ export const appRouter = createTRPCRouter({
         where: {
           issuer: input.address,
           chain_id: input.chainId,
-          is_banned: false,
+          ban: {
+            none: {},
+          },
         },
         select: {
           id: true,
@@ -462,15 +473,11 @@ export const appRouter = createTRPCRouter({
         });
       }
 
-      await prisma.bounties.update({
-        where: {
-          id_chain_id: {
-            id: input.id,
-            chain_id: input.chainId,
-          },
-        },
+      await prisma.ban.create({
         data: {
-          is_banned: true,
+          chain_id: input.chainId,
+          bounty_id: input.id,
+          banned_by: input.address.toLowerCase(),
         },
       });
     }),
@@ -523,15 +530,11 @@ export const appRouter = createTRPCRouter({
         });
       }
 
-      await prisma.claims.update({
-        where: {
-          id_chain_id: {
-            id: input.id,
-            chain_id: input.chainId,
-          },
-        },
+      await prisma.ban.create({
         data: {
-          is_banned: true,
+          chain_id: input.chainId,
+          banned_by: input.address.toLowerCase(),
+          claim_id: input.id,
         },
       });
     }),
