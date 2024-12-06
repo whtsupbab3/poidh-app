@@ -181,7 +181,7 @@ export default function FormBounty({
               account.isDisconnected && 'opacity-50 cursor-not-allowed'
             )}
             onClick={() => {
-              if (account.isConnected && name && description && amount) {
+              if (name && description && amount) {
                 onClose();
                 createBountyMutations.mutate();
               } else {

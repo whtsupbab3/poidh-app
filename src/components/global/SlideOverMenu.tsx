@@ -22,7 +22,7 @@ export default function SlideOverMenu() {
 
   return (
     <div className='flex gap-2 flex-col p-5 text-white'>
-      {account.isConnected && (
+      {account.address && (
         <MenuLink href={`/${chain.slug}/account/${account.address}`}>
           my account
         </MenuLink>

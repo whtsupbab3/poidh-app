@@ -66,7 +66,7 @@ export default function Withdraw({ bountyId }: { bountyId: string }) {
         <button
           className='border border-white rounded-full px-5 py-2  backdrop-blur-sm bg-white/30 hover:bg-white/40'
           onClick={() => {
-            if (account.isConnected) {
+            if (account.address) {
               withdrawFromOpenBountyMutation.mutate(BigInt(bountyId));
             } else {
               toast.error('Please fill in all fields and connect wallet');
