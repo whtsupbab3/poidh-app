@@ -124,7 +124,7 @@ export default function Voting({ bountyId }: { bountyId: string }) {
                 <button
                   className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
                   onClick={() => {
-                    if (account.isConnected) {
+                    if (account.address) {
                       voteMutation.mutate({
                         vote: true,
                         bountyId: BigInt(bountyId),
@@ -139,7 +139,7 @@ export default function Voting({ bountyId }: { bountyId: string }) {
                 <button
                   className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
                   onClick={() => {
-                    if (account.isConnected) {
+                    if (account.address) {
                       voteMutation.mutate({
                         vote: false,
                         bountyId: BigInt(bountyId),
@@ -156,7 +156,7 @@ export default function Voting({ bountyId }: { bountyId: string }) {
               <button
                 className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
                 onClick={() => {
-                  if (account.isConnected) {
+                  if (account.address) {
                     resolveVoteMutation.mutate(BigInt(bountyId));
                   } else {
                     toast.error('Please connect wallet to continue');

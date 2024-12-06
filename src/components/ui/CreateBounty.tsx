@@ -15,7 +15,7 @@ export default function CreateBounty() {
         <div
           className='absolute button -bottom-3 flex cursor-pointer flex-col items-center justify-center'
           onClick={() => {
-            if (account.isConnected) {
+            if (account.address) {
               setShowForm(true);
               return;
             }

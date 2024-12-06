@@ -14,5 +14,5 @@ export function getBanSignatureFirstLine({
   chainId: number;
   type: 'claim' | 'bounty';
 }) {
-  return `Ban ${type}: id: ${id} chainId: ${chainId}\n`;
+  return `Ban ${type} id: ${id} chainId: ${chainId}\n`;
 }

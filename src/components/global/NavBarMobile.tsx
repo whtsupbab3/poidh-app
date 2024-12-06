@@ -32,7 +32,7 @@ export default function NavBarMobile({
           <div
             className='bg-transparent rounded-full'
             onClick={() => {
-              if (account.isConnected) {
+              if (account.address) {
                 setShowForm(true);
                 return;
               }

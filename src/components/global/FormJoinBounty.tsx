@@ -130,7 +130,7 @@ export default function FormJoinBounty({
             )}
             disabled={!amount}
             onClick={() => {
-              if (account.isConnected) {
+              if (account.address) {
                 onClose();
                 bountyMutation.mutate(BigInt(bountyId));
               } else {
