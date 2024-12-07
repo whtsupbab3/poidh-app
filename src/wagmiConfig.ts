@@ -9,7 +9,7 @@ const DEGEN_RPC_URL =
 const ARBITRUM_RPC_URL =
   'https://arb-mainnet.g.alchemy.com/v2/XCJ_kTDkVWrwvQ8vbOOXNxKvKyN30Lu1';
 const BASE_RPC_URL =
-  'https://api.developer.coinbase.com/rpc/v1/base/q_7UksVVI6bvOgx0y6-hR123IsVxVk3-';
+  'https://base-mainnet.g.alchemy.com/v2/u14hNDLOC4WItmevbcUWItEg6KThN5W0';
 
 export const config = getDefaultConfig({
   appName: 'poidh',
