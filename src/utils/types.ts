@@ -19,3 +19,9 @@ export type Wallet = {
   ens: string | null;
   degenName: string | null;
 };
+
+export type Bounty = {
+  title: string;
+  description: string;
+  isGenerating?: boolean;
+};

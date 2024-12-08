@@ -20,6 +20,7 @@ import { trpcClient } from '@/trpc/client';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { InfoIcon } from '@/components/global/Icons';
+import { Bounty } from '@/utils/types';
 
 export default function FormBounty({
   open,
@@ -107,6 +108,35 @@ export default function FormBounty({
     },
   });
 
+  const generateBountyMutation = useMutation({
+    mutationFn: async () => {
+      setName('Generating…');
+      setDescription('Generating…');
+      const res = await fetch('/api/generateBounty', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error: ${res.status}`);
+      }
+
+      return JSON.parse(await res.json());
+    },
+    onSuccess: (bounty: Bounty) => {
+      setName(bounty.title);
+      setDescription(bounty.description);
+      toast.success('Bounty generated successfully');
+    },
+    onError: (error) => {
+      setName('');
+      setDescription('');
+      toast.error('Failed to generate bounty: ' + error.message);
+    },
+  });
+
   return (
     <>
       <Loading open={createBountyMutations.isPending} status={status} />
@@ -129,19 +159,43 @@ export default function FormBounty({
       >
         <DialogContent>
           <Box display='flex' flexDirection='column' width='100%'>
-            <span>title</span>
+            <span
+              className={cn(
+                generateBountyMutation.isPending ? 'animate-pulse' : ''
+              )}
+            >
+              title
+            </span>
             <input
+              disabled={generateBountyMutation.isPending}
               type='text'
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4'
+              className={cn(
+                'border py-2 px-2 rounded-md mb-4 bg-transparent border-[#D1ECFF]',
+                generateBountyMutation.isPending
+                  ? 'cursor-not-allowed animate-pulse'
+                  : ''
+              )}
             />
-            <span>description</span>
+            <span
+              className={cn(
+                generateBountyMutation.isPending ? 'animate-pulse' : ''
+              )}
+            >
+              description
+            </span>
             <textarea
+              disabled={generateBountyMutation.isPending}
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 max-h-28'
+              className={cn(
+                'border py-2 px-2 rounded-md mb-4 max-h-28 bg-transparent border-[#D1ECFF]',
+                generateBountyMutation.isPending
+                  ? 'cursor-not-allowed animate-pulse'
+                  : ''
+              )}
             ></textarea>
 
             <span>reward</span>
@@ -198,6 +252,19 @@ export default function FormBounty({
             <ButtonCTA>create bounty</ButtonCTA>
           </button>
         </DialogActions>
+        <div className='py-4 mt-1 w-full flex justify-center items-center flex-row'>
+          <span className='mr-2'>need a bouty idea? click the</span>
+          <button
+            className={cn(
+              'cursor-pointer items-center text-center',
+              generateBountyMutation.isPending ? 'cursor-not-allowed' : ''
+            )}
+            onClick={() => generateBountyMutation.mutate()}
+            disabled={generateBountyMutation.isPending}
+          >
+            🤖
+          </button>
+        </div>
       </Dialog>
     </>
   );
