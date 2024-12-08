@@ -110,7 +110,11 @@ export default function FormJoinBounty({
             alignItems='left'
             width='100%'
           >
-            <Typography variant='subtitle1' gutterBottom>
+            <Typography
+              variant='subtitle1'
+              gutterBottom
+              className='font-family-geist'
+            >
               Reward
             </Typography>
             <input
@@ -125,7 +129,7 @@ export default function FormJoinBounty({
           <Button
             variant='outlined'
             className={cn(
-              'w-full rounded-full lowercase bg-[#F15E5F] hover:bg-red-400 text-white',
+              'w-full rounded-full lowercase bg-[#F15E5F] hover:bg-red-400 text-white font-family-geist',
               !amount && 'opacity-50 cursor-not-allowed'
             )}
             disabled={!amount}
