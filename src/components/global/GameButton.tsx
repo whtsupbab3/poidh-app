@@ -10,6 +10,13 @@ export default function GameButton() {
         xmlns='http://www.w3.org/2000/svg'
       >
         <g filter='url(#filter0_dd_615_3757)'>
+          <circle
+            cx='79'
+            cy='79.5'
+            r='58'
+            fill='#E2EFFB'
+            filter='url(#bgShadow)'
+          />
           <rect
             x='16.5'
             y='17'
@@ -63,6 +70,9 @@ export default function GameButton() {
           </g>
         </g>
         <defs>
+          <filter id='bgShadow'>
+            <feGaussianBlur in='SourceGraphic' stdDeviation='5' />
+          </filter>
           <filter
             id='filter0_dd_615_3757'
             x='0.25'
@@ -79,7 +89,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dx='6.25' dy='6.25' />
             <feGaussianBlur stdDeviation='4.375' />
             <feColorMatrix
               type='matrix'
@@ -96,7 +105,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dx='-6.25' dy='-6.25' />
             <feGaussianBlur stdDeviation='5' />
             <feColorMatrix
               type='matrix'
@@ -142,7 +150,6 @@ export default function GameButton() {
               in='SourceAlpha'
               result='effect1_innerShadow_615_3757'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -160,7 +167,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -184,7 +190,6 @@ export default function GameButton() {
               in='SourceAlpha'
               result='effect3_innerShadow_615_3757'
             />
-            <feOffset dy='0.315131' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -213,7 +218,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='8.82368' />
             <feGaussianBlur stdDeviation='10.0842' />
             <feComposite in2='hardAlpha' operator='out' />
             <feColorMatrix
@@ -231,7 +235,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='1.26053' />
             <feGaussianBlur stdDeviation='0.630263' />
             <feComposite in2='hardAlpha' operator='out' />
             <feColorMatrix
@@ -255,7 +258,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -273,7 +275,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -308,7 +309,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -378,6 +378,13 @@ export default function GameButton() {
         xmlns='http://www.w3.org/2000/svg'
       >
         <g filter='url(#filter0_dd_513_1935)'>
+          <circle
+            cx='79'
+            cy='79.5'
+            r='58'
+            fill='#E2EFFB'
+            filter='url(#bgShadow)'
+          />
           <rect
             x='16.5'
             y='17'
@@ -484,6 +491,9 @@ export default function GameButton() {
           </g>
         </g>
         <defs>
+          <filter id='bgShadow'>
+            <feGaussianBlur in='SourceGraphic' stdDeviation='5' />
+          </filter>
           <filter
             id='filter0_dd_513_1935'
             x='0.25'
@@ -500,7 +510,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dx='6.25' dy='6.25' />
             <feGaussianBlur stdDeviation='4.375' />
             <feColorMatrix
               type='matrix'
@@ -517,7 +526,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dx='-6.25' dy='-6.25' />
             <feGaussianBlur stdDeviation='5' />
             <feColorMatrix
               type='matrix'
@@ -563,7 +571,6 @@ export default function GameButton() {
               in='SourceAlpha'
               result='effect1_innerShadow_513_1935'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -581,7 +588,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -605,7 +611,6 @@ export default function GameButton() {
               in='SourceAlpha'
               result='effect3_innerShadow_513_1935'
             />
-            <feOffset dy='0.315131' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -634,7 +639,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='8.82368' />
             <feGaussianBlur stdDeviation='10.0842' />
             <feComposite in2='hardAlpha' operator='out' />
             <feColorMatrix
@@ -652,7 +656,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='1.26053' />
             <feGaussianBlur stdDeviation='0.630263' />
             <feComposite in2='hardAlpha' operator='out' />
             <feColorMatrix
@@ -676,7 +679,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -694,7 +696,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -729,7 +730,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -764,7 +764,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -805,7 +804,6 @@ export default function GameButton() {
               in='SourceAlpha'
               result='effect1_innerShadow_513_1935'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -823,7 +821,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -847,7 +844,6 @@ export default function GameButton() {
               in='SourceAlpha'
               result='effect3_innerShadow_513_1935'
             />
-            <feOffset dy='0.315131' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -882,7 +878,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -923,7 +918,6 @@ export default function GameButton() {
               in='SourceAlpha'
               result='effect1_innerShadow_513_1935'
             />
-            <feOffset />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -958,7 +952,6 @@ export default function GameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -1114,6 +1107,13 @@ export function PlainGameButton() {
         xmlns='http://www.w3.org/2000/svg'
       >
         <g filter='url(#filter0_dd_615_3757)'>
+          <circle
+            cx='79'
+            cy='79.5'
+            r='58'
+            fill='#E2EFFB'
+            filter='url(#bgShadow)'
+          />
           <rect
             x='16.5'
             y='17'
@@ -1167,6 +1167,9 @@ export function PlainGameButton() {
           </g>
         </g>
         <defs>
+          <filter id='bgShadow'>
+            <feGaussianBlur in='SourceGraphic' stdDeviation='5' />
+          </filter>
           <filter
             id='filter0_dd_615_3757'
             x='0.25'
@@ -1183,7 +1186,6 @@ export function PlainGameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dx='6.25' dy='6.25' />
             <feGaussianBlur stdDeviation='4.375' />
             <feColorMatrix
               type='matrix'
@@ -1200,7 +1202,6 @@ export function PlainGameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dx='-6.25' dy='-6.25' />
             <feGaussianBlur stdDeviation='5' />
             <feColorMatrix
               type='matrix'
@@ -1246,7 +1247,6 @@ export function PlainGameButton() {
               in='SourceAlpha'
               result='effect1_innerShadow_615_3757'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -1264,7 +1264,6 @@ export function PlainGameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -1288,7 +1287,6 @@ export function PlainGameButton() {
               in='SourceAlpha'
               result='effect3_innerShadow_615_3757'
             />
-            <feOffset dy='0.315131' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -1317,7 +1315,6 @@ export function PlainGameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='8.82368' />
             <feGaussianBlur stdDeviation='10.0842' />
             <feComposite in2='hardAlpha' operator='out' />
             <feColorMatrix
@@ -1335,7 +1332,6 @@ export function PlainGameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='1.26053' />
             <feGaussianBlur stdDeviation='0.630263' />
             <feComposite in2='hardAlpha' operator='out' />
             <feColorMatrix
@@ -1359,7 +1355,6 @@ export function PlainGameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='0.630263' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -1377,7 +1372,6 @@ export function PlainGameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.315131' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
@@ -1412,7 +1406,6 @@ export function PlainGameButton() {
               values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
               result='hardAlpha'
             />
-            <feOffset dy='-0.315131' />
             <feGaussianBlur stdDeviation='0.157566' />
             <feComposite in2='hardAlpha' operator='arithmetic' k2='-1' k3='1' />
             <feColorMatrix
