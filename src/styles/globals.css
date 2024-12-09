@@ -229,6 +229,10 @@ button {
   backdrop-filter: blur(4px);
 }
 
+.font-family-geist {
+  font-family: 'GeistMono-Regular';
+}
+
 .bountyItem.pendingClaims > div > div.borderBox {
   border: 1px solid #cf5d5d;
 }
