@@ -5,7 +5,7 @@ import { http } from 'viem';
 import { arbitrum, base, degen } from 'wagmi/chains';
 
 const DEGEN_RPC_URL =
-  'https://rpc-degen-mainnet-1.t.conduit.xyz/8TM2tJu2NV9h6McqXqDPHCnsvCdwVgyrH';
+  'https://degen-mainnet.g.alchemy.com/v2/u14hNDLOC4WItmevbcUWItEg6KThN5W0';
 const ARBITRUM_RPC_URL =
   'https://arb-mainnet.g.alchemy.com/v2/XCJ_kTDkVWrwvQ8vbOOXNxKvKyN30Lu1';
 const BASE_RPC_URL =

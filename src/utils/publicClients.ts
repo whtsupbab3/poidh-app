@@ -16,7 +16,7 @@ export const basePublicClient = createPublicClient({
 export const degenPublicClient = createPublicClient({
   chain: degen,
   transport: http(
-    'https://rpc-degen-mainnet-1.t.conduit.xyz/8TM2tJu2NV9h6McqXqDPHCnsvCdwVgyrH'
+    'https://degen-mainnet.g.alchemy.com/v2/u14hNDLOC4WItmevbcUWItEg6KThN5W0'
   ),
 });
 
