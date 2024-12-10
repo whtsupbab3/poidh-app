@@ -170,7 +170,12 @@ export default function FormBounty({
               type='text'
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className='border py-2 px-2 rounded-md mb-4 bg-transparent border-[#D1ECFF] disabled:cursor-not-allowed disabled:animate-pulse'
+              className={cn(
+                'border py-2 px-2 rounded-md mb-4 bg-transparent border-[#D1ECFF]',
+                generateBountyMutation.isPending
+                  ? 'cursor-not-allowed animate-pulse'
+                  : ''
+              )}
             />
             <span
               className={cn(
@@ -184,8 +189,13 @@ export default function FormBounty({
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className='border py-2 px-2 rounded-md mb-4 max-h-28 bg-transparent border-[#D1ECFF] disabled:cursor-not-allowed disabled:animate-pulse'
-            />
+              className={cn(
+                'border py-2 px-2 rounded-md mb-4 max-h-28 bg-transparent border-[#D1ECFF]',
+                generateBountyMutation.isPending
+                  ? 'cursor-not-allowed animate-pulse'
+                  : ''
+              )}
+            ></textarea>
 
             <span>reward</span>
             <input
