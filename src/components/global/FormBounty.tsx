@@ -20,7 +20,11 @@ import { trpcClient } from '@/trpc/client';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { InfoIcon } from '@/components/global/Icons';
-import { Bounty } from '@/utils/types';
+
+type Bounty = {
+  title: string;
+  description: string;
+};
 
 export default function FormBounty({
   open,
@@ -118,12 +122,7 @@ export default function FormBounty({
           'Content-Type': 'application/json',
         },
       });
-
-      if (!res.ok) {
-        throw new Error(`Error: ${res.status}`);
-      }
-
-      return JSON.parse(await res.json());
+      return JSON.parse(await res.json()) as Bounty;
     },
     onSuccess: (bounty: Bounty) => {
       setName(bounty.title);
@@ -161,7 +160,7 @@ export default function FormBounty({
           <Box display='flex' flexDirection='column' width='100%'>
             <span
               className={cn(
-                generateBountyMutation.isPending ? 'animate-pulse' : ''
+                generateBountyMutation.isPending && 'animate-pulse'
               )}
             >
               title
@@ -173,14 +172,13 @@ export default function FormBounty({
               onChange={(e) => setName(e.target.value)}
               className={cn(
                 'border py-2 px-2 rounded-md mb-4 bg-transparent border-[#D1ECFF]',
-                generateBountyMutation.isPending
-                  ? 'cursor-not-allowed animate-pulse'
-                  : ''
+                generateBountyMutation.isPending &&
+                  'cursor-not-allowed animate-pulse'
               )}
             />
             <span
               className={cn(
-                generateBountyMutation.isPending ? 'animate-pulse' : ''
+                generateBountyMutation.isPending && 'animate-pulse'
               )}
             >
               description
@@ -192,9 +190,8 @@ export default function FormBounty({
               onChange={(e) => setDescription(e.target.value)}
               className={cn(
                 'border py-2 px-2 rounded-md mb-4 max-h-28 bg-transparent border-[#D1ECFF]',
-                generateBountyMutation.isPending
-                  ? 'cursor-not-allowed animate-pulse'
-                  : ''
+                generateBountyMutation.isPending &&
+                  'cursor-not-allowed animate-pulse'
               )}
             ></textarea>
 
@@ -257,7 +254,7 @@ export default function FormBounty({
           <button
             className={cn(
               'cursor-pointer items-center text-center',
-              generateBountyMutation.isPending ? 'cursor-not-allowed' : ''
+              generateBountyMutation.isPending && 'cursor-not-allowed'
             )}
             onClick={() => generateBountyMutation.mutate()}
             disabled={generateBountyMutation.isPending}
