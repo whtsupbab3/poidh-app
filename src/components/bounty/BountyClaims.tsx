@@ -27,7 +27,7 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     {
       bountyId: Number(bountyId),
       chainId: chain.id,
-      limit: PAGE_SIZE,
+      limit: votingClaimId ? PAGE_SIZE + 1 : PAGE_SIZE,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
