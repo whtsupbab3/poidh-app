@@ -35,6 +35,16 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     }
   );
 
+  const bountyClaimsCount = trpc.bountyClaimsCount.useQuery(
+    {
+      bountyId: Number(bountyId),
+      chainId: chain.id,
+    },
+    {
+      enabled: !!bountyId,
+    }
+  );
+
   const { data: votingClaim } = trpc.claim.useQuery(
     {
       claimId: Number(votingClaimId),
@@ -63,13 +73,7 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     <div>
       <div className='flex flex-col gap-x-2 py-4 border-b border-dashed'>
         <div>
-          <span>
-            {claims.data?.pages.reduce(
-              (acc, curr) => acc + curr.items.length,
-              0
-            )}{' '}
-            claims
-          </span>
+          <span>{Number(bountyClaimsCount.data) || 0} claims</span>
         </div>
       </div>
       {claims.data && (

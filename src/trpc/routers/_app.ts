@@ -179,6 +179,25 @@ export const appRouter = createTRPCRouter({
       };
     }),
 
+  bountyClaimsCount: baseProcedure
+    .input(
+      z.object({
+        bountyId: z.number(),
+        chainId: z.number(),
+      })
+    )
+    .query(async ({ input }) => {
+      return await prisma.claims.count({
+        where: {
+          bounty_id: input.bountyId,
+          chain_id: input.chainId,
+          ban: {
+            none: {},
+          },
+        },
+      });
+    }),
+
   claim: baseProcedure
     .input(z.object({ claimId: z.number(), chainId: z.number() }))
     .query(async ({ input }) => {
