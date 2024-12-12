@@ -155,7 +155,7 @@ export const appRouter = createTRPCRouter({
           },
           ...(input.cursor ? { id: { lt: input.cursor } } : {}),
         },
-        orderBy: { id: 'desc' },
+        orderBy: [{ is_accepted: 'desc' }, { id: 'desc' }],
         take: input.limit,
         select: {
           id: true,
