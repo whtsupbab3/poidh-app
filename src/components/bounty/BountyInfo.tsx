@@ -160,7 +160,8 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
         <div className='flex flex-col space-between'>
           {bounty.data.inProgress ? (
             account.address?.toLocaleLowerCase() ===
-              bounty.data.issuer.toLocaleLowerCase() && (
+              bounty.data.issuer.toLocaleLowerCase() &&
+            !bounty.data.is_voting && (
               <button
                 onClick={() => cancelMutation.mutate(BigInt(bountyId))}
                 disabled={!bounty.data.inProgress}

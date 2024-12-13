@@ -89,12 +89,13 @@ export default function BountyMultiplayer({
         )}
       </div>
       {account.address?.toLocaleLowerCase() !== issuer.toLocaleLowerCase() &&
-        !isVoting &&
-        (inProgress && isCurrentUserAParticipant ? (
-          <Withdraw bountyId={bountyId} />
-        ) : (
-          <JoinBounty bountyId={bountyId} />
-        ))}
+      !isVoting &&
+      inProgress &&
+      isCurrentUserAParticipant ? (
+        <Withdraw bountyId={bountyId} />
+      ) : (
+        !isVoting && inProgress && <JoinBounty bountyId={bountyId} />
+      )}
     </>
   );
 }
