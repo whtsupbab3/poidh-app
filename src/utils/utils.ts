@@ -76,30 +76,31 @@ export const fetchBounty = async (
   chainName: string,
   bountyId: string
 ): Promise<BountyResponse> => {
-  // const response = await fetch(
-  //   `${
-  //     process.env.NEXT_PUBLIC_VERCEL_URL ?? 'http://localhost:3000'
-  //   }/api/bounties/${chainName}/${bountyId}`
-  // );
-  // const data = await response.json();
+  const response = await fetch(
+    `${
+      process.env.NEXT_PUBLIC_VERCEL_URL ?? 'http://localhost:3000'
+    }/api/bounties/${chainName}/${bountyId}`
+  );
+  const data = await response.json();
 
+  return data as BountyResponse;
   // returning dummy data for now
-  return {
-    bounty: {
-      ...dummyBounty,
-      id: Number(dummyBounty.id),
-      status: {
-        in_progress: dummyBounty.in_progress,
-        is_joined_bounty: dummyBounty.is_joined_bounty,
-        is_canceled: dummyBounty.is_canceled,
-        is_multiplayer: dummyBounty.is_multiplayer,
-        is_voting: dummyBounty.is_voting,
-      },
-      participants: dummyBounty.participations.map((p) => ({
-        address: p.user_address,
-        amount: p.amount,
-        user: null,
-      })),
-    },
-  };
+  // return {
+  //   bounty: {
+  //     ...dummyBounty,
+  //     id: Number(dummyBounty.id),
+  //     status: {
+  //       in_progress: dummyBounty.in_progress,
+  //       is_joined_bounty: dummyBounty.is_joined_bounty,
+  //       is_canceled: dummyBounty.is_canceled,
+  //       is_multiplayer: dummyBounty.is_multiplayer,
+  //       is_voting: dummyBounty.is_voting,
+  //     },
+  //     participants: dummyBounty.participations.map((p) => ({
+  //       address: p.user_address,
+  //       amount: p.amount,
+  //       user: null,
+  //     })),
+  //   },
+  // };
 };
