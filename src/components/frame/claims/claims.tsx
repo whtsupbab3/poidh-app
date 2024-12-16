@@ -1,11 +1,9 @@
 import { BountyResponse } from '@/app/api/bounties/[chainName]/[bountyId]/route';
-import BountyClaims from '@/components/bounty/BountyClaims';
 import ClaimItem from '@/components/bounty/ClaimItem';
 import { useGetChain } from '@/hooks/useGetChain';
 import { trpc } from '@/trpc/client';
 import { fetchBounty } from '@/utils/utils';
 import { bountyCurrentVotingClaim } from '@/utils/web3';
-import sdk, { FrameContext } from '@farcaster/frame-sdk';
 import React, { useEffect, useState } from 'react';
 
 const Claims = ({
@@ -15,8 +13,6 @@ const Claims = ({
   bountyId: string;
   chainId: string;
 }) => {
-  const [isSDKLoaded, setIsSDKLoaded] = React.useState(false);
-  const [context, setContext] = React.useState<FrameContext>();
   const [bounty, setBounty] = React.useState<BountyResponse['bounty'] | null>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [votingClaimId, setVotingClaimId] = useState<number | null>(null);
@@ -25,7 +21,7 @@ const Claims = ({
     const fetchCurrentVotingClaim = async () => {
       const currentVotingClaim = await bountyCurrentVotingClaim({
         id: bountyId,
-        chainName: chain.slug,
+        chainName: chainId as 'degen' | 'arbitrum' | 'base',
       });
       setVotingClaimId(currentVotingClaim);
     };
@@ -45,18 +41,8 @@ const Claims = ({
         setLoading(false);
       }
     };
-    const load = async () => {
-      setContext(await sdk.context);
-
-      sdk.actions.ready();
-      console.log(await sdk.context);
-    };
-    if (sdk && !isSDKLoaded) {
-      setIsSDKLoaded(true);
-      void load();
-      void fetchClaims();
-    }
-  }, [isSDKLoaded]);
+    void fetchClaims();
+  }, [bountyId, chainId]);
 
   const { data: votingClaim } = trpc.claim.useQuery(
     {
@@ -101,35 +87,35 @@ const Claims = ({
           </>
         )}
       </div>
-      <div className='w-full flex items-center justify-start flex-col gap-8'>
-        {loading ? (
-          <p className='text-center text-white font-bold w-full'>
-            Bounty Loading...
-          </p>
-        ) : !bounty ? (
-          <p className='text-center text-white font-bold w-full'>
-            Bounty Not Found :(
-          </p>
-        ) : bounty.claims.length === 0 ? (
-          <p className='text-center text-white font-bold w-full'>
-            No Claims found
-          </p>
-        ) : (
-          bounty.claims.map((claim) => (
+      {loading ? (
+        <p className='text-center text-white font-bold w-full'>
+          Bounty Loading...
+        </p>
+      ) : !bounty ? (
+        <p className='text-center text-white font-bold w-full'>
+          Bounty Not Found :(
+        </p>
+      ) : bounty.claims.length === 0 ? (
+        <p className='text-center text-white font-bold w-full'>
+          No Claims found
+        </p>
+      ) : (
+        <div className='w-full flex items-center justify-start flex-col gap-8 lg:grid lg:grid-cols-3'>
+          {bounty.claims.map((claim) => (
             <ClaimItem
               key={claim.id}
               bountyId={bountyId}
               id={claim.id.toString()}
               title={claim.title}
               description={claim.description}
-              issuer={claim.issuer.address!}
+              issuer={claim.issuer.address as string}
               accepted={claim.is_accepted ?? false}
               url={claim.url}
               isVotingOrAcceptedBounty={isVotingOrAcceptedBounty ?? false}
             />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
