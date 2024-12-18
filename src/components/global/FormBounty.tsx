@@ -242,7 +242,7 @@ export default function FormBounty({
           </button>
         </DialogActions>
         <div className='py-4 mt-1 w-full flex justify-center items-center flex-row'>
-          <span className='mr-2'>need a bouty idea? click the</span>
+          <span className='mr-2'>need a bounty idea? click the</span>
           <button
             className='cursor-pointer items-center text-center disabled:cursor-not-allowed'
             onClick={() => generateBountyMutation.mutate()}
