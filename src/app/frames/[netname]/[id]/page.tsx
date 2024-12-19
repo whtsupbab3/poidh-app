@@ -13,7 +13,7 @@ export const generateMetadata = async ({
 
   const frame = {
     version: 'next',
-    imageUrl: `${appUrl}/frames/image?chainId=${params?.netname}&bountyId=${params?.id}`,
+    imageUrl: `${appUrl}/frames/image?chainName=${params?.netname}&bountyId=${params?.id}`,
     button: {
       title: 'See Claims',
       action: {
