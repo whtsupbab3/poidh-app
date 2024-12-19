@@ -6,6 +6,59 @@ import { fetchBounty } from '@/utils/utils';
 import { bountyCurrentVotingClaim } from '@/utils/web3';
 import React, { useEffect, useState } from 'react';
 
+// Add chain configuration
+const CHAIN_INFO: Record<
+  number,
+  { symbol: string; isEVM: boolean; name: string }
+> = {
+  8453: {
+    // Base
+    symbol: 'ETH',
+    isEVM: true,
+    name: 'Base',
+  },
+  42161: {
+    // Arbitrum
+    symbol: 'ETH',
+    isEVM: true,
+    name: 'Arbitrum',
+  },
+  666666666: {
+    // Degen
+    symbol: 'DEGEN',
+    isEVM: false,
+    name: 'Degen',
+  },
+};
+
+// Amount formatting utility
+const formatAmount = (amount: string, chainId: number) => {
+  try {
+    if (!amount) return '0';
+
+    const chain = CHAIN_INFO[chainId];
+    if (!chain) return amount;
+
+    if (chain.isEVM) {
+      // Convert wei to ETH for base and arbitrum
+      const weiAmount = BigInt(amount);
+      const ethAmount = Number(weiAmount) / 1e18;
+
+      return `${chain.name} ${ethAmount.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 4,
+      })} ${chain.symbol}`;
+    } else {
+      // Format DEGEN amount
+      const numberAmount = (parseInt(amount) / 1000000000000000000).toString();
+      return `${numberAmount.toLocaleString()} DEGEN`;
+    }
+  } catch (error) {
+    console.error('Error formatting amount:', error);
+    return amount;
+  }
+};
+
 const Claims = ({
   bountyId,
   chainId,
@@ -17,6 +70,7 @@ const Claims = ({
   const [loading, setLoading] = React.useState<boolean>(false);
   const [votingClaimId, setVotingClaimId] = useState<number | null>(null);
   const chain = useGetChain();
+
   useEffect(() => {
     const fetchCurrentVotingClaim = async () => {
       const currentVotingClaim = await bountyCurrentVotingClaim({
@@ -69,18 +123,21 @@ const Claims = ({
   return (
     <div className='w-full flex items-center justify-start p-6 flex-col gap-4'>
       <div className='w-full flex items-center justify-start flex-col gap-4'>
-        <h1 className='text-3xl font-bold text-center capitalize underline '>
+        {/* <h1 className='text-3xl font-bold text-center capitalize underline '>
           Bounty {bounty && `#${bounty?.id}`}
-        </h1>
+        </h1> */}
         {bounty && (
           <>
-            <h3 className='text-2xl font-semibold text-center capitalize  '>
+            <h3 className='text-2xl font-semibold text-center'>
               "{bounty?.title}"
             </h3>
-            <p className='text-2xl font-medium text-center'>
+            <p className='text-xl font-medium text-center'>
               {bounty?.description}
             </p>
-            <p className='text-2xl font-medium text-center'>
+            <p className='text-lg font-medium text-center'>
+              {formatAmount(bounty?.amount, bounty.chain_id)}
+            </p>
+            <p className='text-lg font-medium text-center'>
               Total Claims:{' '}
               <span className='underline'>{bounty?.claims.length}</span>
             </p>

@@ -9,13 +9,12 @@ const calculateFontSize = (title: string) => {
 };
 
 // Utility function to format amounts
-const formatAmount = (amount: string, chainName: string) => {
+export const formatAmount = (amount: string, chainName: string) => {
   try {
     // Handle empty or invalid amounts
     if (!amount) return '0';
 
     if (chainName.toLowerCase() === 'degen') {
-      // For Degen chain, format the number with commas
       const numberAmount = (parseInt(amount) / 1000000000000000000).toString();
       return `${numberAmount.toLocaleString()} DEGEN`;
     } else {
