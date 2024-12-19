@@ -26,6 +26,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         })
       : null;
 
+  // Create the frame embed object according to spec
+  const frameEmbed = {
+    version: 'next',
+    image: `https://poidh-app-theta.vercel.app/frames/image?chainName=${chain}&bountyId=${bounty?.id}`,
+    button: {
+      title: 'See Claims',
+      action: {
+        type: 'launch_frame',
+        name: 'See Claims',
+        url: `https://poidh-app-theta.vercel.app/frames/${chain}/${bounty?.id}`,
+        splashImageUrl: `https://poidh-app-theta.vercel.app/Logo_poidh.svg`,
+        splashBackgroundColor: '#93c5fd',
+      },
+    },
+  };
+
   return {
     title: bounty?.title || '',
     description: bounty?.description || '',
@@ -43,6 +59,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: bounty?.title || '',
       description: bounty?.description || '',
       images: [`https://poidh.xyz/images/poidh-preview-hero.png`],
+    },
+    other: {
+      'fc:frame': JSON.stringify(frameEmbed),
     },
   };
 }
