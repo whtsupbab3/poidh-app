@@ -73,13 +73,11 @@ const dummyBounty = {
 };
 
 export const fetchBounty = async (
-  chainName: string,
-  bountyId: string
+  chainName: string | null,
+  bountyId: string | null
 ): Promise<BountyResponse> => {
   const response = await fetch(
-    `${
-      process.env.NEXT_PUBLIC_VERCEL_URL ?? 'http://localhost:3000'
-    }/api/bounties/${chainName}/${bountyId}`
+    `https://poidh-app-theta.vercel.app/api/bounties/${chainName}/${bountyId}`
   );
   const data = await response.json();
 
