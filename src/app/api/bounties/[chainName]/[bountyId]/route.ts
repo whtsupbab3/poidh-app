@@ -59,7 +59,7 @@ type ParticipantResponse = {
   } | null;
 };
 
-type BountyResponse = {
+export type BountyResponse = {
   bounty: {
     id: number;
     chain_id: number;
