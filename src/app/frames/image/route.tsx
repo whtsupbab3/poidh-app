@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const bountyData = await fetchBounty(chainId!, bountyId!);
+    const bountyData = await fetchBounty(chainId, bountyId);
     return new ImageResponse(<BountyCard bounty={bountyData.bounty} />, {
       width: 570,
       height: 320,

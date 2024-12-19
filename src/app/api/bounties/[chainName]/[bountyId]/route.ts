@@ -116,8 +116,6 @@ export async function GET(
             issuerUser: {
               select: {
                 address: true,
-                ens: true,
-                degen_name: true,
               },
             },
           },
@@ -125,8 +123,6 @@ export async function GET(
         issuerUser: {
           select: {
             address: true,
-            ens: true,
-            degen_name: true,
           },
         },
         participations: {
@@ -134,8 +130,6 @@ export async function GET(
             user: {
               select: {
                 address: true,
-                ens: true,
-                degen_name: true,
               },
             },
           },
@@ -157,8 +151,6 @@ export async function GET(
         amount: bounty.amount,
         issuer: {
           address: bounty.issuer,
-          ens: bounty.issuerUser?.ens,
-          degen_name: bounty.issuerUser?.degen_name,
         },
         status: {
           in_progress: bounty.in_progress,
@@ -171,12 +163,7 @@ export async function GET(
         participants: bounty.participations.map((p) => ({
           address: p.user_address,
           amount: p.amount,
-          user: p.user
-            ? {
-                ens: p.user.ens ?? null,
-                degen_name: p.user.degen_name ?? null,
-              }
-            : null,
+          user: null,
         })),
         claims: bounty.claims.map((claim) => ({
           id: claim.id,
@@ -186,8 +173,6 @@ export async function GET(
           owner: claim.owner,
           issuer: {
             address: claim.issuer,
-            ens: claim.issuerUser?.ens ?? null,
-            degen_name: claim.issuerUser?.degen_name ?? null,
           },
           is_accepted: claim.is_accepted,
         })),
