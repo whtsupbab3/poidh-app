@@ -1,4 +1,3 @@
-import imageCompression from 'browser-image-compression';
 import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
@@ -56,21 +55,6 @@ export default function FormClaim({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
-  const compressImage = async (image: File): Promise<File> => {
-    const options = {
-      maxSizeMB: 10,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true,
-    };
-    try {
-      const compressedFile = await imageCompression(image, options);
-      return compressedFile;
-    } catch (error) {
-      toast.error('Error compressing image');
-      throw error;
-    }
-  };
-
   const retryUpload = async (file: File): Promise<string> => {
     const MAX_RETRIES = 6;
     const RETRY_DELAY = 3000;
@@ -97,8 +81,7 @@ export default function FormClaim({
       if (file) {
         setUploading(true);
         try {
-          const compressedFile = await compressImage(file);
-          const cid = await retryUpload(compressedFile);
+          const cid = await retryUpload(file);
           setImageURI(`${LINK_IPFS}/${cid}`);
         } catch (error) {
           console.error('Error uploading file:', error);
