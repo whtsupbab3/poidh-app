@@ -39,6 +39,12 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
 
   const signMutation = useMutation({
     mutationFn: async (bountyId: string) => {
+      //arbitrum has a problem with message signing, so all confirmations are on base
+      const chainId = await account.connector?.getChainId();
+      if (chainId !== 8453) {
+        await switctChain.switchChainAsync({ chainId: 8453 });
+      }
+
       const message =
         getBanSignatureFirstLine({
           id: Number(bountyId),
