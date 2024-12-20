@@ -16,7 +16,6 @@ import { decodeEventLog, parseEther } from 'viem';
 import abi from '@/constant/abi/abi';
 import { cn } from '@/utils';
 import Loading from '@/components/global/Loading';
-import { trpcClient } from '@/trpc/client';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { InfoIcon } from '@/components/global/Icons';
@@ -83,25 +82,10 @@ export default function FormBounty({
         throw new Error('Invalid event: ' + data.eventName);
       }
 
-      const bountyId = data.args.id.toString();
-
-      for (let i = 0; i < 60; i++) {
-        setStatus('Indexing ' + i + 's');
-        const bounty = await trpcClient.isBountyCreated.query({
-          id: Number(bountyId),
-          chainId: chain.id,
-        });
-
-        if (bounty) {
-          return bountyId;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1_000));
-      }
-
-      throw new Error('Failed to index bounty');
+      return data.args.id.toString();
     },
     onSuccess: (bountyId) => {
-      router.push(`/${chain.slug}/bounty/${bountyId}`);
+      router.push(`/${chain.slug}/bounty/${bountyId}?indexing=true`);
       toast.success('Bounty created successfully');
     },
     onError: (error) => {

@@ -3,8 +3,6 @@
 import { NetworkSelector } from '@/components/global/NetworkSelector';
 import * as React from 'react';
 
-import 'react-toastify/dist/ReactToastify.css';
-
 const Home = () => {
   return (
     <div className='flex flex-col items-center justify-center text-center p-6 min-h-[85vh]'>
