@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: bounty?.title || '',
       description: bounty?.description || '',
       siteName: 'POIDH',
-      images: [`https://poidh.xyz/images/poidh-preview-hero.png`],
+      images: [JSON.stringify(frameEmbed)],
       type: 'website',
       locale: 'en_US',
     },
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title: bounty?.title || '',
       description: bounty?.description || '',
-      images: [`https://poidh.xyz/images/poidh-preview-hero.png`],
+      images: [JSON.stringify(frameEmbed)],
     },
     other: {
       'fc:frame': JSON.stringify(frameEmbed),
