@@ -47,6 +47,11 @@ export default function ClaimItem({
 
   const signMutation = useMutation({
     mutationFn: async (claimId: string) => {
+      const chainId = await account.connector?.getChainId();
+      if (chainId !== 8453) {
+        //arbitrum has a problem with message signing, so all confirmations are on base
+        await switctChain.switchChainAsync({ chainId: 8453 });
+      }
       const message = getBanSignatureFirstLine({
         id: Number(claimId),
         chainId: chain.id,
