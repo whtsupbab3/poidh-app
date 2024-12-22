@@ -13,6 +13,7 @@ model Bounties {
   title            String
   description      String
   amount           String
+  amount_sort      Float
   issuer           String
   in_progress      Boolean? @default(true)
   is_joined_bounty Boolean? @default(false)
