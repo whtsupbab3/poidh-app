@@ -71,10 +71,19 @@ export const appRouter = createTRPCRouter({
         chainId: z.number(),
         status: z.enum(['open', 'progress', 'past']),
         limit: z.number().min(1).max(100).default(10),
-        cursor: z.number().nullish(),
+        cursor: z
+          .object({
+            id: z.number(),
+            amount_sort: z.number(),
+            ids: z.array(z.number()),
+          })
+          .nullish(),
+        sortType: z.enum(['value', 'id']).default('id'),
       })
     )
     .query(async ({ input }) => {
+      const sortById = input.sortType === 'id';
+      const sortByValue = input.sortType === 'value';
       const items = await prisma.bounties.findMany({
         where: {
           chain_id: input.chainId,
@@ -99,20 +108,40 @@ export const appRouter = createTRPCRouter({
                 is_canceled: false,
               }
             : {}),
-          ...(input.cursor ? { id: { lt: input.cursor } } : {}),
+          ...(input.cursor
+            ? sortById
+              ? { id: { lt: input.cursor.id } }
+              : { amount_sort: { lte: input.cursor.amount_sort } }
+            : {}),
+          ...(input.cursor && !sortById && { id: { notIn: input.cursor.ids } }),
         },
         include: {
           claims: {
             take: 1,
           },
         },
-        orderBy: { id: 'desc' },
+        orderBy: sortById
+          ? { id: 'desc' }
+          : sortByValue
+          ? { amount_sort: 'desc' }
+          : {},
         take: input.limit,
       });
 
-      let nextCursor: (typeof items)[number]['id'] | undefined = undefined;
+      let nextCursor:
+        | {
+            id: (typeof items)[number]['id'];
+            amount_sort: (typeof items)[number]['amount_sort'];
+            ids: (typeof items)[number]['id'][];
+          }
+        | undefined = undefined;
+
       if (items.length === input.limit) {
-        nextCursor = items[items.length - 1].id;
+        nextCursor = {
+          id: items[items.length - 1].id,
+          amount_sort: items[items.length - 1].amount_sort,
+          ids: [...(input.cursor?.ids ?? []), ...items.map((item) => item.id)],
+        };
       }
 
       return {
@@ -527,7 +556,7 @@ export const appRouter = createTRPCRouter({
       }
 
       const isAdmin = checkIsAdmin(input.address);
-      const chain = chains[input.chainName];
+      const chain = chains['base'];
 
       if (!isAdmin) {
         throw new TRPCError({

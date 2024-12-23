@@ -66,7 +66,7 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
   );
 
   if (!claims) {
-    return null;
+    return <div className=''>No claims</div>;
   }
 
   return (

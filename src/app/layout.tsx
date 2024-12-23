@@ -1,11 +1,13 @@
 import '@/styles/globals.css';
 import '@/styles/colors.css';
+import 'react-toastify/dist/ReactToastify.css';
 import { headers } from 'next/headers';
 import React from 'react';
 import { TRPCProvider } from '@/trpc/client';
 import Header from '@/components/layout/Header';
 import '@rainbow-me/rainbowkit/styles.css';
 import { WalletProvider } from '@/components/global/WalletProvider';
+import { ToastContainer } from 'react-toastify';
 
 export const metadata = {
   title: "poidh - pics or it didn't happen",
@@ -28,6 +30,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
           <WalletProvider>
             <Header />
             {children}
+            <ToastContainer />
           </WalletProvider>
         </TRPCProvider>
       </body>
