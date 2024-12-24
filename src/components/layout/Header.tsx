@@ -88,6 +88,24 @@ const Header = () => {
             MenuListProps={{
               'aria-labelledby': 'basic-button',
             }}
+            sx={{
+              '& .MuiPaper-root': {
+                backdropFilter: 'blur(8px)',
+                background:
+                  'linear-gradient(to top, rgba(209, 236, 255, 0.2) 10%, rgba(209, 236, 255, 0.1) 30%, rgba(209, 236, 255, 0.05) 50%)',
+                color: '#FFF',
+                marginTop: '0.25rem',
+                fontFamily: 'GeistMono-Regular',
+                fontSize: '0.875rem',
+              },
+              '& .MuiMenuItem-root': {
+                fontFamily: 'GeistMono-Regular',
+                fontSize: '0.875rem',
+              },
+              '& .MuiList-root': {
+                gap: '1.25rem',
+              },
+            }}
           >
             {networks.map(({ href, Icon, name }) => (
               <MenuItem

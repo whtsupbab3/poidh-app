@@ -499,7 +499,7 @@ export const appRouter = createTRPCRouter({
       }
 
       const isAdmin = checkIsAdmin(input.address);
-      const chain = chains[input.chainName];
+      const chain = chains['base'];
 
       if (!isAdmin) {
         throw new TRPCError({
