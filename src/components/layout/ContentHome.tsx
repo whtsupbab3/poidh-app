@@ -14,7 +14,7 @@ type SortType = 'value' | 'id';
 
 export default function ContentHome() {
   const [display, setDisplay] = useState<DisplayType>('open');
-  const [sortType, setSortType] = useState<SortType>('id');
+  const [sortType, setSortType] = useState<SortType>('value');
   const chain = useGetChain();
 
   const bounties = trpc.bounties.useInfiniteQuery(
@@ -71,35 +71,32 @@ export default function ContentHome() {
             <Select
               id='sort-select'
               value={sortType}
-              className='h-full py-0 bg-[#D1ECFF]/20 text-bold bg-gradient-to-t from-white-200 from-10% via-30% to-50% rounded-full hover:border-white'
+              className='h-full py-0 rounded-full'
               sx={{
                 color: 'white',
                 '& .MuiSvgIcon-root': { color: 'white' },
                 '& fieldset': {
                   borderColor: 'white',
-                  '&:hover': {
-                    borderColor: 'white !important',
-                  },
                 },
-                '& .MuiSelect-select': {
-                  padding: '0 32px 0 12px !important',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: '36px',
-                  minHeight: '36px',
-                  '@media (min-width: 768px)': {
-                    minHeight: '42px',
-                  },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'white !important',
                 },
-                '&:hover': {
-                  '& fieldset': {
-                    borderColor: 'white !important',
-                  },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'white !important',
                 },
-                '&.Mui-focused': {
-                  '& fieldset': {
-                    borderColor: 'white !important',
+              }}
+              MenuProps={{
+                sx: {
+                  '& .MuiPaper-root': {
+                    backdropFilter: 'blur(8px)',
+                    background:
+                      'linear-gradient(to top, rgba(209, 236, 255, 0.2) 10%, rgba(209, 236, 255, 0.1) 30%, rgba(209, 236, 255, 0.05) 50%)',
+                    color: '#FFF',
+                    marginTop: '0.25rem',
+                  },
+                  '& .MuiMenuItem-root': {
+                    fontFamily: 'GeistMono-Regular',
+                    fontSize: '0.875rem',
                   },
                 },
               }}
