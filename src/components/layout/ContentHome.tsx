@@ -14,7 +14,7 @@ type SortType = 'value' | 'id';
 
 export default function ContentHome() {
   const [display, setDisplay] = useState<DisplayType>('open');
-  const [sortType, setSortType] = useState<SortType>('id');
+  const [sortType, setSortType] = useState<SortType>('value');
   const chain = useGetChain();
 
   const bounties = trpc.bounties.useInfiniteQuery(
