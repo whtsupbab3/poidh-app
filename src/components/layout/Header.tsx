@@ -59,7 +59,7 @@ const Header = () => {
           >
             <MenuIcon width={30} height={30} />
           </button>
-          <Link href={`/${chain.slug}`}>
+          <Link href={`/`}>
             <Logo />
           </Link>
         </div>
