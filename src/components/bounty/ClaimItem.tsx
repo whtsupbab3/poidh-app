@@ -13,8 +13,7 @@ import {
 import abi from '@/constant/abi/abi';
 import { useMutation } from '@tanstack/react-query';
 import Loading from '@/components/global/Loading';
-import { cn } from '@/utils';
-import { getBanSignatureFirstLine } from '@/utils/utils';
+import { cn, getBanSignatureFirstLine } from '@/utils/utils';
 
 export default function ClaimItem({
   id,
