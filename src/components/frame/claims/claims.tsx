@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CopyIcon } from '@/components/global/Icons';
 import { toast } from 'react-toastify';
+import CreateClaim from '@/components/ui/CreateClaim';
 
 // Types
 interface ChainInfo {
@@ -179,10 +180,10 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
         <p className='text-base md:text-lg font-medium text-center'>
           {formatAmount(bounty.amount, bounty.chain_id)}
         </p>
-        <p className='text-base md:text-lg font-medium text-center'>
-          bounty issuer:
+        {/* <p className='text-base md:text-lg font-medium text-center'>
+          bounty issuer:{' '}
           {`${bounty.issuer.slice(0, 5)}…${bounty.issuer.slice(-6)}`}
-        </p>
+        </p> */}
         <p className='text-base md:text-lg font-medium text-center'>
           Total Claims:{' '}
           <span className='underline'>{bounty.claims.length}</span>
@@ -249,6 +250,7 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
           ))}
         </div>
       )}
+      <CreateClaim bountyId={String(bounty.id)} />
     </div>
   );
 };
