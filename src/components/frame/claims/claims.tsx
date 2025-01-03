@@ -250,7 +250,6 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
           ))}
         </div>
       )}
-      <CreateClaim bountyId={String(bounty.id)} />
     </div>
   );
 };
