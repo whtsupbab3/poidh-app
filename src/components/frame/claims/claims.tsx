@@ -170,7 +170,7 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
 
   return (
     <div className='w-full flex items-center justify-start px-4 md:px-6 py-4 flex-col gap-4'>
-      <div className='w-full flex items-center justify-start flex-col gap-3'>
+      <div className='w-4/6 flex items-center justify-start flex-col gap-3'>
         <h3 className='text-xl md:text-2xl font-semibold text-center px-2'>
           "{bounty.title}"
         </h3>
