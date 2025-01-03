@@ -174,7 +174,7 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
         <h3 className='text-xl md:text-2xl font-semibold text-center px-2'>
           "{bounty.title}"
         </h3>
-        <p className='text-lg md:text-xl font-medium text-center px-2'>
+        <p className='w-4/6 text-lg md:text-xl font-medium text-center px-2'>
           {bounty.description}
         </p>
         <p className='text-base md:text-lg font-medium text-center'>
