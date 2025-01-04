@@ -3,16 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useGetChain } from '@/hooks/useGetChain';
 import { CopyDoneIcon, CopyIcon } from '@/components/global/Icons';
-
-type Claim = {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
-  issuer: string;
-  bountyId: string;
-  accepted: boolean;
-};
+import { Claim } from '@/utils/types';
 
 export default function ClaimsListAccount({ claims }: { claims: Claim[] }) {
   return (
