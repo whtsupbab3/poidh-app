@@ -18,7 +18,7 @@ const Home = () => {
   const randomClaims = trpc.randomAcceptedClaims.useQuery({ limit: 24 });
 
   return (
-    <div className='flex flex-col items-center justify-center text-center p-6 min-h-[85vh] pt-32'>
+    <div className='flex flex-col items-center justify-center text-center p-6 min-h-[85vh] pt-8 md:pt-24 lg:pt-32'>
       <h1 className='text-4xl mb-8'>poidh</h1>
       <p className='text-lg mb-8'>the easiest way to get stuff done</p>
 
