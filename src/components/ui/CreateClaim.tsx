@@ -3,14 +3,15 @@ import { useAccount } from 'wagmi';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import FormClaim from '@/components/global/FormClaim';
-import { toast } from 'react-toastify';
 import { useGetChain } from '@/hooks/useGetChain';
 import { trpc } from '@/trpc/client';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 export default function CreateClaim({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();
   const [showForm, setShowForm] = useState(false);
   const account = useAccount();
+  const { openConnectModal } = useConnectModal();
 
   const bounty = trpc.bounty.useQuery({
     id: Number(bountyId),
@@ -31,7 +32,7 @@ export default function CreateClaim({ bountyId }: { bountyId: string }) {
               setShowForm(true);
               return;
             }
-            toast.error('Please connect your wallet');
+            openConnectModal?.();
           }}
         >
           <GameButton />
