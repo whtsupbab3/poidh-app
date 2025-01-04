@@ -2,16 +2,7 @@ import React from 'react';
 
 import ClaimItem from '@/components/bounty/ClaimItem';
 import Voting from '@/components/bounty/Voting';
-
-type Claim = {
-  id: string;
-  issuer: string;
-  bountyId: string;
-  title: string;
-  description: string;
-  accepted: boolean;
-  url: string;
-};
+import { Claim } from '@/utils/types';
 
 export default function ClaimList({
   bountyId,

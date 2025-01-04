@@ -150,6 +150,34 @@ export const appRouter = createTRPCRouter({
       };
     }),
 
+  randomAcceptedClaims: baseProcedure
+    .input(
+      z.object({
+        limit: z.number().min(0).default(24),
+      })
+    )
+    .query(async ({ input }) => {
+      return await prisma.$queryRaw`
+        SELECT c.*, 
+          c.chain_id AS "chainId", 
+          c.is_accepted AS "accepted", 
+          c.bounty_id AS "bountyId", 
+          b.title AS "bountyTitle", 
+          b.amount AS "bountyAmount"
+        FROM "Claims" c
+        JOIN (
+            SELECT id, chain_id, title, amount 
+            FROM "Bounties"
+            WHERE in_progress IS FALSE
+              AND is_canceled IS FALSE
+              AND is_voting IS FALSE
+        ) b ON c.bounty_id = b.id AND c.chain_id = b.chain_id
+        WHERE c.is_accepted IS TRUE
+        ORDER BY RANDOM()
+        LIMIT ${input.limit};
+      `;
+    }),
+
   participations: baseProcedure
     .input(z.object({ bountyId: z.number(), chainId: z.number() }))
     .query(async ({ input }) => {

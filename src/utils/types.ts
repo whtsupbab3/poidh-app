@@ -19,3 +19,13 @@ export type Wallet = {
   ens: string | null;
   degenName: string | null;
 };
+
+export type Claim = {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  issuer: string;
+  bountyId: string;
+  accepted: boolean;
+};
