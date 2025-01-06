@@ -193,7 +193,7 @@ export default function ClaimItem({
         open={acceptClaimMutation.isPending || submitForVoteMutation.isPending}
         status={status}
       />
-      <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
+      <div className='p-[2px] text-white relative bg-poidhRed border-poidhRed border-2 rounded-xl '>
         <div className='left-5 top-5 absolute  flex flex-col text-white'>
           {bounty.data &&
             bounty.data.inProgress &&
@@ -201,7 +201,7 @@ export default function ClaimItem({
               bounty.data.issuer.toLocaleLowerCase() &&
             !isVotingOrAcceptedBounty && (
               <button
-                className='cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5'
+                className='cursor-pointer mt-5 text-white hover:bg-poidhRed bg-poidhRed bg-opacity-30 border border-poidhRed rounded-[8px] py-2 px-5'
                 onClick={() => {
                   bounty.data.participations.length > 1
                     ? submitForVoteMutation.mutate({
@@ -222,7 +222,7 @@ export default function ClaimItem({
         </div>
 
         {accepted && (
-          <div className='left-5 top-5 text-white bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5 absolute'>
+          <div className='left-5 top-5 text-white bg-poidhRed border border-poidhRed rounded-[8px] py-2 px-5 absolute'>
             accepted
           </div>
         )}
@@ -236,7 +236,7 @@ export default function ClaimItem({
               }
             }}
             className={cn(
-              'border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5 hover:bg-red-400 hover:text-white absolute right-5 top-5'
+              'border border-poidhRed w-fit rounded-md py-2 px-5 mt-5 hover:bg-red-400 hover:text-white absolute right-5 top-5'
             )}
           >
             ban
@@ -244,7 +244,7 @@ export default function ClaimItem({
         )}
         <div
           style={{ backgroundImage: `url(${imageUrl})` }}
-          className='bg-[#12AAFF] bg-cover bg-center w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
+          className='bg-poidhBlue bg-cover bg-center w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
         ></div>
         <div className='p-3'>
           <div className='flex flex-col'>
