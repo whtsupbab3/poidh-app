@@ -10,7 +10,7 @@ import { WalletProvider } from '@/components/global/WalletProvider';
 import { ToastContainer } from 'react-toastify';
 
 export const metadata = {
-  title: "poidh - pics or it didn't happen",
+  title: "poidh - pics or it didn't happen - crypto bounties",
   description:
     "poidh - pics or it didn't happen - fully onchain bounties + collectible NFTs - start your collection today on Arbitrum, Base, or Degen Chain",
 };
