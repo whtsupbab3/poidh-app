@@ -45,7 +45,10 @@ const Home = () => {
           <h3 className='text-2xl mt-8 mb-4'>
             or browse some of the
             <span className='text-poidhRed'>{` ${
-              completedBountiesCount.data ? completedBountiesCount.data : '???'
+              // 278 - the amount of completed bounties in poidh v1
+              completedBountiesCount.data
+                ? completedBountiesCount.data + 278
+                : '???'
             } `}</span>
             completed bounties
           </h3>
