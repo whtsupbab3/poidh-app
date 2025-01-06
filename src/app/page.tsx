@@ -41,7 +41,7 @@ const Home = () => {
       <NetworkSelector height={60} width={60} />
       {randomClaims && !randomClaims.error && (
         <>
-          <h3 className='text-2xl mt-8 mb-4'>or browse our past bouties</h3>
+          <h3 className='text-2xl mt-8 mb-4'>or browse our past bounties</h3>
           {randomClaims.isLoading && (
             <p className='animate-pulse mt-5 text-lg'>Loading...</p>
           )}
