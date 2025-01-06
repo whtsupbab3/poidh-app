@@ -150,6 +150,18 @@ export const appRouter = createTRPCRouter({
       };
     }),
 
+  completedBountiesCount: baseProcedure.query(async () => {
+    return await prisma.claims.count({
+      where: {
+        is_accepted: true,
+        bounty: {
+          in_progress: false,
+          is_canceled: false,
+        },
+      },
+    });
+  }),
+
   randomAcceptedClaims: baseProcedure
     .input(
       z.object({
@@ -170,7 +182,6 @@ export const appRouter = createTRPCRouter({
             FROM "Bounties"
             WHERE in_progress IS FALSE
               AND is_canceled IS FALSE
-              AND is_voting IS FALSE
         ) b ON c.bounty_id = b.id AND c.chain_id = b.chain_id
         WHERE c.is_accepted IS TRUE
         ORDER BY RANDOM()
