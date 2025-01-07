@@ -9,7 +9,13 @@ import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
 import abi from '@/constant/abi/abi';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export default function Voting({ bountyId }: { bountyId: string }) {
+export default function Voting({
+  bountyId,
+  isAcceptedBounty,
+}: {
+  bountyId: string;
+  isAcceptedBounty: boolean;
+}) {
   const account = useAccount();
   const chain = useGetChain();
   const writeContract = useWriteContract({});
@@ -153,30 +159,34 @@ export default function Voting({ bountyId }: { bountyId: string }) {
                 </button>
               </>
             ) : (
-              <button
-                className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
-                onClick={() => {
-                  if (account.address) {
-                    resolveVoteMutation.mutate(BigInt(bountyId));
-                  } else {
-                    toast.error('Please connect wallet to continue');
-                  }
-                }}
-              >
-                resolve vote
-              </button>
+              !isAcceptedBounty && (
+                <button
+                  className='border mt-5 border-white rounded-full px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'
+                  onClick={() => {
+                    if (account.address) {
+                      resolveVoteMutation.mutate(BigInt(bountyId));
+                    } else {
+                      toast.error('Please connect wallet to continue');
+                    }
+                  }}
+                >
+                  resolve vote
+                </button>
+              )
             )}
           </div>
 
-          <div className='mt-5 '>
-            Deadline:{' '}
-            {new Date(
-              parseInt(voting.data.deadline ?? '0') * 1000
-            ).toLocaleString()}
-          </div>
+          {!isAcceptedBounty && (
+            <div className='mt-5 '>
+              Deadline:{' '}
+              {new Date(
+                parseInt(voting.data.deadline ?? '0') * 1000
+              ).toLocaleString()}
+            </div>
+          )}
         </>
       ) : (
-        <div>Loading voting data...</div>
+        <div className='animate-pulse'>Loading voting data...</div>
       )}
     </div>
   );
