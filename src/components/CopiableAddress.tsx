@@ -29,8 +29,9 @@ export default function CopiableAdress({
         href={`/${chain.slug}/account/${address}`}
         className='hover:text-gray-200'
       >
-        {walletDisplayName.isLoading && formatWalletAddress(address)}
-        {walletDisplayName.data ?? formatWalletAddress(address)}
+        {walletDisplayName.isLoading
+          ? formatWalletAddress(address)
+          : walletDisplayName.data || formatWalletAddress(address)}
       </Link>
       <span
         onClick={(e) => {
