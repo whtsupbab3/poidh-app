@@ -11,7 +11,7 @@ import {
   useWriteContract,
 } from 'wagmi';
 import { useMutation } from '@tanstack/react-query';
-import CopiableAddress from '@/components/CopiableAddress';
+import DisplayAddress from '@/components/DisplayAddress';
 import { formatEther } from 'viem';
 import abi from '@/constant/abi/abi';
 import Loading from '@/components/global/Loading';
@@ -137,7 +137,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           </p>
           <p className='mt-5 normal-case break-all'>
             bounty issuer:{' '}
-            <CopiableAddress address={bounty.data.issuer} chain={chain} />
+            <DisplayAddress address={bounty.data.issuer} chain={chain} />
           </p>
           {isAdmin.data && (
             <button
