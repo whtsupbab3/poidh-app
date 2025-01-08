@@ -6,7 +6,7 @@ import Withdraw from '@/components/ui/Withdraw';
 import { trpc } from '@/trpc/client';
 import { Chain } from '@/utils/types';
 import { useAccount } from 'wagmi';
-import DisplayAddress from '@/components/DisplayAddress';
+import CopiableAddress from '@/components/CopiableAddress';
 import { formatEther } from 'viem';
 import { cn } from '@/utils';
 
@@ -71,7 +71,7 @@ export default function BountyMultiplayer({
                     key={participant.user_address}
                     className='flex items-center'
                   >
-                    <DisplayAddress
+                    <CopiableAddress
                       address={participant.user_address}
                       chain={chain}
                     />

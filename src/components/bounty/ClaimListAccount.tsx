@@ -2,8 +2,8 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 import { useGetChain } from '@/hooks/useGetChain';
-import { CopyDoneIcon, CopyIcon } from '@/components/global/Icons';
 import { Claim } from '@/utils/types';
+import CopiableAdress from '@/components/CopiableAddress';
 
 export default function ClaimsListAccount({ claims }: { claims: Claim[] }) {
   return (
@@ -20,7 +20,6 @@ export default function ClaimsListAccount({ claims }: { claims: Claim[] }) {
 function ClaimItem({ claim }: { claim: Claim }) {
   const chain = useGetChain();
   const [imageUrl, setImageUrl] = useState('');
-  const [isCopied, setCopied] = useState(false);
 
   const fetchImageUrl = async (url: string) => {
     const response = await fetch(url);
@@ -59,37 +58,10 @@ function ClaimItem({ claim }: { claim: Claim }) {
         </div>
         <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed'>
           <span className=''>issuer</span>
-          <div className='flex flex-row'>
-            <Link
-              href={`/${chain.slug}/account/${claim.issuer}`}
-              className='hover:text-gray-200'
-            >
-              {formatAddress(claim.issuer)}
-            </Link>
-            <span
-              onClick={() => {
-                setCopied(true);
-                navigator.clipboard.writeText(claim.issuer);
-                setTimeout(() => {
-                  setCopied(false);
-                }, 1000);
-              }}
-              className='cursor-pointer ml-2 hover:text-gray-200'
-            >
-              {isCopied ? (
-                <CopyDoneIcon width={20} height={20} />
-              ) : (
-                <CopyIcon width={20} height={20} />
-              )}
-            </span>
-          </div>
+          <CopiableAdress chain={chain} address={claim.issuer} />
         </div>
         <div>claim id: {claim.id}</div>
       </div>
     </div>
   );
-}
-
-function formatAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }

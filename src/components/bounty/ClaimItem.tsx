@@ -15,6 +15,7 @@ import { useMutation } from '@tanstack/react-query';
 import Loading from '@/components/global/Loading';
 import { cn } from '@/utils';
 import { getBanSignatureFirstLine } from '@/utils/utils';
+import CopiableAddress from '@/components/CopiableAddress';
 
 export default function ClaimItem({
   id,
@@ -258,22 +259,9 @@ export default function ClaimItem({
           <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed'>
             <span className=''>issuer</span>
             <span className='flex flex-row'>
-              <Link
-                href={`/${chain.slug}/account/${issuer}`}
-                className='hover:text-gray-200'
-              >
-                {issuer.slice(0, 5) + '…' + issuer.slice(-6)}
-              </Link>
-              <span className='ml-1 text-white'>
-                <button
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(issuer);
-                    toast.success('Address copied to clipboard');
-                  }}
-                >
-                  <CopyIcon width={16} height={16} />
-                </button>
-              </span>
+              <div className='hover:text-gray-200'>
+                <CopiableAddress address={issuer} chain={chain} />
+              </div>
             </span>
           </div>
           <div>claim id: {id}</div>
