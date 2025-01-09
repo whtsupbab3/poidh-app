@@ -27,5 +27,6 @@ export type Claim = {
   url: string;
   issuer: string;
   bountyId: string;
+  chainId: 666666666 | 42161 | 8453;
   accepted: boolean;
 };

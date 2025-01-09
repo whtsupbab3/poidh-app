@@ -42,3 +42,7 @@ export const chains: Record<Netname, Chain> = {
     },
   },
 };
+
+export function getChainById(chainId: 666666666 | 42161 | 8453): Chain {
+  return Object.values(chains).find((chain) => chain.id === chainId)!;
+}

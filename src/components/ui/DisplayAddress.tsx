@@ -11,7 +11,7 @@ export default function DisplayAddress({
   address: string;
 }) {
   const walletDisplayName = useQuery({
-    queryKey: ['getWalletDisplayName', address, chain.slug],
+    queryKey: ['getWalletDisplayName', address, chain?.slug],
     queryFn: () =>
       getWalletDisplayName({
         address: address,
@@ -21,10 +21,12 @@ export default function DisplayAddress({
 
   return (
     <Link
-      href={`/${chain.slug}/account/${address}`}
-      className='overflow-hidden lg:w-[25ch] w-[15ch] overflow-ellipsis hover:text-gray-200'
+      href={`/${chain?.slug}/account/${address}`}
+      className='hover:text-gray-200 block truncate overflow-ellipsis m-0 p-0'
     >
-      {walletDisplayName.data ?? address}
+      {walletDisplayName.isLoading
+        ? formatWalletAddress(address)
+        : walletDisplayName.data || formatWalletAddress(address)}
     </Link>
   );
 }
@@ -36,10 +38,9 @@ async function getWalletDisplayName({
   address: string;
   chainName: 'arbitrum' | 'base' | 'degen';
 }) {
-  const nickname = await getDegenOrEnsName({ address, chainName });
-  if (nickname) {
-    return nickname;
-  }
+  return (await getDegenOrEnsName({ address, chainName })) || null;
+}
 
+function formatWalletAddress(address: string): string {
   return address.slice(0, 6) + '…' + address.slice(-4);
 }

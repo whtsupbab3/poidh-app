@@ -6,9 +6,10 @@ import Withdraw from '@/components/ui/Withdraw';
 import { trpc } from '@/trpc/client';
 import { Chain } from '@/utils/types';
 import { useAccount } from 'wagmi';
-import DisplayAddress from '@/components/DisplayAddress';
+import DisplayAddress from '@/components/ui/DisplayAddress';
 import { formatEther } from 'viem';
 import { cn } from '@/utils';
+import CopyAddressButton from '@/components/ui/CopyAddressButton';
 
 export default function BountyMultiplayer({
   chain,
@@ -63,18 +64,26 @@ export default function BountyMultiplayer({
         </button>
 
         {showParticipants && (
-          <div className='border mt-5 border-white rounded-[8px] px-10 lg:px-5 py-2 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'>
-            <div className='flex flex-col'>
+          <div className='border mt-5 border-white rounded-[8px] py-2 px-4 flex justify-between items-center backdrop-blur-sm bg-[#D1ECFF]/20 w-fit'>
+            <div className='flex flex-col px-0'>
               {participants.isSuccess ? (
                 participants.data.map((participant) => (
                   <p
                     key={participant.user_address}
-                    className='flex items-center'
+                    className='flex items-center justify-between w-full'
                   >
-                    <DisplayAddress
-                      address={participant.user_address}
-                      chain={chain}
-                    />
+                    <div className='flex flex-row items-center '>
+                      <div className='mr-1'>
+                        <CopyAddressButton
+                          address={participant.user_address}
+                          size={10}
+                        />
+                      </div>
+                      <DisplayAddress
+                        chain={chain}
+                        address={participant.user_address}
+                      />
+                    </div>
                     &nbsp;
                     {`${formatEther(BigInt(participant.amount))} ${
                       chain.currency

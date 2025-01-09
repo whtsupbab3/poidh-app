@@ -5,14 +5,14 @@ import * as React from 'react';
 import { trpc } from '@/trpc/client';
 
 import 'react-toastify/dist/ReactToastify.css';
-import PastBountyCard from '@/components/ui/PastBountyCard';
+import PastBountyCard from '@/components/bounty/PastBountyCard';
 import { Claim } from '@/utils/types';
 
-interface DetailedClaim extends Claim {
-  chainId: number;
+type DetailedClaim = {
+  chainId: 666666666 | 42161 | 8453;
   bountyTitle: string;
   bountyAmount: string;
-}
+} & Claim;
 
 const Home = () => {
   const completedBountiesCount = trpc.completedBountiesCount.useQuery();
@@ -44,7 +44,10 @@ const Home = () => {
         <>
           <h3 className='text-2xl mt-8 mb-4'>
             or browse some of the
-            <span className='text-poidhRed' style={{ textShadow: "1px 1px 2px white" }}>{` ${
+            <span
+              className='text-poidhRed'
+              style={{ textShadow: '1px 1px 2px white' }}
+            >{` ${
               // 278 - the amount of completed bounties in poidh v1
               completedBountiesCount.data
                 ? completedBountiesCount.data + 278
@@ -61,7 +64,6 @@ const Home = () => {
                 <PastBountyCard
                   key={`${claim.id}-${claim.chainId}`}
                   claim={claim}
-                  chainId={claim.chainId}
                   bountyTitle={claim.bountyTitle}
                   bountyAmount={claim.bountyAmount}
                 />
