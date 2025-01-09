@@ -189,6 +189,14 @@ export default function FormBounty({
                 checked={isSoloBounty}
                 onClick={() => setIsSoloBounty(!isSoloBounty)}
                 inputProps={{ 'aria-label': 'controlled' }}
+                sx={{
+                  '& .MuiSwitch-thumb': {
+                    color: isSoloBounty ? '#F15E5F' : 'default',
+                  },
+                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                    backgroundColor: '#fff',
+                  },
+                }}
               />
             </div>
             <div className=' text-xs'>
