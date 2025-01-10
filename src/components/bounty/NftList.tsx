@@ -1,4 +1,5 @@
-import { CopyDoneIcon, CopyIcon } from '@/components/global/Icons';
+import CopyAddressButton from '@/components/ui/CopyAddressButton';
+import DisplayAddress from '@/components/ui/DisplayAddress';
 import { useGetChain } from '@/hooks/useGetChain';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
@@ -31,7 +32,6 @@ export default function NftList({ NFTs }: { NFTs: NFT[] }) {
 function NftListItem({ NFT }: { NFT: NFT }) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const chain = useGetChain();
-  const [isCopied, setCopied] = useState(false);
 
   const fetchImageUrl = async (url: string) => {
     const response = await fetch(url);
@@ -44,12 +44,12 @@ function NftListItem({ NFT }: { NFT: NFT }) {
   }, [NFT]);
 
   return (
-    <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl w-full'>
+    <div className='p-[2px] text-white relative bg-poidhRed border-poidhRed border-2 rounded-xl w-full'>
       <Link href={`/${chain.slug}/bounty/${NFT.bountyId}`}>
-        <div className='bg-[#12AAFF] aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'>
+        <div className='bg-poidhBlue aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'>
           <div
             style={{ backgroundImage: `url(${imageUrl})` }}
-            className='bg-[#12AAFF] bg-cover bg-center aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
+            className='bg-poidhBlue bg-cover bg-center aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
           />
         </div>
       </Link>
@@ -63,38 +63,16 @@ function NftListItem({ NFT }: { NFT: NFT }) {
           </p>
         </div>
         <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed'>
-          <span className=''>issuer</span>
-          <div className='flex flex-row'>
-            <Link
-              href={`/${chain.slug}/account/${NFT.issuer}`}
-              className='hover:text-gray-200'
-            >
-              {formatAddress(NFT.issuer)}
-            </Link>
-            <span
-              onClick={() => {
-                setCopied(true);
-                navigator.clipboard.writeText(NFT.issuer);
-                setTimeout(() => {
-                  setCopied(false);
-                }, 1000);
-              }}
-              className='cursor-pointer ml-2 hover:text-gray-200'
-            >
-              {isCopied ? (
-                <CopyDoneIcon width={20} height={20} />
-              ) : (
-                <CopyIcon width={20} height={20} />
-              )}
-            </span>
+          <span className=''>issuer&nbsp;</span>
+          <div className='flex flex-row  items-center w-full justify-end overflow-hidden'>
+            <DisplayAddress chain={chain} address={NFT.issuer} />
+            <div className='ml-2'>
+              <CopyAddressButton address={NFT.issuer} />
+            </div>
           </div>
         </div>
         <div>claim id: {NFT.id}</div>
       </div>
     </div>
   );
-}
-
-function formatAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
