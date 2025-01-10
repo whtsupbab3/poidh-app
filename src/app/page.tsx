@@ -6,10 +6,10 @@ import { trpc } from '@/trpc/client';
 
 import 'react-toastify/dist/ReactToastify.css';
 import PastBountyCard from '@/components/bounty/PastBountyCard';
-import { Claim } from '@/utils/types';
+import { ChainId, Claim } from '@/utils/types';
 
 type DetailedClaim = {
-  chainId: 666666666 | 42161 | 8453;
+  chainId: ChainId;
   bountyTitle: string;
   bountyAmount: string;
 } & Claim;

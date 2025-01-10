@@ -3,7 +3,7 @@ import {
   basePublicClient,
   degenPublicClient,
 } from '@/utils/publicClients';
-import { Chain, Netname } from '@/utils/types';
+import { Chain, ChainId, Netname } from '@/utils/types';
 
 export const chains: Record<Netname, Chain> = {
   degen: {
@@ -43,6 +43,6 @@ export const chains: Record<Netname, Chain> = {
   },
 };
 
-export function getChainById(chainId: 666666666 | 42161 | 8453): Chain {
+export function getChainById(chainId: ChainId): Chain {
   return Object.values(chains).find((chain) => chain.id === chainId)!;
 }

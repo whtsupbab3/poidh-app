@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { Claim } from '@/utils/types';
+import { ChainId, Claim } from '@/utils/types';
 import { formatEther } from 'viem';
 import DisplayAddress from '@/components/ui/DisplayAddress';
 import { getChainById } from '@/utils/config';
@@ -17,7 +17,7 @@ export default function PastBountyCard({
 }) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const chain = getChainById(claim.chainId);
+  const chain = getChainById(claim.chainId as ChainId);
 
   const fetchImageUrl = async (url: string) => {
     const response = await fetch(url);
