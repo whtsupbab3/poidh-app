@@ -2,6 +2,8 @@ export type Currency = 'eth' | 'degen';
 
 export type Netname = 'degen' | 'base' | 'arbitrum';
 
+export type ChainId = 666666666 | 42161 | 8453;
+
 export type Chain = {
   id: number;
   name: string;
@@ -27,5 +29,6 @@ export type Claim = {
   url: string;
   issuer: string;
   bountyId: string;
+  chainId?: ChainId;
   accepted: boolean;
 };

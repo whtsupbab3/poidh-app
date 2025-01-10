@@ -1,8 +1,6 @@
-import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useGetChain } from '@/hooks/useGetChain';
-import { CopyIcon } from '@/components/global/Icons';
 import { trpc, trpcClient } from '@/trpc/client';
 import {
   useAccount,
@@ -15,6 +13,8 @@ import { useMutation } from '@tanstack/react-query';
 import Loading from '@/components/global/Loading';
 import { cn } from '@/utils';
 import { getBanSignatureFirstLine } from '@/utils/utils';
+import DisplayAddress from '@/components/ui/DisplayAddress';
+import CopyAddressButton from '@/components/ui/CopyAddressButton';
 
 export default function ClaimItem({
   id,
@@ -255,26 +255,14 @@ export default function ClaimItem({
               {description}
             </p>
           </div>
-          <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed'>
-            <span className=''>issuer</span>
-            <span className='flex flex-row'>
-              <Link
-                href={`/${chain.slug}/account/${issuer}`}
-                className='hover:text-gray-200'
-              >
-                {issuer.slice(0, 5) + '…' + issuer.slice(-6)}
-              </Link>
-              <span className='ml-1 text-white'>
-                <button
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(issuer);
-                    toast.success('Address copied to clipboard');
-                  }}
-                >
-                  <CopyIcon width={16} height={16} />
-                </button>
-              </span>
-            </span>
+          <div className='mt-2 py-2 flex flex-row items-center text-sm border-t border-dashed'>
+            <span className='shrink-0 mr-2'>issuer&nbsp;</span>
+            <div className='flex flex-row  items-center w-full justify-end overflow-hidden'>
+              <DisplayAddress chain={chain} address={issuer} />
+              <div className='ml-2'>
+                <CopyAddressButton address={issuer} />
+              </div>
+            </div>
           </div>
           <div>claim id: {id}</div>
         </div>
