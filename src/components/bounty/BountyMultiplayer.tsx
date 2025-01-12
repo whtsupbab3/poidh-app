@@ -68,11 +68,11 @@ export default function BountyMultiplayer({
             <div className='flex flex-col px-0'>
               {participants.isSuccess ? (
                 participants.data.map((participant) => (
-                  <p
+                  <div
                     key={participant.user_address}
                     className='flex items-center justify-between w-full'
                   >
-                    <div className='flex flex-row items-center '>
+                    <div className='flex flex-row items-center'>
                       <div className='mr-1'>
                         <CopyAddressButton
                           address={participant.user_address}
@@ -88,7 +88,7 @@ export default function BountyMultiplayer({
                     {`${formatEther(BigInt(participant.amount))} ${
                       chain.currency
                     }`}
-                  </p>
+                  </div>
                 ))
               ) : (
                 <p>Loading addresses…</p>

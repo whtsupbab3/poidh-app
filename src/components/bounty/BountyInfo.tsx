@@ -136,15 +136,15 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           <p className='mt-5 normal-case break-words'>
             {bounty.data.description}
           </p>
-          <p className='flex flex-row mt-5 normal-case break-all flex-wrap'>
+          <div className='flex flex-row mt-5 normal-case break-all flex-wrap'>
             bounty issuer:&nbsp;
-            <span className='flex flex-row  items-center justify-end overflow-hidden'>
+            <div className='flex flex-row  items-center justify-end overflow-hidden'>
               <DisplayAddress chain={chain} address={bounty.data.issuer} />
               <div className='ml-2'>
                 <CopyAddressButton address={bounty.data.issuer} />
               </div>
-            </span>
-          </p>
+            </div>
+          </div>
           {isAdmin.data && (
             <button
               onClick={() => {
