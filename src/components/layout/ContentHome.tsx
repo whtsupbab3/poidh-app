@@ -129,7 +129,7 @@ export default function ContentHome() {
             threshold={300}
           >
             <BountyList
-              key={bounties.data.pages[0]?.items[0].id || 'empty-list'}
+              key={bounties.data.pages[0]?.items[0]?.id || 'empty-list'}
               bounties={bounties.data.pages.flatMap((page) =>
                 page.items.map((bounty) => ({
                   id: bounty.id.toString(),

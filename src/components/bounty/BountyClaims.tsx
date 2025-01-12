@@ -89,7 +89,7 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
           threshold={300}
         >
           <ClaimList
-            key={claims.data.pages[0]?.items[0].id || 'empty-list'}
+            key={claims.data.pages[0]?.items[0]?.id || 'empty-list'}
             bountyId={bountyId}
             isMultiplayer={bounty?.isMultiplayer || false}
             votingClaim={
