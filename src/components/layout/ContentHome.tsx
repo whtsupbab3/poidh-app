@@ -7,6 +7,7 @@ import { trpc } from '@/trpc/client';
 import BountyList from '@/components/ui/BountyList';
 import { cn } from '@/utils';
 import { FormControl, MenuItem, Select } from '@mui/material';
+import InfiniteScroll from 'react-infinite-scroller';
 import { SortIcon } from '@/components/global/Icons';
 
 type DisplayType = 'open' | 'progress' | 'past';
@@ -21,7 +22,7 @@ export default function ContentHome() {
     {
       chainId: chain.id,
       status: display,
-      limit: 6,
+      limit: 6, // doubled on the first load
       sortType,
     },
     {
@@ -30,7 +31,7 @@ export default function ContentHome() {
   );
 
   return (
-    <>
+    <div>
       <div className='z-1 flex flex-wrap container mx-auto border-b border-white hover:border-white py-6 md:py-12 sm:py-8 w-full items-center px-8'>
         <div className='hidden md:flex flex-1'></div>
         <div className='w-full md:w-auto flex justify-center'>
@@ -117,33 +118,34 @@ export default function ContentHome() {
 
       <div className='pb-20 z-1'>
         {bounties.data && (
-          <BountyList
-            bounties={bounties.data.pages.flatMap((page) =>
-              page.items.map((bounty) => ({
-                id: bounty.id.toString(),
-                title: bounty.title,
-                description: bounty.description,
-                amount: bounty.amount,
-                isMultiplayer: bounty.is_multiplayer || false,
-                inProgress: bounty.in_progress || false,
-                hasClaims: bounty.claims.length > 0,
-                network: chain.slug,
-              }))
-            )}
-          />
+          <InfiniteScroll
+            loadMore={async () => await bounties.fetchNextPage()}
+            hasMore={bounties.hasNextPage && !bounties.isFetchingNextPage}
+            loader={
+              <div key='loader' className='animate-pulse text-center'>
+                Loading more...
+              </div>
+            }
+            threshold={300}
+          >
+            <BountyList
+              key={bounties.data.pages[0]?.items[0]?.id || 'empty-list'}
+              bounties={bounties.data.pages.flatMap((page) =>
+                page.items.map((bounty) => ({
+                  id: bounty.id.toString(),
+                  title: bounty.title,
+                  description: bounty.description,
+                  amount: bounty.amount,
+                  isMultiplayer: bounty.is_multiplayer || false,
+                  inProgress: bounty.in_progress || false,
+                  hasClaims: bounty.claims.length > 0,
+                  network: chain.slug,
+                }))
+              )}
+            />
+          </InfiniteScroll>
         )}
       </div>
-      {bounties.hasNextPage && (
-        <div className='flex justify-center items-center pb-96'>
-          <button
-            className='border border-white rounded-full px-5  backdrop-blur-sm bg-[#D1ECFF]/20  py-2'
-            onClick={() => bounties.fetchNextPage()}
-            disabled={bounties.isFetchingNextPage}
-          >
-            {bounties.isFetchingNextPage ? 'loading...' : 'show more'}
-          </button>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

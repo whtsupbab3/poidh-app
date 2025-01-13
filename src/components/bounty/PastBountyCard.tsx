@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { ChainId, Claim } from '@/utils/types';
 import { formatEther } from 'viem';
@@ -32,9 +31,11 @@ export default function PastBountyCard({
   return (
     <>
       {claim && (
-        <Link
+        <div
           className='lg:col-span-4 p-3 bg-whiteblue border-1 rounded-xl cursor-pointer'
-          href={`/${chain?.slug}/bounty/${claim.bountyId}`}
+          onClick={() => {
+            window.location.href = `/${chain?.slug}/bounty/${claim.bountyId}`;
+          }}
         >
           <div className='p-[2px] text-white relative bg-poidhRed border-poidhRed border-2 rounded-xl'>
             <div>
@@ -77,7 +78,7 @@ export default function PastBountyCard({
               {formatEther(BigInt(bountyAmount))} {chain?.currency}
             </span>
           </div>
-        </Link>
+        </div>
       )}
     </>
   );
