@@ -82,7 +82,6 @@ export const appRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const limit = !input.cursor ? input.limit * 2 : input.limit;
       const sortById = input.sortType === 'id';
       const sortByValue = input.sortType === 'value';
       const items = await prisma.bounties.findMany({
@@ -126,7 +125,7 @@ export const appRouter = createTRPCRouter({
           : sortByValue
           ? { amount_sort: 'desc' }
           : {},
-        take: limit,
+        take: input.limit,
       });
 
       let nextCursor:
@@ -137,7 +136,7 @@ export const appRouter = createTRPCRouter({
           }
         | undefined = undefined;
 
-      if (items.length === limit) {
+      if (items.length === input.limit) {
         nextCursor = {
           id: items[items.length - 1].id,
           amount_sort: items[items.length - 1].amount_sort,
