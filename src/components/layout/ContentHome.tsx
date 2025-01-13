@@ -22,7 +22,7 @@ export default function ContentHome() {
     {
       chainId: chain.id,
       status: display,
-      limit: 6, // doubled on the first load
+      limit: 6,
       sortType,
     },
     {
