@@ -3,7 +3,6 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 
 import { useGetChain } from '@/hooks/useGetChain';
-import Banner from '@/components/global/Banner';
 import SlideOverMenu from '@/components/global/SlideOverMenu';
 import Logo from '@/components/ui/Logo';
 import {
@@ -50,7 +49,6 @@ const Header = () => {
       >
         <SlideOverMenu />
       </Drawer>
-      <Banner />
       <div className='flex justify-between items-center h-[4.5rem] px-4 lg:px-20 border-b border-white'>
         <div className='flex'>
           <button
