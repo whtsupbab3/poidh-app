@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { trpc } from '@/trpc/client';
 import { useGetChain } from '@/hooks/useGetChain';
 import ClaimList from '@/components/bounty/ClaimList';
+import InfiniteScroll from 'react-infinite-scroller';
 import { bountyCurrentVotingClaim } from '@/utils/web3';
 
 const PAGE_SIZE = 9;
@@ -35,6 +36,16 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     }
   );
 
+  const bountyClaimsCount = trpc.bountyClaimsCount.useQuery(
+    {
+      bountyId: Number(bountyId),
+      chainId: chain.id,
+    },
+    {
+      enabled: !!bountyId,
+    }
+  );
+
   const { data: votingClaim } = trpc.claim.useQuery(
     {
       claimId: Number(votingClaimId),
@@ -56,58 +67,53 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
   );
 
   if (!claims) {
-    return null;
+    return <div className=''>No claims</div>;
   }
 
   return (
     <div>
       <div className='flex flex-col gap-x-2 py-4 border-b border-dashed'>
         <div>
-          <span>
-            {claims.data?.pages.reduce(
-              (acc, curr) => acc + curr.items.length,
-              0
-            )}{' '}
-            claims
-          </span>
+          <span>{Number(bountyClaimsCount.data) || 0} claims</span>
         </div>
       </div>
       {claims.data && (
-        <ClaimList
-          bountyId={bountyId}
-          isMultiplayer={bounty?.isMultiplayer || false}
-          votingClaim={
-            votingClaim
-              ? {
-                  ...votingClaim,
-                  accepted: votingClaim.is_accepted || false,
-                  id: votingClaim.id.toString(),
-                  bountyId: votingClaim.bounty_id.toString(),
-                  issuer: votingClaim.issuer,
-                }
-              : null
+        <InfiniteScroll
+          loadMore={async () => await claims.fetchNextPage()}
+          hasMore={claims.hasNextPage && !claims.isFetchingNextPage}
+          loader={
+            <div key='loader' className='animate-pulse text-center'>
+              Loading more...
+            </div>
           }
-          claims={claims.data.pages.flatMap((page) => {
-            return page.items.map((item) => ({
-              ...item,
-              accepted: item.is_accepted || false,
-              id: item.id.toString(),
-              issuer: item.issuer,
-              bountyId: item.bounty_id.toString(),
-            }));
-          })}
-        />
-      )}
-      {claims.hasNextPage && (
-        <div className='flex justify-center items-center'>
-          <button
-            onClick={() => claims.fetchNextPage()}
-            className='border border-white rounded-full px-5 backdrop-blur-sm bg-[#D1ECFF]/20 py-2'
-            disabled={claims.isFetchingNextPage}
-          >
-            {claims.isFetchingNextPage ? 'loading…' : 'show more'}
-          </button>
-        </div>
+          threshold={300}
+        >
+          <ClaimList
+            key={claims.data.pages[0]?.items[0]?.id || 'empty-list'}
+            bountyId={bountyId}
+            isMultiplayer={bounty?.isMultiplayer || false}
+            votingClaim={
+              votingClaim
+                ? {
+                    ...votingClaim,
+                    accepted: votingClaim.is_accepted || false,
+                    id: votingClaim.id.toString(),
+                    bountyId: votingClaim.bounty_id.toString(),
+                    issuer: votingClaim.issuer,
+                  }
+                : null
+            }
+            claims={claims.data.pages.flatMap((page) => {
+              return page.items.map((item) => ({
+                ...item,
+                accepted: item.is_accepted || false,
+                id: item.id.toString(),
+                issuer: item.issuer,
+                bountyId: item.bounty_id.toString(),
+              }));
+            })}
+          />
+        </InfiniteScroll>
       )}
     </div>
   );

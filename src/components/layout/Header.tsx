@@ -3,7 +3,6 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 
 import { useGetChain } from '@/hooks/useGetChain';
-import Banner from '@/components/global/Banner';
 import SlideOverMenu from '@/components/global/SlideOverMenu';
 import Logo from '@/components/ui/Logo';
 import {
@@ -50,7 +49,6 @@ const Header = () => {
       >
         <SlideOverMenu />
       </Drawer>
-      <Banner />
       <div className='flex justify-between items-center h-[4.5rem] px-4 lg:px-20 border-b border-white'>
         <div className='flex'>
           <button
@@ -59,7 +57,7 @@ const Header = () => {
           >
             <MenuIcon width={30} height={30} />
           </button>
-          <Link href={`/${chain.slug}`}>
+          <Link href={`/`}>
             <Logo />
           </Link>
         </div>
@@ -87,6 +85,24 @@ const Header = () => {
             onClose={handleClose}
             MenuListProps={{
               'aria-labelledby': 'basic-button',
+            }}
+            sx={{
+              '& .MuiPaper-root': {
+                backdropFilter: 'blur(8px)',
+                background:
+                  'linear-gradient(to top, rgba(209, 236, 255, 0.2) 10%, rgba(209, 236, 255, 0.1) 30%, rgba(209, 236, 255, 0.05) 50%)',
+                color: '#FFF',
+                marginTop: '0.25rem',
+                fontFamily: 'GeistMono-Regular',
+                fontSize: '0.875rem',
+              },
+              '& .MuiMenuItem-root': {
+                fontFamily: 'GeistMono-Regular',
+                fontSize: '0.875rem',
+              },
+              '& .MuiList-root': {
+                gap: '1.25rem',
+              },
             }}
           >
             {networks.map(({ href, Icon, name }) => (

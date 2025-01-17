@@ -1,18 +1,10 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
+import { Claim } from '@/utils/types';
+import DisplayAddress from '@/components/ui/DisplayAddress';
 import { useGetChain } from '@/hooks/useGetChain';
-import { CopyDoneIcon, CopyIcon } from '@/components/global/Icons';
-
-type Claim = {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
-  issuer: string;
-  bountyId: string;
-  accepted: boolean;
-};
+import CopyAddressButton from '@/components/ui/CopyAddressButton';
 
 export default function ClaimsListAccount({ claims }: { claims: Claim[] }) {
   return (
@@ -29,7 +21,6 @@ export default function ClaimsListAccount({ claims }: { claims: Claim[] }) {
 function ClaimItem({ claim }: { claim: Claim }) {
   const chain = useGetChain();
   const [imageUrl, setImageUrl] = useState('');
-  const [isCopied, setCopied] = useState(false);
 
   const fetchImageUrl = async (url: string) => {
     const response = await fetch(url);
@@ -42,18 +33,18 @@ function ClaimItem({ claim }: { claim: Claim }) {
   }, [claim]);
 
   return (
-    <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
+    <div className='p-[2px] text-white relative bg-poidhRed border-poidhRed border-2 rounded-xl '>
       <Link href={`/${chain.slug}/bounty/${claim.bountyId}`}>
         {claim.accepted && (
-          <div className='right-5 top-5  text-white bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5 absolute '>
+          <div className='right-5 top-5  text-white bg-poidhRed border border-poidhRed rounded-[8px] py-2 px-5 absolute '>
             accepted
           </div>
         )}
 
-        <div className='bg-[#12AAFF] w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'>
+        <div className='bg-poidhBlue w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'>
           <div
             style={{ backgroundImage: `url(${imageUrl})` }}
-            className='bg-[#12AAFF] bg-cover bg-center w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
+            className='bg-poidhBlue bg-cover bg-center w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
           ></div>
         </div>
       </Link>
@@ -66,39 +57,17 @@ function ClaimItem({ claim }: { claim: Claim }) {
             {claim.description}
           </p>
         </div>
-        <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed'>
-          <span className=''>issuer</span>
-          <div className='flex flex-row'>
-            <Link
-              href={`/${chain.slug}/account/${claim.issuer}`}
-              className='hover:text-gray-200'
-            >
-              {formatAddress(claim.issuer)}
-            </Link>
-            <span
-              onClick={() => {
-                setCopied(true);
-                navigator.clipboard.writeText(claim.issuer);
-                setTimeout(() => {
-                  setCopied(false);
-                }, 1000);
-              }}
-              className='cursor-pointer ml-2 hover:text-gray-200'
-            >
-              {isCopied ? (
-                <CopyDoneIcon width={20} height={20} />
-              ) : (
-                <CopyIcon width={20} height={20} />
-              )}
-            </span>
+        <div className='mt-2 py-2 flex flex-row items-center text-sm border-t border-dashed'>
+          <span className='shrink-0 mr-2'>issuer&nbsp;</span>
+          <div className='flex flex-row  items-center w-full justify-end overflow-hidden'>
+            <DisplayAddress chain={chain} address={claim.issuer} />
+            <div className='ml-2'>
+              <CopyAddressButton address={claim.issuer} />
+            </div>
           </div>
         </div>
         <div>claim id: {claim.id}</div>
       </div>
     </div>
   );
-}
-
-function formatAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }

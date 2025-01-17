@@ -16,10 +16,14 @@ import { decodeEventLog, parseEther } from 'viem';
 import abi from '@/constant/abi/abi';
 import { cn } from '@/utils';
 import Loading from '@/components/global/Loading';
-import { trpcClient } from '@/trpc/client';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { InfoIcon } from '@/components/global/Icons';
+
+type Bounty = {
+  title: string;
+  description: string;
+};
 
 export default function FormBounty({
   open,
@@ -78,25 +82,10 @@ export default function FormBounty({
         throw new Error('Invalid event: ' + data.eventName);
       }
 
-      const bountyId = data.args.id.toString();
-
-      for (let i = 0; i < 60; i++) {
-        setStatus('Indexing ' + i + 's');
-        const bounty = await trpcClient.isBountyCreated.query({
-          id: Number(bountyId),
-          chainId: chain.id,
-        });
-
-        if (bounty) {
-          return bountyId;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1_000));
-      }
-
-      throw new Error('Failed to index bounty');
+      return data.args.id.toString();
     },
     onSuccess: (bountyId) => {
-      router.push(`/${chain.slug}/bounty/${bountyId}`);
+      router.push(`/${chain.slug}/bounty/${bountyId}?indexing=true`);
       toast.success('Bounty created successfully');
     },
     onError: (error) => {
@@ -104,6 +93,30 @@ export default function FormBounty({
     },
     onSettled: () => {
       setStatus('');
+    },
+  });
+
+  const generateBountyMutation = useMutation({
+    mutationFn: async () => {
+      setName('Generating…');
+      setDescription('Generating…');
+      const res = await fetch('/api/generateBounty', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return JSON.parse(await res.json()) as Bounty;
+    },
+    onSuccess: (bounty: Bounty) => {
+      setName(bounty.title);
+      setDescription(bounty.description);
+      toast.success('Bounty generated successfully');
+    },
+    onError: (error) => {
+      setName('');
+      setDescription('');
+      toast.error('Failed to generate bounty: ' + error.message);
     },
   });
 
@@ -129,19 +142,33 @@ export default function FormBounty({
       >
         <DialogContent>
           <Box display='flex' flexDirection='column' width='100%'>
-            <span>title</span>
+            <span
+              className={cn(
+                generateBountyMutation.isPending && 'animate-pulse'
+              )}
+            >
+              title
+            </span>
             <input
+              disabled={generateBountyMutation.isPending}
               type='text'
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4'
+              className='border py-2 px-2 rounded-md mb-4 bg-transparent border-[#D1ECFF] disabled:cursor-not-allowed disabled:animate-pulse'
             />
-            <span>description</span>
+            <span
+              className={cn(
+                generateBountyMutation.isPending && 'animate-pulse'
+              )}
+            >
+              description
+            </span>
             <textarea
+              disabled={generateBountyMutation.isPending}
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 max-h-28'
+              className='border py-2 px-2 rounded-md mb-4 max-h-28 bg-transparent border-[#D1ECFF] disabled:cursor-not-allowed disabled:animate-pulse'
             ></textarea>
 
             <span>reward</span>
@@ -162,6 +189,14 @@ export default function FormBounty({
                 checked={isSoloBounty}
                 onClick={() => setIsSoloBounty(!isSoloBounty)}
                 inputProps={{ 'aria-label': 'controlled' }}
+                sx={{
+                  '& .MuiSwitch-thumb': {
+                    color: isSoloBounty ? '#F15E5F' : 'default',
+                  },
+                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                    backgroundColor: '#fff',
+                  },
+                }}
               />
             </div>
             <div className=' text-xs'>
@@ -198,6 +233,16 @@ export default function FormBounty({
             <ButtonCTA>create bounty</ButtonCTA>
           </button>
         </DialogActions>
+        <div className='py-4 mt-1 w-full flex justify-center items-center flex-row'>
+          <span className='mr-2'>need a bounty idea? click the</span>
+          <button
+            className='cursor-pointer items-center text-center disabled:cursor-not-allowed'
+            onClick={() => generateBountyMutation.mutate()}
+            disabled={generateBountyMutation.isPending}
+          >
+            🤖
+          </button>
+        </div>
       </Dialog>
     </>
   );

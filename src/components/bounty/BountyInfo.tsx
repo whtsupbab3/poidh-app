@@ -11,12 +11,13 @@ import {
   useWriteContract,
 } from 'wagmi';
 import { useMutation } from '@tanstack/react-query';
-import DisplayAddress from '@/components/DisplayAddress';
 import { formatEther } from 'viem';
 import abi from '@/constant/abi/abi';
 import Loading from '@/components/global/Loading';
 import { cn } from '@/utils';
 import { getBanSignatureFirstLine } from '@/utils/utils';
+import DisplayAddress from '@/components/ui/DisplayAddress';
+import CopyAddressButton from '@/components/ui/CopyAddressButton';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();
@@ -39,6 +40,12 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
 
   const signMutation = useMutation({
     mutationFn: async (bountyId: string) => {
+      //arbitrum has a problem with message signing, so all confirmations are on base
+      const chainId = await account.connector?.getChainId();
+      if (chainId !== 8453) {
+        await switctChain.switchChainAsync({ chainId: 8453 });
+      }
+
       const message =
         getBanSignatureFirstLine({
           id: Number(bountyId),
@@ -129,10 +136,15 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           <p className='mt-5 normal-case break-words'>
             {bounty.data.description}
           </p>
-          <p className='mt-5 normal-case break-all'>
-            bounty issuer:{' '}
-            <DisplayAddress address={bounty.data.issuer} chain={chain} />
-          </p>
+          <div className='flex flex-row mt-5 normal-case break-all flex-wrap'>
+            bounty issuer:&nbsp;
+            <div className='flex flex-row  items-center justify-end overflow-hidden'>
+              <DisplayAddress chain={chain} address={bounty.data.issuer} />
+              <div className='ml-2'>
+                <CopyAddressButton address={bounty.data.issuer} />
+              </div>
+            </div>
+          </div>
           {isAdmin.data && (
             <button
               onClick={() => {
@@ -144,7 +156,7 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
               }}
               disabled={bounty.data.ban.length > 0 || false}
               className={cn(
-                'border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5',
+                'border border-poidhRed w-fit rounded-md py-2 px-5 mt-5',
                 bounty.data.ban.length > 0
                   ? 'bg-red-400 text-white'
                   : 'hover:bg-red-400 hover:text-white'
@@ -160,17 +172,18 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
         <div className='flex flex-col space-between'>
           {bounty.data.inProgress ? (
             account.address?.toLocaleLowerCase() ===
-              bounty.data.issuer.toLocaleLowerCase() && (
+              bounty.data.issuer.toLocaleLowerCase() &&
+            !bounty.data.is_voting && (
               <button
                 onClick={() => cancelMutation.mutate(BigInt(bountyId))}
                 disabled={!bounty.data.inProgress}
-                className='border border-[#F15E5F] rounded-md w-fit py-2 px-5 mt-5 hover:bg-red-400 hover:text-white'
+                className='border border-poidhRed rounded-md w-fit py-2 px-5 mt-5 hover:bg-red-400 hover:text-white'
               >
                 cancel
               </button>
             )
           ) : (
-            <span className='border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5 bg-[#F15E5F] text-white'>
+            <span className='border border-poidhRed w-fit rounded-md py-2 px-5 mt-5 bg-poidhRed text-white'>
               {bounty.data.isCanceled ? 'canceled' : 'accepted'}
             </span>
           )}

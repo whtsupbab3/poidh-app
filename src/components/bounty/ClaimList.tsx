@@ -2,16 +2,7 @@ import React from 'react';
 
 import ClaimItem from '@/components/bounty/ClaimItem';
 import Voting from '@/components/bounty/Voting';
-
-type Claim = {
-  id: string;
-  issuer: string;
-  bountyId: string;
-  title: string;
-  description: string;
-  accepted: boolean;
-  url: string;
-};
+import { Claim } from '@/utils/types';
 
 export default function ClaimList({
   bountyId,
@@ -26,6 +17,7 @@ export default function ClaimList({
 }) {
   const isVotingOrAcceptedBounty =
     !!votingClaim || claims.some((claim) => claim.accepted);
+
   return (
     <>
       <div
@@ -49,7 +41,12 @@ export default function ClaimList({
         )}
       </div>
       <div className='grid grid-cols-12'>
-        {votingClaim && <Voting bountyId={bountyId} />}
+        {votingClaim && (
+          <Voting
+            bountyId={bountyId}
+            isAcceptedBounty={claims.some((claim) => claim.accepted)}
+          />
+        )}
       </div>
 
       <div className='container mx-auto px-0  py-12 flex flex-col gap-12 lg:grid lg:grid-cols-12 lg:gap-12 lg:px-0'>

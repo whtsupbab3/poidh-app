@@ -3,9 +3,10 @@ import { useAccount } from 'wagmi';
 import FormBounty from '@/components/global/FormBounty';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
-import { toast } from 'react-toastify';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 export default function CreateBounty() {
+  const { openConnectModal } = useConnectModal();
   const [showForm, setShowForm] = useState(false);
   const account = useAccount();
 
@@ -19,7 +20,7 @@ export default function CreateBounty() {
               setShowForm(true);
               return;
             }
-            toast.error('Please connect your wallet');
+            openConnectModal?.();
           }}
         >
           <GameButton />

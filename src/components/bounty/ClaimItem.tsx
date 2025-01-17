@@ -1,8 +1,6 @@
-import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useGetChain } from '@/hooks/useGetChain';
-import { CopyIcon } from '@/components/global/Icons';
 import { trpc, trpcClient } from '@/trpc/client';
 import {
   useAccount,
@@ -13,7 +11,10 @@ import {
 import abi from '@/constant/abi/abi';
 import { useMutation } from '@tanstack/react-query';
 import Loading from '@/components/global/Loading';
-import { cn, getBanSignatureFirstLine } from '@/utils/utils';
+import { cn } from '@/utils';
+import { getBanSignatureFirstLine } from '@/utils/utils';
+import DisplayAddress from '@/components/ui/DisplayAddress';
+import CopyAddressButton from '@/components/ui/CopyAddressButton';
 
 export default function ClaimItem({
   id,
@@ -46,6 +47,11 @@ export default function ClaimItem({
 
   const signMutation = useMutation({
     mutationFn: async (claimId: string) => {
+      const chainId = await account.connector?.getChainId();
+      if (chainId !== 8453) {
+        //arbitrum has a problem with message signing, so all confirmations are on base
+        await switctChain.switchChainAsync({ chainId: 8453 });
+      }
       const message = getBanSignatureFirstLine({
         id: Number(claimId),
         chainId: chain.id,
@@ -187,7 +193,7 @@ export default function ClaimItem({
         open={acceptClaimMutation.isPending || submitForVoteMutation.isPending}
         status={status}
       />
-      <div className='p-[2px] text-white relative bg-[#F15E5F] border-[#F15E5F] border-2 rounded-xl '>
+      <div className='p-[2px] text-white relative bg-poidhRed border-poidhRed border-2 rounded-xl '>
         <div className='left-5 top-5 absolute  flex flex-col text-white'>
           {bounty.data &&
             bounty.data.inProgress &&
@@ -195,7 +201,7 @@ export default function ClaimItem({
               bounty.data.issuer.toLocaleLowerCase() &&
             !isVotingOrAcceptedBounty && (
               <button
-                className='cursor-pointer mt-5 text-white hover:bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5'
+                className='cursor-pointer mt-5 text-white hover:bg-poidhRed bg-poidhRed bg-opacity-30 border border-poidhRed rounded-[8px] py-2 px-5'
                 onClick={() => {
                   bounty.data.participations.length > 1
                     ? submitForVoteMutation.mutate({
@@ -216,7 +222,7 @@ export default function ClaimItem({
         </div>
 
         {accepted && (
-          <div className='left-5 top-5 text-white bg-[#F15E5F] border border-[#F15E5F] rounded-[8px] py-2 px-5 absolute'>
+          <div className='left-5 top-5 text-white bg-poidhRed border border-poidhRed rounded-[8px] py-2 px-5 absolute'>
             accepted
           </div>
         )}
@@ -230,7 +236,7 @@ export default function ClaimItem({
               }
             }}
             className={cn(
-              'border border-[#F15E5F] w-fit rounded-md py-2 px-5 mt-5 hover:bg-red-400 hover:text-white absolute right-5 top-5'
+              'border border-poidhRed w-fit rounded-md py-2 px-5 mt-5 hover:bg-red-400 hover:text-white absolute right-5 top-5'
             )}
           >
             ban
@@ -238,7 +244,7 @@ export default function ClaimItem({
         )}
         <div
           style={{ backgroundImage: `url(${imageUrl})` }}
-          className='bg-[#12AAFF] bg-cover bg-center w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
+          className='bg-poidhBlue bg-cover bg-center w-full aspect-w-1 aspect-h-1 rounded-[8px] overflow-hidden'
         ></div>
         <div className='p-3'>
           <div className='flex flex-col'>
@@ -249,26 +255,14 @@ export default function ClaimItem({
               {description}
             </p>
           </div>
-          <div className='mt-2 py-2 flex flex-row justify-between text-sm border-t border-dashed'>
-            <span className=''>issuer</span>
-            <span className='flex flex-row'>
-              <Link
-                href={`/${chain.slug}/account/${issuer}`}
-                className='hover:text-gray-200'
-              >
-                {issuer.slice(0, 5) + '…' + issuer.slice(-6)}
-              </Link>
-              <span className='ml-1 text-white'>
-                <button
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(issuer);
-                    toast.success('Address copied to clipboard');
-                  }}
-                >
-                  <CopyIcon width={16} height={16} />
-                </button>
-              </span>
-            </span>
+          <div className='mt-2 py-2 flex flex-row items-center text-sm border-t border-dashed'>
+            <span className='shrink-0 mr-2'>issuer&nbsp;</span>
+            <div className='flex flex-row  items-center w-full justify-end overflow-hidden'>
+              <DisplayAddress chain={chain} address={issuer} />
+              <div className='ml-2'>
+                <CopyAddressButton address={issuer} />
+              </div>
+            </div>
           </div>
           <div>claim id: {id}</div>
         </div>
