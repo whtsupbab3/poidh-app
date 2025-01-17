@@ -210,12 +210,7 @@ export const appRouter = createTRPCRouter({
         bountyId: z.number(),
         chainId: z.number(),
         limit: z.number().min(1).max(100).default(10),
-        cursor: z
-          .object({
-            id: z.number(),
-            ids: z.array(z.number()),
-          })
-          .nullish(),
+        cursor: z.number().nullish(),
       })
     )
     .query(async ({ input }) => {
@@ -226,10 +221,10 @@ export const appRouter = createTRPCRouter({
           ban: {
             none: {},
           },
-          ...(input.cursor ? { id: { lt: input.cursor.id } } : {}),
-          ...(input.cursor && { id: { notIn: input.cursor.ids } }),
+          ...(input.cursor ? { is_accepted: false } : {}),
+          ...(input.cursor ? { id: { lt: input.cursor } } : {}),
         },
-        orderBy: [{ is_accepted: 'desc' }, { id: 'desc' }],
+        orderBy: [!input.cursor ? { is_accepted: 'desc' } : {}, { id: 'desc' }],
         take: input.limit,
         select: {
           id: true,
@@ -242,17 +237,9 @@ export const appRouter = createTRPCRouter({
         },
       });
 
-      let nextCursor:
-        | {
-            id: (typeof items)[number]['id'];
-            ids: (typeof items)[number]['id'][];
-          }
-        | undefined = undefined;
+      let nextCursor: number | undefined = undefined;
       if (items.length === input.limit) {
-        nextCursor = {
-          id: items[items.length - 1].id,
-          ids: [...(input.cursor?.ids ?? []), ...items.map((item) => item.id)],
-        };
+        nextCursor = items[items.length - 1].id;
       }
 
       return {
