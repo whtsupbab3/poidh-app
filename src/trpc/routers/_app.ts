@@ -221,9 +221,10 @@ export const appRouter = createTRPCRouter({
           ban: {
             none: {},
           },
+          ...(input.cursor ? { is_accepted: false } : {}),
           ...(input.cursor ? { id: { lt: input.cursor } } : {}),
         },
-        orderBy: [{ is_accepted: 'desc' }, { id: 'desc' }],
+        orderBy: [!input.cursor ? { is_accepted: 'desc' } : {}, { id: 'desc' }],
         take: input.limit,
         select: {
           id: true,
@@ -236,7 +237,7 @@ export const appRouter = createTRPCRouter({
         },
       });
 
-      let nextCursor: (typeof items)[number]['id'] | undefined = undefined;
+      let nextCursor: number | undefined = undefined;
       if (items.length === input.limit) {
         nextCursor = items[items.length - 1].id;
       }
