@@ -1,8 +1,13 @@
+/* eslint-disable react/jsx-no-undef */
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CopyIcon } from '@/components/global/Icons';
 import { toast } from 'react-toastify';
 import CreateClaim from '@/components/ui/CreateClaim';
+import ButtonCTA from '@/components/ui/ButtonCTA';
+import FormClaim from '@/components/global/FormClaim';
+import { useAccount } from 'wagmi';
+import FormJoinBounty from '@/components/global/FormJoinBounty';
 
 // Types
 interface ChainInfo {
@@ -31,20 +36,35 @@ interface Claim {
   owner: string;
 }
 
+interface BountyParticipant {
+  address: string;
+  amount: string;
+  user: User | null;
+}
+
+interface BountyStatus {
+  in_progress: boolean;
+  is_canceled: boolean;
+  is_joined_bounty: boolean;
+  is_multiplayer: boolean;
+  is_voting: boolean;
+}
+
+interface BountyIssuer {
+  address: string;
+}
+
 interface Bounty {
   id: number;
   chain_id: ChainId;
   title: string;
   description: string;
   amount: string;
-  issuer: string;
-  in_progress: boolean | null;
-  is_joined_bounty: boolean | null;
-  is_canceled: boolean | null;
-  is_multiplayer: boolean | null;
-  is_voting: boolean | null;
+  issuer: BountyIssuer;
+  status: BountyStatus;
   deadline: number | null;
   claims: Claim[];
+  participants: BountyParticipant[];
 }
 
 interface BountyResponse {
@@ -105,6 +125,9 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
   const [bounty, setBounty] = useState<Bounty | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({});
+  const [showClaimForm, setShowClaimForm] = useState(false);
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const { address, isConnected } = useAccount();
 
   const fetchImageUrl = async (url: string, claimId: number) => {
     try {
@@ -145,6 +168,16 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
     void fetchBounty();
   }, [bountyId, chainId]);
 
+  // Check if there's an accepted claim
+  const hasAcceptedClaim = bounty?.claims.some((claim) => claim.is_accepted);
+
+  const showCreateClaimButton = isConnected && !hasAcceptedClaim;
+
+  const isOpen = true;
+  const isVoting = false;
+
+  console.log('b', bounty);
+
   if (loading) {
     return (
       <div className='text-center text-white font-bold w-full'>
@@ -180,14 +213,47 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
         <p className='text-base md:text-lg font-medium text-center'>
           {formatAmount(bounty.amount, bounty.chain_id)}
         </p>
-        {/* <p className='text-base md:text-lg font-medium text-center'>
+        <p className='text-base md:text-lg font-medium text-center'>
           bounty issuer:{' '}
-          {`${bounty.issuer.slice(0, 5)}…${bounty.issuer.slice(-6)}`}
-        </p> */}
+          {`${bounty.issuer.address.slice(0, 5)}…${bounty.issuer.address.slice(
+            -6
+          )}`}
+        </p>
         <p className='text-base md:text-lg font-medium text-center'>
           Total Claims:{' '}
           <span className='underline'>{bounty.claims.length}</span>
         </p>
+
+        {/* Action Buttons Container */}
+        <div className='flex flex-row gap-4 items-center justify-center'>
+          {showCreateClaimButton && (
+            <>
+              <div onClick={() => setShowClaimForm(true)}>
+                <button className='flex backdrop-blur-sm bg-[#FFD1D1]/20 text-bold bg-gradient-to-t from-[#F15E5F]/20 from-10% via-30% to-50% gap-x-5 border border-[#F15E5F] rounded-full px-5 py-2 hover:bg-[#F15E5F]/30 transition-all duration-200'>
+                  create claim
+                </button>
+              </div>
+              <FormClaim
+                bountyId={bountyId}
+                onClose={() => setShowClaimForm(false)}
+                open={showClaimForm}
+              />
+            </>
+          )}
+
+          {!hasAcceptedClaim && isOpen && !isVoting && (
+            <>
+              <div onClick={() => setShowJoinForm(true)}>
+                <ButtonCTA>join bounty</ButtonCTA>
+              </div>
+              <FormJoinBounty
+                bountyId={bountyId}
+                onClose={() => setShowJoinForm(false)}
+                open={showJoinForm}
+              />
+            </>
+          )}
+        </div>
       </div>
 
       {bounty.claims.length === 0 ? (
