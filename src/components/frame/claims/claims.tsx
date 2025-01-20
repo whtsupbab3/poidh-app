@@ -173,8 +173,8 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
 
   const showCreateClaimButton = isConnected && !hasAcceptedClaim;
 
-  const isOpen = true;
-  const isVoting = false;
+  const isOpen = bounty?.status.is_multiplayer;
+  const isVoting = bounty?.status.is_voting;
 
   console.log('b', bounty);
 
