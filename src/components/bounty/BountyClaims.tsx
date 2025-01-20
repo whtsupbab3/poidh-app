@@ -56,16 +56,6 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
     }
   );
 
-  const { data: bounty } = trpc.bounty.useQuery(
-    {
-      id: Number(bountyId),
-      chainId: chain.id,
-    },
-    {
-      enabled: !!bountyId,
-    }
-  );
-
   if (!claims) {
     return <div className=''>No claims</div>;
   }
@@ -91,7 +81,6 @@ export default function BountyClaims({ bountyId }: { bountyId: string }) {
           <ClaimList
             key={claims.data.pages[0]?.items[0]?.id || 'empty-list'}
             bountyId={bountyId}
-            isMultiplayer={bounty?.isMultiplayer || false}
             votingClaim={
               votingClaim
                 ? {

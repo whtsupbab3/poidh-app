@@ -8,12 +8,10 @@ export default function ClaimList({
   bountyId,
   claims,
   votingClaim,
-  isMultiplayer,
 }: {
   bountyId: string;
   claims: Claim[];
   votingClaim: Claim | null;
-  isMultiplayer: boolean;
 }) {
   const isVotingOrAcceptedBounty =
     !!votingClaim || claims.some((claim) => claim.accepted);
@@ -50,7 +48,7 @@ export default function ClaimList({
       </div>
 
       <div className='container mx-auto px-0  py-12 flex flex-col gap-12 lg:grid lg:grid-cols-12 lg:gap-12 lg:px-0'>
-        {isMultiplayer && <p className='col-span-12'>other claims</p>}
+        {votingClaim && <p className='col-span-12'>other claims</p>}
         {claims
           .filter((claim) => claim.id !== votingClaim?.id)
           .map((claim) => (
