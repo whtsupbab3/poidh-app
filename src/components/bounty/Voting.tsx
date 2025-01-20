@@ -159,10 +159,20 @@ export default function Voting({
                     fill='#FFF'
                     style={{ fontSize: '3.5px', pointerEvents: 'none' }}
                   >
-                    <tspan x={x} y={y} dx={dx} dy={dy}>
+                    <tspan
+                      x={x}
+                      y={y}
+                      dx={dataEntry.percentage === 100 ? 0 : dx}
+                      dy={dataEntry.percentage === 100 ? 0 : dy}
+                    >
                       {Math.round(dataEntry.percentage)}%
                     </tspan>
-                    <tspan x={x} y={y + 3} dx={dx} dy={dy}>
+                    <tspan
+                      x={x}
+                      y={y + 3}
+                      dx={dataEntry.percentage === 100 ? 0 : dx}
+                      dy={dataEntry.percentage === 100 ? 0 : dy}
+                    >
                       {dataEntry.title}
                     </tspan>
                   </text>
