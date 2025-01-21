@@ -139,7 +139,7 @@ export default function Voting({
                       Number(formatEther(BigInt(voting.data.yes || 0))) -
                       Number(formatEther(BigInt(voting.data.no || 0)))
                     : 0,
-                  title: 'No vote',
+                  title: 'Abstain',
                   color: '#5A5A5A',
                 },
               ]}
