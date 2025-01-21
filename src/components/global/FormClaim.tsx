@@ -53,7 +53,16 @@ export default function FormClaim({
     reader.readAsDataURL(file);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    maxFiles: 1,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp'],
+    },
+    onDropRejected: () => {
+      toast.error('Please upload only image files');
+    },
+  });
 
   const retryUpload = async (file: File): Promise<string> => {
     const MAX_RETRIES = 6;
