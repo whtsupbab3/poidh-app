@@ -12,7 +12,7 @@ export const generateMetadataForBountyFrame = async ({
 }): Promise<Metadata> => {
   const frame = {
     version: 'next',
-    imageUrl: `${appUrl}/frames/image?chainName=${params?.netname}&bountyId=${params?.id}`,
+    // imageUrl: `${appUrl}/frames/image?chainName=${params?.netname}&bountyId=${params?.id}`,
     button: {
       title: 'See Claims',
       action: {
@@ -61,8 +61,8 @@ export const generateMetadataForBountyFrame = async ({
         "poidh - pics or it didn't happen - fully onchain bounties + collectible NFTs - start your collection today on Arbitrum, Base, or Degen Chain",
       images: ['https://poidh.xyz/images/poidh-preview-hero.png'],
     },
-    other: {
-      'fc:frame': JSON.stringify(frame),
-    },
+    // other: {
+    //   'fc:frame': JSON.stringify(frame),
+    // },
   };
 };
