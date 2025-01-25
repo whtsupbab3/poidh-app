@@ -18,6 +18,7 @@ import { cn } from '@/utils';
 import { getBanSignatureFirstLine } from '@/utils/utils';
 import DisplayAddress from '@/components/ui/DisplayAddress';
 import CopyAddressButton from '@/components/ui/CopyAddressButton';
+import BreadcrumpNavigation from '@/components/global/BreadcrumpNavigation';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();
@@ -126,9 +127,10 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
   }
 
   return (
-    <>
+    <div className='flex flex-col'>
+      <BreadcrumpNavigation />
       <Loading open={cancelMutation.isPending} status={status} />
-      <div className='flex pt-20 flex-col justify-between lg:flex-row'>
+      <div className='flex pt-10 flex-col justify-between lg:flex-row'>
         <div className='flex flex-col  lg:w-[50%]'>
           <p className='max-w-[30ch] overflow-hidden text-ellipsis text-2xl lg:text-4xl text-bold normal-case break-words'>
             {bounty.data.title}
@@ -198,6 +200,6 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           issuer={bounty.data.issuer}
         />
       )}
-    </>
+    </div>
   );
 }
