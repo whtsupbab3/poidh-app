@@ -237,6 +237,8 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
                 bountyId={bountyId}
                 onClose={() => setShowClaimForm(false)}
                 open={showClaimForm}
+                contractAddress='0x2445BfFc6aB9EEc6C562f8D7EE325CddF1780814'
+                chainId={666666666}
               />
             </>
           )}
