@@ -3,7 +3,7 @@ import { Netname } from '@/utils/types';
 import { Metadata } from 'next';
 import prisma from 'prisma/prisma';
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+const appUrl = 'https://poidh-app-theta.vercel.app';
 
 export const generateMetadataForBountyFrame = async ({
   params,
