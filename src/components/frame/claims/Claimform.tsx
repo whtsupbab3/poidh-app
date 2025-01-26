@@ -1,24 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
-
-import { useGetChain } from '@/hooks/useGetChain';
-import { buildMetadata, cn, uploadFile, uploadMetadata } from '@/utils';
-import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
-import abi from '@/constant/abi/abi';
 import Image from 'next/image';
 import { useMutation } from '@tanstack/react-query';
-
-import { Dialog, DialogContent, DialogActions, Box } from '@mui/material';
-import { decodeEventLog } from 'viem';
+import { Dialog, DialogContent, DialogActions } from '@mui/material';
+import { buildMetadata, cn, uploadFile, uploadMetadata } from '@/utils';
+import { useGetChain } from '@/hooks/useGetChain';
 import { trpc, trpcClient } from '@/trpc/client';
 import Loading from '@/components/global/Loading';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
+import { useAccount, usePublicClient, useWriteContract } from 'wagmi';
+import abi from '@/constant/abi/abi';
 
 const LINK_IPFS = 'https://beige-impossible-dragon-883.mypinata.cloud/ipfs';
 
-export default function FormClaim({
+export default function ClaimForm({
   bountyId,
   open,
   onClose,
@@ -37,9 +34,9 @@ export default function FormClaim({
   const [uploading, setUploading] = useState(false);
 
   const account = useAccount();
-  const writeContract = useWriteContract({});
   const chain = useGetChain();
-  const switchChain = useSwitchChain();
+  const { writeContractAsync } = useWriteContract();
+  const publicClient = usePublicClient();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -76,9 +73,6 @@ export default function FormClaim({
         if (attempt === MAX_RETRIES) {
           throw error;
         }
-        console.log(
-          `Attempt ${attempt} failed, retrying in ${RETRY_DELAY}ms...`
-        );
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
       }
     }
@@ -94,7 +88,7 @@ export default function FormClaim({
           setImageURI(`${LINK_IPFS}/${cid}`);
         } catch (error) {
           console.error('Error uploading file:', error);
-          alert('Trouble uploading file');
+          toast.error('Trouble uploading file');
         }
         setUploading(false);
       }
@@ -103,58 +97,42 @@ export default function FormClaim({
     uploadImage();
   }, [file]);
 
-  const createClaimMutations = useMutation({
-    mutationFn: async (bountyId: bigint) => {
-      const chainId = await account.connector?.getChainId();
-      if (chain.id !== chainId) {
-        await switchChain.switchChainAsync({ chainId: chain.id });
-      }
+  const doTransaction = async (bountyId: bigint) => {
+    try {
+      setStatus('Sending transaction');
       const metadata = buildMetadata(imageURI, name, description);
       const metadataResponse = await uploadMetadata(metadata);
       const uri = `${LINK_IPFS}/${metadataResponse.IpfsHash}`;
-      const tx = await writeContract.writeContractAsync({
+
+      const hash = await writeContractAsync({
         abi,
         address: chain.contracts.mainContract as `0x${string}`,
         functionName: 'createClaim',
         args: [bountyId, name, uri, description],
+        chainId: chain.id,
       });
 
-      setStatus('Waiting for receipt');
-      const receipt = await chain.provider.waitForTransactionReceipt({
-        hash: tx,
+      setStatus('Waiting for confirmation');
+      const transaction = await publicClient?.waitForTransactionReceipt({
+        hash,
       });
 
-      const log = receipt.logs
-        .map((log) => {
-          try {
-            return decodeEventLog({
-              abi,
-              data: log.data,
-              topics: log.topics,
-            });
-          } catch (e) {
-            return null;
-          }
-        })
-        .find((log) => log?.eventName === 'ClaimCreated');
+      await bountyMutation.mutate(BigInt(bountyId));
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to create claim: ' + (error as any).message);
+      setStatus('Failed to create claim');
+    }
+  };
 
-      if (!log) {
-        throw new Error('No logs found');
-      }
-
-      if (log.eventName !== 'ClaimCreated') {
-        throw new Error('Invalid event: ' + log.eventName);
-      }
-
-      const claimId = log.args.id.toString();
-
+  const bountyMutation = useMutation({
+    mutationFn: async (bountyId: bigint) => {
       for (let i = 0; i < 60; i++) {
         setStatus('Indexing ' + i + 's');
         const claim = await trpcClient.isClaimCreated.query({
-          id: Number(claimId),
+          id: Number(bountyId),
           chainId: chain.id,
         });
-
         if (claim) {
           return;
         }
@@ -180,7 +158,7 @@ export default function FormClaim({
 
   return (
     <>
-      <Loading open={createClaimMutations.isPending} status={status} />
+      <Loading open={bountyMutation.isPending} status={status} />
       <Dialog
         open={open}
         onClose={onClose}
@@ -191,6 +169,7 @@ export default function FormClaim({
             borderRadius: '10px',
             color: 'white',
             border: '1px solid #D1ECFF',
+            background: '#12AAFF',
           },
         }}
       >
@@ -214,10 +193,12 @@ export default function FormClaim({
                 src={preview}
                 alt='Preview'
                 className='w-[300px] h-[300px] mt-2 rounded-md object-contain'
+                width={300}
+                height={300}
               />
             )}
           </div>
-          <Box mt={2} mb={-3}>
+          <div className='mt-4 mb-0'>
             <span>title</span>
             <input
               type='text'
@@ -231,8 +212,8 @@ export default function FormClaim({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 w-full'
-            ></textarea>
-          </Box>
+            />
+          </div>
         </DialogContent>
         <DialogActions>
           <button
@@ -243,7 +224,7 @@ export default function FormClaim({
             onClick={() => {
               if (name && description && imageURI && !uploading) {
                 onClose();
-                createClaimMutations.mutate(BigInt(bountyId));
+                doTransaction(BigInt(bountyId));
               } else {
                 toast.error(
                   'Please fill in all fields and check wallet connection.'
