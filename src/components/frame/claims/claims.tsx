@@ -226,22 +226,20 @@ const Claims: React.FC<ClaimsProps> = ({ bountyId, chainId }) => {
 
         {/* Action Buttons Container */}
         <div className='flex flex-row gap-4 items-center justify-center'>
-          {showCreateClaimButton && (
-            <>
-              <div onClick={() => setShowClaimForm(true)}>
-                <button className='flex backdrop-blur-sm bg-[#FFD1D1]/20 text-bold bg-gradient-to-t from-[#F15E5F]/20 from-10% via-30% to-50% gap-x-5 border border-[#F15E5F] rounded-full px-5 py-2 hover:bg-[#F15E5F]/30 transition-all duration-200'>
-                  create claim
-                </button>
-              </div>
-              <FormClaim
-                bountyId={bountyId}
-                onClose={() => setShowClaimForm(false)}
-                open={showClaimForm}
-                contractAddress='0x2445BfFc6aB9EEc6C562f8D7EE325CddF1780814'
-                chainId={666666666}
-              />
-            </>
-          )}
+          <>
+            <div onClick={() => setShowClaimForm(true)}>
+              <button className='flex backdrop-blur-sm bg-[#FFD1D1]/20 text-bold bg-gradient-to-t from-[#F15E5F]/20 from-10% via-30% to-50% gap-x-5 border border-[#F15E5F] rounded-full px-5 py-2 hover:bg-[#F15E5F]/30 transition-all duration-200'>
+                create claim
+              </button>
+            </div>
+            <FormClaim
+              bountyId={bountyId}
+              onClose={() => setShowClaimForm(false)}
+              open={showClaimForm}
+              contractAddress='0x2445BfFc6aB9EEc6C562f8D7EE325CddF1780814'
+              chainId={666666666}
+            />
+          </>
 
           {!hasAcceptedClaim && isOpen && !isVoting && (
             <>
