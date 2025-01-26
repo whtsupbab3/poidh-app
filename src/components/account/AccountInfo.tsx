@@ -8,9 +8,10 @@ import ClaimsListAccount from '@/components/bounty/ClaimListAccount';
 import NftList from '@/components/bounty/NftList';
 import BountyList from '@/components/ui/BountyList';
 import { trpc } from '@/trpc/client';
-import FilterButton from '@/components/ui/FilterButton';
+import { cn } from '@/utils';
+import { formatWalletAddress } from '@/utils/web3';
 
-type Section = 'nft' | 'bounties' | 'claims';
+type Section = 'nfts' | 'bounties' | 'claims';
 
 export default function AccountInfo({ address }: { address: string }) {
   const chain = useGetChain();
@@ -42,7 +43,7 @@ export default function AccountInfo({ address }: { address: string }) {
     }
   );
 
-  const [currentSection, setCurrentSection] = useState<Section>('nft');
+  const [currentSection, setCurrentSection] = useState<Section>('nfts');
 
   const [ETHinContract, setETHinContract] = useState<string>('0');
   const [totalETHPaid, setTotalETHPaid] = useState<string>('0');
@@ -93,7 +94,7 @@ export default function AccountInfo({ address }: { address: string }) {
               <div className='flex flex-col border-b border-dashed'>
                 <span>user</span>
                 <span className='text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl'>
-                  {formatAddress(address)}
+                  {formatWalletAddress(address)}
                 </span>
               </div>
               <div className='flex flex-col'>
@@ -130,35 +131,47 @@ export default function AccountInfo({ address }: { address: string }) {
             </div>
             <div className='flex flex-col '>
               <span>poidh score:</span>
-              <span className='text-4xl text-[#F15E5F] border-y border-dashed'>
+              <span className='text-4xl text-poihRed border-y border-dashed'>
                 {poidhScore}
               </span>
             </div>
           </div>
 
-          <div className='flex flex-row overflow-x-scroll items-center py-12 border-b border-white lg:justify-center gap-x-5 '>
-            <FilterButton
-              onClick={() => setCurrentSection('nft')}
-              show={currentSection !== 'nft'}
+          <div className='flex flex-row overflow-x-scroll items-center py-6 border-b border-white justify-center gap-x-5 w-full px-3'>
+            <div
+              id='btn-container'
+              className={cn(
+                'flex flex-nowrap border border-white rounded-full transition-all bg-gradient-to-r h-[42px] gap-2 md:gap-4 md:text-base sm:text-sm text-xs',
+                currentSection == 'nfts' && 'from-red-500 to-40%',
+                currentSection == 'bounties' &&
+                  'via-red-500 from-transparent to-transparent from-[23.33%] to-[76.66%]',
+                currentSection == 'claims' &&
+                  'from-transparent from-60% to-red-500'
+              )}
             >
-              NFTs ({NFTs.data?.length ?? 0})
-            </FilterButton>
-            <FilterButton
-              onClick={() => setCurrentSection('bounties')}
-              show={currentSection !== 'bounties'}
-            >
-              bounties ({bounties.data?.length ?? 0})
-            </FilterButton>
-            <FilterButton
-              onClick={() => setCurrentSection('claims')}
-              show={currentSection !== 'claims'}
-            >
-              claims ({claims.data?.length ?? 0})
-            </FilterButton>
+              <button
+                onClick={() => setCurrentSection('nfts')}
+                className='flex-grow sm:flex-grow-0 md:px-5 px-3 h-full flex items-center justify-center'
+              >
+                NFTs({NFTs.data?.length ?? 0})
+              </button>
+              <button
+                onClick={() => setCurrentSection('bounties')}
+                className='flex-grow sm:flex-grow-0 md:px-5 px-3 h-full flex items-center justify-center'
+              >
+                bounties ({bounties.data?.length ?? 0})
+              </button>
+              <button
+                onClick={() => setCurrentSection('claims')}
+                className='flex-grow sm:flex-grow-0 md:px-5 px-3 h-full flex items-center justify-center'
+              >
+                claims ({claims.data?.length ?? 0})
+              </button>
+            </div>
           </div>
 
           <div>
-            {currentSection === 'nft' && (
+            {currentSection === 'nfts' && (
               <div className='lg:px-20 px-8'>
                 <NftList NFTs={NFTs.data ?? []} />
               </div>
@@ -190,8 +203,4 @@ export default function AccountInfo({ address }: { address: string }) {
       )}
     </>
   );
-}
-
-function formatAddress(address: string) {
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
