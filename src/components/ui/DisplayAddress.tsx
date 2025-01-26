@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getDegenOrEnsName } from '@/utils/web3';
+import { formatWalletAddress, getDegenOrEnsName } from '@/utils/web3';
 import Link from 'next/link';
 import { Chain } from '@/utils/types';
 
@@ -39,8 +39,4 @@ async function getWalletDisplayName({
   chainName: 'arbitrum' | 'base' | 'degen';
 }) {
   return (await getDegenOrEnsName({ address, chainName })) || null;
-}
-
-function formatWalletAddress(address: string): string {
-  return address.slice(0, 6) + '…' + address.slice(-4);
 }
