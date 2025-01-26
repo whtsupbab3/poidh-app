@@ -62,6 +62,8 @@ export default function NavBarMobile({
             bountyId={bountyId}
             open={showForm}
             onClose={() => setShowForm(false)}
+            contractAddress={''}
+            chainId={0}
           />
         )
       )}

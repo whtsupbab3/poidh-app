@@ -43,6 +43,8 @@ export default function CreateClaim({ bountyId }: { bountyId: string }) {
         bountyId={bountyId}
         onClose={() => setShowForm(false)}
         open={showForm}
+        contractAddress={''}
+        chainId={0}
       />
     </div>
   );

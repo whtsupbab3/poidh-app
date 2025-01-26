@@ -1,20 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
-
-import { useGetChain } from '@/hooks/useGetChain';
-import { buildMetadata, cn, uploadFile, uploadMetadata } from '@/utils';
-import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
-import abi from '@/constant/abi/abi';
+import { decodeEventLog, getAddress, encodeFunctionData } from 'viem';
 import Image from 'next/image';
-import { useMutation } from '@tanstack/react-query';
-
 import { Dialog, DialogContent, DialogActions, Box } from '@mui/material';
-import { decodeEventLog } from 'viem';
 import { trpc, trpcClient } from '@/trpc/client';
 import Loading from '@/components/global/Loading';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
+import { buildMetadata, cn, uploadFile, uploadMetadata } from '@/utils';
+import abi from '@/constant/abi/abi';
 
 const LINK_IPFS = 'https://beige-impossible-dragon-883.mypinata.cloud/ipfs';
 
@@ -22,10 +17,14 @@ export default function FormClaim({
   bountyId,
   open,
   onClose,
+  contractAddress,
+  chainId,
 }: {
   bountyId: string;
   open: boolean;
   onClose: () => void;
+  contractAddress: string;
+  chainId: number;
 }) {
   const [preview, setPreview] = useState<string>('');
   const [imageURI, setImageURI] = useState<string>('');
@@ -33,13 +32,23 @@ export default function FormClaim({
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
-  const utils = trpc.useUtils();
+  const [account, setAccount] = useState<string>('');
   const [uploading, setUploading] = useState(false);
+  const utils = trpc.useUtils();
 
-  const account = useAccount();
-  const writeContract = useWriteContract({});
-  const chain = useGetChain();
-  const switchChain = useSwitchChain();
+  useEffect(() => {
+    const connectWallet = async () => {
+      try {
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        });
+        setAccount(getAddress(accounts[0]));
+      } catch (error) {
+        console.error('Error connecting wallet:', error);
+      }
+    };
+    connectWallet();
+  }, []);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -67,9 +76,6 @@ export default function FormClaim({
         if (attempt === MAX_RETRIES) {
           throw error;
         }
-        console.log(
-          `Attempt ${attempt} failed, retrying in ${RETRY_DELAY}ms...`
-        );
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
       }
     }
@@ -85,38 +91,62 @@ export default function FormClaim({
           setImageURI(`${LINK_IPFS}/${cid}`);
         } catch (error) {
           console.error('Error uploading file:', error);
-          alert('Trouble uploading file');
+          toast.error('Error uploading file');
         }
         setUploading(false);
       }
     };
-
     uploadImage();
   }, [file]);
 
-  const createClaimMutations = useMutation({
-    mutationFn: async (bountyId: bigint) => {
-      const chainId = await account.connector?.getChainId();
-      if (chain.id !== chainId) {
-        await switchChain.switchChainAsync({ chainId: chain.id });
+  const createClaim = async () => {
+    try {
+      const currentChainId = await window.ethereum.request({
+        method: 'eth_chainId',
+      });
+
+      if (parseInt(currentChainId, 16) !== chainId) {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: `0x${chainId.toString(16)}` }],
+        });
       }
+
       const metadata = buildMetadata(imageURI, name, description);
       const metadataResponse = await uploadMetadata(metadata);
       const uri = `${LINK_IPFS}/${metadataResponse.IpfsHash}`;
-      const tx = await writeContract.writeContractAsync({
+
+      const data = encodeFunctionData({
         abi,
-        address: chain.contracts.mainContract as `0x${string}`,
         functionName: 'createClaim',
-        args: [bountyId, name, uri, description],
+        args: [BigInt(bountyId), name, uri, description],
+      });
+
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [
+          {
+            from: account,
+            to: contractAddress,
+            data,
+          },
+        ],
       });
 
       setStatus('Waiting for receipt');
-      const receipt = await chain.provider.waitForTransactionReceipt({
-        hash: tx,
-      });
+
+      // Wait for transaction confirmation
+      let receipt;
+      while (!receipt) {
+        receipt = await window.ethereum.request({
+          method: 'eth_getTransactionReceipt',
+          params: [txHash],
+        });
+        if (!receipt) await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
 
       const log = receipt.logs
-        .map((log) => {
+        .map((log: { data: any; topics: any }) => {
           try {
             return decodeEventLog({
               abi,
@@ -127,51 +157,49 @@ export default function FormClaim({
             return null;
           }
         })
-        .find((log) => log?.eventName === 'ClaimCreated');
+        .find(
+          (log: { eventName: string }) => log?.eventName === 'ClaimCreated'
+        );
 
-      if (!log) {
-        throw new Error('No logs found');
-      }
-
-      if (log.eventName !== 'ClaimCreated') {
-        throw new Error('Invalid event: ' + log.eventName);
+      if (!log || log.eventName !== 'ClaimCreated') {
+        throw new Error('Claim creation event not found');
       }
 
       const claimId = log.args.id.toString();
 
+      // Wait for indexing
       for (let i = 0; i < 60; i++) {
-        setStatus('Indexing ' + i + 's');
+        setStatus(`Indexing ${i}s`);
         const claim = await trpcClient.isClaimCreated.query({
           id: Number(claimId),
-          chainId: chain.id,
+          chainId,
         });
-
         if (claim) {
+          toast.success('Claim created successfully');
+          utils.bountyClaims.refetch();
+          resetForm();
           return;
         }
-        await new Promise((resolve) => setTimeout(resolve, 1_000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
+      throw new Error('Failed to index claim');
+    } catch (error) {
+      console.error('Error creating claim:', error);
+      toast.error(`Failed to create claim: ${error}`);
+    }
+  };
 
-      throw new Error('Failed to index bounty');
-    },
-    onSuccess: () => {
-      toast.success('Claim created successfully');
-    },
-    onError: (error) => {
-      toast.error('Failed to create claim: ' + error.message);
-    },
-    onSettled: () => {
-      utils.bountyClaims.refetch();
-      setName('');
-      setDescription('');
-      setImageURI('');
-      setPreview('');
-    },
-  });
+  const resetForm = () => {
+    setName('');
+    setDescription('');
+    setImageURI('');
+    setPreview('');
+    onClose();
+  };
 
   return (
     <>
-      <Loading open={createClaimMutations.isPending} status={status} />
+      <Loading open={status !== ''} status={status} />
       <Dialog
         open={open}
         onClose={onClose}
@@ -222,23 +250,20 @@ export default function FormClaim({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 w-full'
-            ></textarea>
+            />
           </Box>
         </DialogContent>
         <DialogActions>
           <button
             className={cn(
               'flex flex-row items-center justify-center',
-              account.isDisconnected && 'opacity-50 cursor-not-allowed'
+              !account && 'opacity-50 cursor-not-allowed'
             )}
             onClick={() => {
-              if (name && description && imageURI && !uploading) {
-                onClose();
-                createClaimMutations.mutate(BigInt(bountyId));
+              if (name && description && imageURI && !uploading && account) {
+                createClaim();
               } else {
-                toast.error(
-                  'Please fill in all fields and check wallet connection.'
-                );
+                toast.error('Please fill in all fields and connect wallet');
               }
             }}
           >
