@@ -41,8 +41,8 @@ export default function CreateClaim({ bountyId }: { bountyId: string }) {
       )}
       <FormClaim
         bountyId={bountyId}
-        onClose={() => setShowForm(false)}
         open={showForm}
+        onClose={() => setShowForm(false)}
       />
     </div>
   );
