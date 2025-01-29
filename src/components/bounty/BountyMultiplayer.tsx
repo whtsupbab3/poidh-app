@@ -1,15 +1,15 @@
 import { useState } from 'react';
 
 import { ExpandMoreIcon } from '@/components/global/Icons';
-import JoinBounty from '@/components/ui/JoinBounty';
-import Withdraw from '@/components/ui/Withdraw';
 import { trpc } from '@/trpc/client';
 import { Chain } from '@/utils/types';
 import { useAccount } from 'wagmi';
-import DisplayAddress from '@/components/ui/DisplayAddress';
 import { formatEther } from 'viem';
 import { cn } from '@/utils';
-import CopyAddressButton from '@/components/ui/CopyAddressButton';
+import CopyAddressButton from '../global/CopyAddressButton';
+import DisplayAddress from '../global/DisplayAddress';
+import Withdraw from './Withdraw';
+import JoinBounty from './JoinBounty';
 
 export default function BountyMultiplayer({
   chain,

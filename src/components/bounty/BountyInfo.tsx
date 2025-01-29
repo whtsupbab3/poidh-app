@@ -16,8 +16,8 @@ import abi from '@/constant/abi/abi';
 import Loading from '@/components/global/Loading';
 import { cn } from '@/utils';
 import { getBanSignatureFirstLine } from '@/utils/utils';
-import DisplayAddress from '@/components/ui/DisplayAddress';
-import CopyAddressButton from '@/components/ui/CopyAddressButton';
+import DisplayAddress from '@/components/global/DisplayAddress';
+import CopyAddressButton from '@/components/global/CopyAddressButton';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();

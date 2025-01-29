@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-
-import FormJoinBounty from '@/components/global/FormJoinBounty';
-import ButtonCTA from '@/components/ui/ButtonCTA';
+import FormJoinBounty from './FormJoinBounty';
+import ButtonCTA from '../global/ButtonCTA';
 
 export default function JoinBounty({ bountyId }: { bountyId: string }) {
   const [showForm, setShowForm] = useState(false);

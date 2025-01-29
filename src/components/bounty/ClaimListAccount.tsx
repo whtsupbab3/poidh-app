@@ -2,9 +2,9 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 import { Claim } from '@/utils/types';
-import DisplayAddress from '@/components/ui/DisplayAddress';
 import { useGetChain } from '@/hooks/useGetChain';
-import CopyAddressButton from '@/components/ui/CopyAddressButton';
+import DisplayAddress from '../global/DisplayAddress';
+import CopyAddressButton from '../global/CopyAddressButton';
 
 export default function ClaimsListAccount({ claims }: { claims: Claim[] }) {
   return (

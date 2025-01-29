@@ -6,10 +6,10 @@ import { formatEther } from 'viem';
 import { useGetChain } from '@/hooks/useGetChain';
 import ClaimsListAccount from '@/components/bounty/ClaimListAccount';
 import NftList from '@/components/bounty/NftList';
-import BountyList from '@/components/ui/BountyList';
 import { trpc } from '@/trpc/client';
 import { cn } from '@/utils';
 import { formatWalletAddress } from '@/utils/web3';
+import BountyList from '../bounty/BountyList';
 
 type Section = 'nfts' | 'bounties' | 'claims';
 

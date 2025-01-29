@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 
-import BountyItem from '@/components/ui/BountyItem';
 import { cn } from '@/utils';
+import BountyItem from './BountyItem';
 
 type Bounty = {
   id: string;

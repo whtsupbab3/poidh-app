@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ChainId, Claim } from '@/utils/types';
 import { formatEther } from 'viem';
-import DisplayAddress from '@/components/ui/DisplayAddress';
 import { getChainById } from '@/utils/config';
-import CopyAddressButton from '@/components/ui/CopyAddressButton';
+import DisplayAddress from '../global/DisplayAddress';
+import CopyAddressButton from '../global/CopyAddressButton';
 
 export default function PastBountyCard({
   claim,
