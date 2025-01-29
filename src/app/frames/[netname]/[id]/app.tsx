@@ -8,10 +8,6 @@ const Claims = dynamic(() => import('@/components/frame/claims/claims'), {
   ssr: false,
 });
 
-const Header = dynamic(() => import('@/components/frame/claims/header'), {
-  ssr: false,
-});
-
 export default function App({
   bountyId,
   chainId,
@@ -20,7 +16,6 @@ export default function App({
   chainId: string;
 }) {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
-
   useEffect(() => {
     const load = async () => {
       sdk.actions.ready();
@@ -30,11 +25,5 @@ export default function App({
       void load();
     }
   }, [isSDKLoaded]);
-
-  return (
-    <div className='min-h-screen bg-black'>
-      <Header chainId={chainId} />
-      <Claims chainId={chainId} bountyId={bountyId} />
-    </div>
-  );
+  return <Claims chainId={chainId} bountyId={bountyId} />;
 }

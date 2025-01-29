@@ -7,7 +7,6 @@ import { trpc } from '@/trpc/client';
 import 'react-toastify/dist/ReactToastify.css';
 import PastBountyCard from '@/components/bounty/PastBountyCard';
 import { ChainId, Claim } from '@/utils/types';
-import sdk from '@farcaster/frame-sdk';
 
 type DetailedClaim = {
   chainId: ChainId;
@@ -18,8 +17,6 @@ type DetailedClaim = {
 const Home = () => {
   const completedBountiesCount = trpc.completedBountiesCount.useQuery();
   const randomClaims = trpc.randomAcceptedClaims.useQuery({ limit: 24 });
-
-  sdk.actions.ready();
 
   return (
     <div className='flex flex-col items-center justify-center text-center p-6 min-h-[85vh] pt-8 md:pt-24 lg:pt-32'>
