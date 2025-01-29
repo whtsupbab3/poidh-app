@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { formatEther } from 'viem';
 
 import { useGetChain } from '@/hooks/useGetChain';
-import ClaimsListAccount from '@/components/bounty/ClaimListAccount';
+import ClaimsListAccount from '@/components/account/ClaimListAccount';
 import NftList from '@/components/bounty/NftList';
 import { trpc } from '@/trpc/client';
 import { cn } from '@/utils';
