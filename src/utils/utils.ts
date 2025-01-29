@@ -1,4 +1,4 @@
-import { BountyResponse } from '@/app/(root)/api/bounties/[chainName]/[bountyId]/route';
+import { BountyResponse } from '@/app/api/bounties/[chainName]/[bountyId]/route';
 import clsx, { ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
