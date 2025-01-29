@@ -628,12 +628,13 @@ export const appRouter = createTRPCRouter({
       });
     }),
 
-  accountScore: baseProcedure
+  accountStats: baseProcedure
     .input(z.object({ address: addressSchema, chainId: z.number() }))
     .query(async ({ input }) => {
       const chain = getChainById({
         chainId: input.chainId as 666666666 | 42161 | 8453,
       });
+      const address = input.address.toLowerCase();
       const bounties = await prisma.bounties.findMany({
         where: {
           issuer: input.address.toLowerCase(),
@@ -677,14 +678,14 @@ export const appRouter = createTRPCRouter({
 
       const amountInContract = formatEther(
         bounties
-          .filter((bounty) => !bounty.in_progress)
+          .filter((bounty) => bounty.in_progress)
           .flatMap((bounty) => BigInt(bounty.amount))
           .reduce((total, amount) => total + amount, BigInt(0))
       );
 
       const totalPaid = formatEther(
         bounties
-          .filter((bounty) => bounty.in_progress)
+          .filter((bounty) => !bounty.in_progress)
           .flatMap((bounty) => BigInt(bounty.amount))
           .reduce((total, amount) => total + amount, BigInt(0))
       );
@@ -704,15 +705,21 @@ export const appRouter = createTRPCRouter({
         totalEarn: convertAmount({ price, amount: totalEarn }),
       };
 
-      const poidhScore =
-        result.totalEarn.amountUSD +
-        result.totalPaid.amountUSD +
-        NFTsCount * 10;
+      const acceptedClaimsCount = claims.filter(
+        (claim) => claim.is_accepted
+      ).length;
+
+      const improvedPoidhScore =
+        0.5 * result.totalEarn.amountUSD +
+        0.3 * result.totalPaid.amountUSD +
+        0.1 * result.amountInContract.amountUSD +
+        5 * NFTsCount +
+        10 * acceptedClaimsCount;
 
       return {
         ...result,
-        poidhScore: Number(poidhScore.toFixed(0)),
-        acceptedClaimsCount: claims.filter((claim) => claim.is_accepted).length,
+        poidhScore: Math.round(improvedPoidhScore),
+        acceptedClaimsCount,
       };
     }),
 });

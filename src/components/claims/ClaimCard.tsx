@@ -1,6 +1,6 @@
 import { useGetChain } from '@/hooks/useGetChain';
 import { trpc } from '@/trpc/client';
-import { Currency } from '@/utils/types';
+import { Currency, Netname } from '@/utils/types';
 import { getBanSignatureFirstLine } from '@/utils/utils';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { useMutation } from '@tanstack/react-query';
@@ -9,6 +9,9 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useAccount, useSignMessage, useSwitchChain } from 'wagmi';
 import { BanIcon, CloseIcon, ZoomInIcon, ZoomOutIcon } from '../global/Icons';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { formatAddress } from '../account/AccountInfo';
 
 export type ClaimCardProps = {
   open: boolean;
@@ -33,6 +36,7 @@ export default function ClaimCard({ claim, open, onClose }: ClaimCardProps) {
   const utils = trpc.useUtils();
   const chain = useGetChain();
   const switctChain = useSwitchChain();
+  const router = useRouter;
   const { signMessageAsync } = useSignMessage();
 
   const banClaimMutation = trpc.banClaim.useMutation({});
@@ -152,29 +156,34 @@ export default function ClaimCard({ claim, open, onClose }: ClaimCardProps) {
                   <span className='font-semibold text-xs sm:text-sm text-white'>
                     Issuer
                   </span>
-                  <span className='text-xs sm:text-sm text-white/90 max-w-[15ch] overflow-hidden overflow-ellipsis'>
-                    {claim.issuer.address}
-                  </span>
+                  <Link
+                    href={`/${chain.slug}/account/${claim.issuer.address}`}
+                    className='text-xs sm:text-sm text-white/90 max-w-[15ch] overflow-hidden overflow-ellipsis hover:text-gray-200'
+                  >
+                    {formatAddress(claim.issuer.address)}
+                  </Link>
                 </div>
 
                 <div className='grid grid-cols-3 gap-1 sm:gap-2 text-center text-[10px] sm:text-xs'>
                   <div className='bg-blur-white rounded p-1.5 sm:p-2'>
-                    <div className='font-bold text-white'>
-                      {claim.issuer.scorePoidh}
+                    <div className='h-6 flex items-center justify-center'>
+                      {formatNumber(claim.issuer.scorePoidh)}
                     </div>
-                    <div className='text-white/80'>Score</div>
+                    <div className='text-white/80 mt-1'>Score</div>
                   </div>
+
                   <div className='bg-blur-white rounded p-1.5 sm:p-2'>
-                    <div className='font-bold text-white'>
+                    <div className='h-6 flex items-center justify-center'>
                       {claim.issuer.completedClaims}
                     </div>
-                    <div className='text-white/80'>Claims</div>
+                    <div className='text-white/80 mt-1'>Claims</div>
                   </div>
+
                   <div className='bg-blur-white rounded p-1.5 sm:p-2'>
-                    <div className='font-bold text-white'>
-                      {claim.issuer.earnedAmount}
+                    <div className='h-6 flex items-center justify-center'>
+                      {formatNumber(claim.issuer.earnedAmount)}
                     </div>
-                    <div className='text-white/80'>
+                    <div className='text-white/80 mt-1'>
                       Earned ({claim.currency})
                     </div>
                   </div>
@@ -257,4 +266,14 @@ export default function ClaimCard({ claim, open, onClose }: ClaimCardProps) {
       </Dialog>
     </>
   );
+}
+
+function formatNumber(num: number) {
+  const [a, b] = num.toString().split('.');
+
+  if (!b || !b.slice(0, 4).replaceAll('0', '')) {
+    return a;
+  }
+
+  return a + '.' + b.slice(0, 4);
 }
