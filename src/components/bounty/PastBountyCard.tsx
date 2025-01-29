@@ -4,6 +4,7 @@ import { formatEther } from 'viem';
 import { getChainById } from '@/utils/config';
 import DisplayAddress from '../global/DisplayAddress';
 import CopyAddressButton from '../global/CopyAddressButton';
+import { fetchPrice, formatAmount } from '@/utils/utils';
 
 export default function PastBountyCard({
   claim,
@@ -15,6 +16,7 @@ export default function PastBountyCard({
   bountyAmount: string;
 }) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [price, setPrice] = useState<number>(0);
 
   const chain = getChainById({ chainId: claim.chainId as ChainId });
 
@@ -23,6 +25,10 @@ export default function PastBountyCard({
     const data = await response.json();
     setImageUrl(data.image);
   };
+
+  useEffect(() => {
+    fetchPrice({ currency: chain.currency }).then(setPrice);
+  }, [chain.currency]);
 
   useEffect(() => {
     fetchImageUrl(claim?.url);
@@ -59,7 +65,10 @@ export default function PastBountyCard({
                 </div>
                 <div className='mt-2 py-2 flex flex-row items-center text-sm border-t border-dashed'>
                   <span className='shrink-0 mr-2'>issuer&nbsp;</span>
-                  <div className='flex flex-row  items-center w-full justify-end overflow-hidden'>
+                  <div
+                    className='flex flex-row  items-center w-full justify-end overflow-hidden'
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <DisplayAddress chain={chain} address={claim.issuer} />
                     <div className='ml-2'>
                       <CopyAddressButton address={claim.issuer} />
@@ -75,7 +84,11 @@ export default function PastBountyCard({
               {bountyTitle}
             </p>
             <span className='text-md'>
-              {formatEther(BigInt(bountyAmount))} {chain?.currency}
+              {formatAmount({
+                amount: formatEther(BigInt(bountyAmount)),
+                currency: chain.currency,
+                price: price.toString(),
+              })}
             </span>
           </div>
         </div>
