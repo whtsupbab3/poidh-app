@@ -3,48 +3,25 @@
 import { useState } from 'react';
 
 import { useGetChain } from '@/hooks/useGetChain';
-import ClaimsListAccount from '@/components/account/ClaimListAccount';
 import NftList from '@/components/bounty/NftList';
 import { trpc } from '@/trpc/client';
 import { cn } from '@/utils';
-import { formatWalletAddress } from '@/utils/web3';
 import BountyList from '../bounty/BountyList';
+import ClaimsListAccount from './ClaimListAccount';
 
 type Section = 'nfts' | 'bounties' | 'claims';
 
 export default function AccountInfo({ address }: { address: string }) {
   const chain = useGetChain();
-  const bounties = trpc.userBounties.useQuery(
-    {
-      address,
-      chainId: chain.id,
-    },
-    {
-      enabled: !!address,
-    }
-  );
-  const claims = trpc.userClaims.useQuery(
-    {
-      address,
-      chainId: chain.id,
-    },
-    {
-      enabled: !!address,
-    }
-  );
-  const NFTs = trpc.userNFTs.useQuery(
-    {
-      address,
-      chainId: chain.id,
-    },
-    {
-      enabled: !!address,
-    }
-  );
 
   const [currentSection, setCurrentSection] = useState<Section>('nfts');
 
-  const accountStats = trpc.accountStats.useQuery(
+  const accountActivities = trpc.accountActivities.useQuery(
+    { address, chainId: chain.id },
+    { enabled: !!address }
+  );
+
+  const accountStats = trpc.accountInfo.useQuery(
     { address, chainId: chain.id },
     { enabled: !!address }
   );
@@ -55,20 +32,27 @@ export default function AccountInfo({ address }: { address: string }) {
         <div>
           <div className='flex flex-col lg:flex-row lg:justify-between lg:items-start p-8'>
             <div>
-              <div className='flex flex-col border-b border-dashed'>
+              <div className='flex flex-col border-b border-dashed pb-4'>
                 <span>user</span>
-                <span className='text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl'>
-                  {formatWalletAddress(address)}
-                </span>
+                <div className='flex flex-row items-center gap-2'>
+                  <span className='text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl'>
+                    {formatAddress(address)}
+                  </span>
+                </div>
               </div>
               <div className='flex flex-col'>
-                <div>{`completed bounties: ${NFTs.data?.length ?? 0}`}</div>
+                <div>{`completed bounties: ${
+                  accountActivities.data?.NFTs.length ?? 0
+                }`}</div>
                 <div>
                   {`total paid: ${
                     accountStats.data?.totalPaid.amountCrypto ?? 0
                   } ${chain.currency}`}
                 </div>
-                <div>in progress bounties: {bounties.data?.length ?? 0}</div>
+                <div>
+                  in progress bounties:{' '}
+                  {accountActivities.data?.bounties.length ?? 0}
+                </div>
                 <div>
                   {`total in contract: ${
                     accountStats.data?.amountInContract.amountCrypto ?? 0
@@ -111,19 +95,19 @@ export default function AccountInfo({ address }: { address: string }) {
                 onClick={() => setCurrentSection('nfts')}
                 className='flex-grow sm:flex-grow-0 md:px-5 px-3 h-full flex items-center justify-center'
               >
-                NFTs({NFTs.data?.length ?? 0})
+                NFTs({accountActivities.data?.NFTs.length ?? 0})
               </button>
               <button
                 onClick={() => setCurrentSection('bounties')}
                 className='flex-grow sm:flex-grow-0 md:px-5 px-3 h-full flex items-center justify-center'
               >
-                bounties ({bounties.data?.length ?? 0})
+                bounties ({accountActivities.data?.bounties.length ?? 0})
               </button>
               <button
                 onClick={() => setCurrentSection('claims')}
                 className='flex-grow sm:flex-grow-0 md:px-5 px-3 h-full flex items-center justify-center'
               >
-                claims ({claims.data?.length ?? 0})
+                claims ({accountActivities.data?.claims.length ?? 0})
               </button>
             </div>
           </div>
@@ -131,28 +115,16 @@ export default function AccountInfo({ address }: { address: string }) {
           <div>
             {currentSection === 'nfts' && (
               <div className='lg:px-20 px-8'>
-                <NftList NFTs={NFTs.data ?? []} />
+                <NftList NFTs={accountActivities.data?.NFTs ?? []} />
               </div>
             )}
             {currentSection === 'bounties' && (
-              <BountyList bounties={bounties.data ?? []} />
+              <BountyList bounties={accountActivities.data?.bounties ?? []} />
             )}
             {currentSection === 'claims' && (
               <div className='lg:px-20 px-8'>
                 <ClaimsListAccount
-                  claims={
-                    claims.data?.map((claim) => {
-                      return {
-                        id: claim.id.toString(),
-                        title: claim.title,
-                        description: claim.description,
-                        issuer: claim.issuer,
-                        bountyId: claim.bounty!.id.toString(),
-                        accepted: claim.is_accepted || false,
-                        url: claim.url,
-                      };
-                    }) ?? []
-                  }
+                  claims={accountActivities.data?.claims ?? []}
                 />
               </div>
             )}

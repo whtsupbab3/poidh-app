@@ -7,8 +7,8 @@ import serverEnv from '@/utils/serverEnv';
 import { TRPCError } from '@trpc/server';
 import { formatEther, getAddress } from 'viem';
 import { chains, getChainById } from '@/utils/config';
-import { getBanSignatureFirstLine } from '@/utils/utils';
-import { Currency } from '@/utils/types';
+import { fetchPrice, getBanSignatureFirstLine } from '@/utils/utils';
+import { ChainId } from '@/utils/types';
 
 export const addressSchema = z
   .string()
@@ -293,7 +293,7 @@ export const appRouter = createTRPCRouter({
       });
     }),
 
-  userBounties: baseProcedure
+  accountActivities: baseProcedure
     .input(
       z.object({
         address: addressSchema,
@@ -301,32 +301,32 @@ export const appRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const bounties = await prisma.bounties.findMany({
-        where: {
-          issuer: input.address.toLowerCase(),
-          chain_id: input.chainId,
-          ban: {
-            none: {},
+      const bounties = (
+        await prisma.bounties.findMany({
+          where: {
+            issuer: input.address.toLowerCase(),
+            chain_id: input.chainId,
+            ban: {
+              none: {},
+            },
+            is_canceled: false,
           },
-          is_canceled: false,
-        },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          chain_id: true,
-          amount: true,
-          is_multiplayer: true,
-          in_progress: true,
-          claims: {
-            take: 1,
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            chain_id: true,
+            amount: true,
+            is_multiplayer: true,
+            in_progress: true,
+            claims: {
+              take: 1,
+            },
           },
-        },
 
-        orderBy: { id: 'desc' },
-      });
-
-      return bounties.map((bounty) => ({
+          orderBy: { id: 'desc' },
+        })
+      ).map((bounty) => ({
         id: bounty.id.toString(),
         title: bounty.title,
         description: bounty.description,
@@ -336,71 +336,66 @@ export const appRouter = createTRPCRouter({
         inProgress: bounty.in_progress || false,
         hasClaims: bounty.claims.length > 0,
       }));
-    }),
 
-  userClaims: baseProcedure
-    .input(
-      z.object({
-        address: addressSchema,
-        chainId: z.number(),
-      })
-    )
-    .query(async ({ input }) => {
-      return prisma.claims.findMany({
-        where: {
-          issuer: input.address.toLowerCase(),
-          chain_id: input.chainId,
-          ban: {
-            none: {},
-          },
-        },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          is_accepted: true,
-          url: true,
-          bounty: {
-            select: {
-              id: true,
-              amount: true,
+      const claims = (
+        await prisma.claims.findMany({
+          where: {
+            issuer: input.address.toLowerCase(),
+            chain_id: input.chainId,
+            ban: {
+              none: {},
             },
           },
-          issuer: true,
-          owner: true,
-        },
-        orderBy: { id: 'desc' },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            is_accepted: true,
+            url: true,
+            bounty: {
+              select: {
+                id: true,
+                amount: true,
+              },
+            },
+            issuer: true,
+            owner: true,
+          },
+          orderBy: { id: 'desc' },
+        })
+      ).map((claim) => {
+        return {
+          id: claim.id.toString(),
+          title: claim.title,
+          description: claim.description,
+          issuer: claim.issuer,
+          bountyId: claim.bounty!.id.toString(),
+          accepted: claim.is_accepted || false,
+          url: claim.url,
+        };
       });
-    }),
 
-  userNFTs: baseProcedure
-    .input(
-      z.object({
-        address: addressSchema,
-        chainId: z.number(),
-      })
-    )
-    .query(async ({ input }) => {
-      const NFTs = await prisma.claims.findMany({
-        where: {
-          owner: input.address.toLowerCase(),
-          chain_id: input.chainId,
-        },
-        select: {
-          id: true,
-          url: true,
-          title: true,
-          description: true,
-          issuer: true,
-          bounty: {
-            select: {
-              id: true,
+      const NFTs = (
+        await prisma.claims.findMany({
+          where: {
+            owner: input.address.toLowerCase(),
+            chain_id: input.chainId,
+          },
+          select: {
+            id: true,
+            url: true,
+            title: true,
+            description: true,
+            issuer: true,
+            bounty: {
+              select: {
+                id: true,
+              },
             },
           },
-        },
-        orderBy: { id: 'desc' },
-      });
-      return NFTs.map((NFT) => ({
+          orderBy: { id: 'desc' },
+        })
+      ).map((NFT) => ({
         id: NFT.id.toString(),
         url: NFT.url,
         title: NFT.title,
@@ -408,6 +403,12 @@ export const appRouter = createTRPCRouter({
         bountyId: NFT.bounty!.id.toString(),
         issuer: NFT.issuer,
       }));
+
+      return {
+        bounties,
+        claims,
+        NFTs,
+      };
     }),
 
   isBountyCreated: baseProcedure
@@ -514,6 +515,22 @@ export const appRouter = createTRPCRouter({
       return checkIsAdmin(input.address);
     }),
 
+  isIssuer: baseProcedure
+    .input(
+      z.object({
+        address: addressSchema.optional(),
+        chainId: z.number(),
+        bountyId: z.number(),
+      })
+    )
+    .query(async ({ input }) => {
+      return checkIsIssuer({
+        address: input.address,
+        bountyId: input.bountyId,
+        chainId: input.chainId,
+      });
+    }),
+
   banBounty: baseProcedure
     .input(
       z.object({
@@ -576,6 +593,7 @@ export const appRouter = createTRPCRouter({
       z.object({
         id: z.number(),
         chainId: z.number(),
+        bountyId: z.number(),
         address: addressSchema,
         signature: bytesSchema,
         chainName: chainNameSchema,
@@ -596,10 +614,15 @@ export const appRouter = createTRPCRouter({
         });
       }
 
+      const isIssuer = await checkIsIssuer({
+        address: input.address,
+        bountyId: input.bountyId,
+        chainId: input.chainId,
+      });
       const isAdmin = checkIsAdmin(input.address);
       const chain = chains['base'];
 
-      if (!isAdmin) {
+      if (!isAdmin || !isIssuer) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'Not authorized to perform this action',
@@ -628,8 +651,13 @@ export const appRouter = createTRPCRouter({
       });
     }),
 
-  accountStats: baseProcedure
-    .input(z.object({ address: addressSchema, chainId: z.number() }))
+  accountInfo: baseProcedure
+    .input(
+      z.object({
+        address: addressSchema,
+        chainId: z.number().transform((num) => num as ChainId),
+      })
+    )
     .query(async ({ input }) => {
       const chain = getChainById({
         chainId: input.chainId as 666666666 | 42161 | 8453,
@@ -731,12 +759,24 @@ export function checkIsAdmin(address?: string) {
   return serverEnv.ADMINS.includes(address.toLocaleLowerCase());
 }
 
-export async function fetchPrice({ currency }: { currency: Currency }) {
-  const response = await fetch(
-    `https://api.coinbase.com/v2/exchange-rates?currency=${currency}`
-  );
-  const body = await response.json();
-  return Number(body.data.rates.USD);
+export async function checkIsIssuer({
+  bountyId,
+  chainId,
+  address,
+}: {
+  bountyId: number;
+  chainId: number;
+  address?: `0x${string}`;
+}) {
+  if (!address) {
+    return false;
+  }
+
+  const bounty = await prisma.bounties.findUniqueOrThrow({
+    where: { id_chain_id: { id: bountyId, chain_id: chainId } },
+  });
+
+  return address.toLocaleLowerCase() === bounty.issuer;
 }
 
 function convertAmount({ amount, price }: { amount: string; price: number }) {
