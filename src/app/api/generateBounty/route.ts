@@ -1,5 +1,5 @@
-const prompt = `Generate unique, creative, and fun bounty ideas for the "Pics or It Didn't Happen" (poidh) website. Each bounty should encourage users to engage in amusing, interesting, or surprising activities that can be easily documented with a photo, screenshot, or video.
-               Ensure the ideas are diverse, spanning different themes such as real-life actions, contributions, playful tasks, or simple creative(could be developer) projects. 
+const PROMPT = `Generate unique, creative, and fun bounty ideas for the "Pics or It Didn't Happen" (poidh) website. Each bounty should encourage users to engage in amusing, interesting, or surprising activities that can be easily documented with a photo, screenshot, or video.
+               Ensure the ideas are diverse, spanning different themes such as real-life actions, contributions, playful tasks, or simple creative(could be developer) projects.
                Ideas must remain achievable and enjoyable for users of all skill levels. A user should share result either in video or in photo. Include:
                Title: A short, catchy description of the bounty (max 50 characters).
                Description: A clear and engaging explanation of what the user must do to complete the bounty (max 350 characters).
@@ -23,7 +23,7 @@ export async function POST(): Promise<Response> {
       messages: [
         {
           role: 'system',
-          content: prompt,
+          content: PROMPT,
         },
         {
           role: 'user',

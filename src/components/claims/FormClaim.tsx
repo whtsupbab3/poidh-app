@@ -14,7 +14,7 @@ import { decodeEventLog } from 'viem';
 import { trpc, trpcClient } from '@/trpc/client';
 import Loading from '@/components/global/Loading';
 import GameButton from '@/components/global/GameButton';
-import ButtonCTA from '@/components/ui/ButtonCTA';
+import ButtonCTA from '@/components/global/ButtonCTA';
 
 const LINK_IPFS = 'https://beige-impossible-dragon-883.mypinata.cloud/ipfs';
 
