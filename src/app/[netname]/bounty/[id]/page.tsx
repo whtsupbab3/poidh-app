@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import BountyClaims from '@/components/bounty/BountyClaims';
 import BountyInfo from '@/components/bounty/BountyInfo';
-import CreateClaim from '@/components/ui/CreateClaim';
 import NavBarMobile from '@/components/global/NavBarMobile';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { useSearchParams } from 'next/navigation';
@@ -10,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { trpc, trpcClient } from '@/trpc/client';
 import { useGetChain } from '@/hooks/useGetChain';
 import Loading from '@/components/global/Loading';
+import CreateClaim from '@/components/claims/CreateClaim';
 
 export default function Bounty({ params }: { params: { id: string } }) {
   const chain = useGetChain();

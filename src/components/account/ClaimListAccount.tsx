@@ -2,9 +2,9 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 import { Claim } from '@/utils/types';
-import DisplayAddress from '@/components/ui/DisplayAddress';
 import { useGetChain } from '@/hooks/useGetChain';
-import CopyAddressButton from '@/components/ui/CopyAddressButton';
+import DisplayAddress from '../global/DisplayAddress';
+import CopyAddressButton from '../global/CopyAddressButton';
 
 export default function ClaimsListAccount({ claims }: { claims: Claim[] }) {
   return (
@@ -36,7 +36,7 @@ function ClaimItem({ claim }: { claim: Claim }) {
     <div className='p-[2px] text-white relative bg-poidhRed border-poidhRed border-2 rounded-xl '>
       <Link href={`/${chain.slug}/bounty/${claim.bountyId}`}>
         {claim.accepted && (
-          <div className='right-5 top-5  text-white bg-poidhRed border border-poidhRed rounded-[8px] py-2 px-5 absolute '>
+          <div className='right-5 top-5  text-white bg-poidhRed border border-poidhRed rounded-[8px] py-2 px-5 absolute'>
             accepted
           </div>
         )}

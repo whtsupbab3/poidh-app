@@ -17,8 +17,8 @@ import abi from '@/constant/abi/abi';
 import { cn } from '@/utils';
 import Loading from '@/components/global/Loading';
 import GameButton from '@/components/global/GameButton';
-import ButtonCTA from '@/components/ui/ButtonCTA';
 import { InfoIcon } from '@/components/global/Icons';
+import ButtonCTA from '../global/ButtonCTA';
 
 type Bounty = {
   title: string;

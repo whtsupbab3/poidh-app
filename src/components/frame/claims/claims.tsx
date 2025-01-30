@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CopyIcon } from '@/components/global/Icons';
 import { toast } from 'react-toastify';
-import CreateClaim from '@/components/ui/CreateClaim';
-import ButtonCTA from '@/components/ui/ButtonCTA';
-import FormClaim from '@/components/global/FormClaim';
 import { useAccount } from 'wagmi';
-import FormJoinBounty from '@/components/global/FormJoinBounty';
+import FormClaim from '@/components/claims/FormClaim';
+import ButtonCTA from '@/components/global/ButtonCTA';
+import FormJoinBounty from '@/components/bounty/FormJoinBounty';
+import CreateClaim from '@/components/claims/CreateClaim';
 
 // Types
 interface ChainInfo {

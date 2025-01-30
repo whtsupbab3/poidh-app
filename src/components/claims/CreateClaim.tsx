@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
 import GameButton from '@/components/global/GameButton';
-import ButtonCTA from '@/components/ui/ButtonCTA';
-import FormClaim from '@/components/global/FormClaim';
 import { useGetChain } from '@/hooks/useGetChain';
 import { trpc } from '@/trpc/client';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
+import FormClaim from './FormClaim';
+import ButtonCTA from '../global/ButtonCTA';
 
 export default function CreateClaim({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
-import FormBounty from '@/components/global/FormBounty';
 import GameButton from '@/components/global/GameButton';
-import ButtonCTA from '@/components/ui/ButtonCTA';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
+import ButtonCTA from '../global/ButtonCTA';
+import FormBounty from './FormBounty';
 
 export default function CreateBounty() {
   const { openConnectModal } = useConnectModal();

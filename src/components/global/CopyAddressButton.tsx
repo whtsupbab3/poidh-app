@@ -14,7 +14,6 @@ export default function CopyAddressButton({
   return (
     <div
       onClick={(e) => {
-        e.preventDefault();
         setCopied(true);
         navigator.clipboard.writeText(address);
         toast.success('address copied to clipboard');
