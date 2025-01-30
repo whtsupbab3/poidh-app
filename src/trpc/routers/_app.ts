@@ -622,7 +622,7 @@ export const appRouter = createTRPCRouter({
       const isAdmin = checkIsAdmin(input.address);
       const chain = chains['base'];
 
-      if (!isAdmin || !isIssuer) {
+      if (!isAdmin && !isIssuer) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'Not authorized to perform this action',
