@@ -22,6 +22,9 @@ import {
 } from '@/utils/utils';
 import DisplayAddress from '@/components/global/DisplayAddress';
 import CopyAddressButton from '@/components/global/CopyAddressButton';
+import BountyHistory from './BountyHistory';
+import Withdraw from './Withdraw';
+import JoinBounty from './JoinBounty';
 
 export default function BountyInfo({ bountyId }: { bountyId: string }) {
   const chain = useGetChain();
@@ -42,6 +45,16 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
       chainId: chain.id,
     },
     { enabled: !!bountyId }
+  );
+
+  const participants = trpc.participations.useQuery(
+    {
+      bountyId: Number(bountyId),
+      chainId: chain.id,
+    },
+    {
+      enabled: !!bountyId,
+    }
   );
 
   const signMutation = useMutation({
@@ -127,6 +140,12 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
     },
   });
 
+  const isCurrentUserAParticipant = participants.data?.some(
+    (participant) =>
+      participant.user_address.toLocaleLowerCase() ===
+      account.address?.toLocaleLowerCase()
+  );
+
   useEffect(() => {
     fetchPrice({ currency: chain.currency }).then(setPrice);
   }, [chain.currency]);
@@ -204,14 +223,23 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
         </div>
       </div>
       {bounty.data.isMultiplayer && (
-        <BountyMultiplayer
-          chain={chain}
-          bountyId={bountyId}
-          inProgress={Boolean(bounty.data.inProgress)}
-          isVoting={!!bounty.data.is_voting && !!bounty.data.inProgress}
-          issuer={bounty.data.issuer}
-        />
+        <BountyMultiplayer chain={chain} bountyId={bountyId} />
       )}
+      <BountyHistory
+        transactions={bounty.data.transactions.map((transaction) => {
+          return { ...transaction, timestamp: Number(transaction.timestamp) };
+        })}
+      />
+      {account.address?.toLocaleLowerCase() !==
+        bounty.data.issuer.toLocaleLowerCase() &&
+      !(bounty.data.is_voting && bounty.data.inProgress) &&
+      bounty.data.inProgress &&
+      isCurrentUserAParticipant ? (
+        <Withdraw bountyId={bountyId} />
+      ) : (
+        !bounty.data.is_voting &&
+        bounty.data.inProgress && <JoinBounty bountyId={bountyId} />
+      )}{' '}
     </>
   );
 }
