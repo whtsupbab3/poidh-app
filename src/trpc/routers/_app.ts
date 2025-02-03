@@ -52,6 +52,14 @@ export const appRouter = createTRPCRouter({
               user_address: true,
             },
           },
+          transactions: {
+            select: {
+              tx: true,
+              address: true,
+              action: true,
+              timestamp: true,
+            },
+          },
         },
       });
 

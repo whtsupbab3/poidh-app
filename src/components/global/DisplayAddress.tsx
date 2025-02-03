@@ -31,7 +31,7 @@ export default function DisplayAddress({
   );
 }
 
-async function getWalletDisplayName({
+export async function getWalletDisplayName({
   address,
   chainName,
 }: {
