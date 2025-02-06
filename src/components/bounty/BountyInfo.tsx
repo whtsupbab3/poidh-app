@@ -150,6 +150,12 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
     fetchPrice({ currency: chain.currency }).then(setPrice);
   }, [chain.currency]);
 
+  const canWithdraw =
+    account.address?.toLocaleLowerCase() !==
+      bounty.data?.issuer.toLocaleLowerCase() &&
+    !bounty.data?.is_voting &&
+    isCurrentUserAParticipant;
+
   if (!bounty.data) {
     return null;
   }
@@ -230,16 +236,13 @@ export default function BountyInfo({ bountyId }: { bountyId: string }) {
           return { ...transaction, timestamp: Number(transaction.timestamp) };
         })}
       />
-      {account.address?.toLocaleLowerCase() !==
-        bounty.data.issuer.toLocaleLowerCase() &&
-      !(bounty.data.is_voting && bounty.data.inProgress) &&
-      bounty.data.inProgress &&
-      isCurrentUserAParticipant ? (
-        <Withdraw bountyId={bountyId} />
-      ) : (
-        !bounty.data.is_voting &&
-        bounty.data.inProgress && <JoinBounty bountyId={bountyId} />
-      )}{' '}
+      {bounty.data.is_multiplayer &&
+        bounty.data.inProgress &&
+        (canWithdraw ? (
+          <Withdraw bountyId={bountyId} />
+        ) : (
+          !bounty.data.is_voting && <JoinBounty bountyId={bountyId} />
+        ))}
     </>
   );
 }
